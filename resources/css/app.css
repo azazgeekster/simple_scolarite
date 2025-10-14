@@ -1,0 +1,11 @@
+/* @import "tailwindcss";
+
+*/
+
+/* @import "tailwindcss/preflight" */
+/* @tailwind utilities; */
+
+@import "tailwindcss";
+@source "../views";
+
+@custom-variant dark (&:where(.dark, .dark *));

@@ -1,0 +1,80 @@
+    <div class="flex flex-col md:flex-row gap-4">
+
+        <div
+            class="w-full sm:w-1/2 md:w-1/2 flex-shrink-0 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+
+            <form id="profileForm" action="{{ route('profile.update.photo') }}" method="POST" enctype="multipart/form-data"
+                class="p-4 bg-white rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                @csrf
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Profile Photo</h2>
+
+                <div class="flex flex-col items-center space-y-4">
+                    <!-- Profile Picture Preview -->
+                    <div class="relative">
+                        <img id="profilePreview"
+                            class="w-36 h-36 rounded-full border-4 border-blue-400 dark:border-gray-600"
+                            src="{{ $student->setAvatar() }}" alt="Profile Picture">
+                        <label for="photo_profile"
+                            class="absolute bottom-1 right-1 bg-blue-400 text-white p-2 rounded-full cursor-pointer hover:bg-gray-600 transition-colors">
+                            📷
+                        </label>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $student->full_name }}</p>
+                        <div class="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            {{$student->full_name_ar ?? $student->full_name }}
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $student->apogee }}</p>
+                        <div class="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{$student->cne  }}</p>
+                    </div>
+                    <!-- Email filire -->
+                    <div class="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $student->email }}</p>
+                        <div class="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{$student->filiere  }}</p>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Last login:
+                        {{ \Carbon\Carbon::parse($student->last_login)->diffForHumans()}}
+                    </p>
+
+                    <!-- Upload Input (Hidden) -->
+                    <input type="file" id="photo_profile" name="photo_profile" class="hidden" accept="image/*">
+                    <!-- Buttons -->
+                    <div class="flex space-x-4">
+                        <button id="uploadBtn" type="submit"
+                            class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
+                            Save Picture
+                        </button>
+                        <button id="removeBtn" type="button"
+                            class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5  transition-colors">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Additional Information Section (2/3 width on desktop, full width on mobile) -->
+        <div
+            class="w-full sm:w-1/2 md:flex-1 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+            <div class="p-4">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Important Notices</h2>
+
+                <!-- Info Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Apogee -->
+                    <div class="text-gray-900 dark:text-white">{{ $student->apogee }}</div>
+                    <!-- Email -->
+                    <div class="text-gray-900 dark:text-white">{{ $student->email }}</div>
+                    <!-- Filiere -->
+                    <div class="text-gray-900 dark:text-white">{{ $student->filiere }}</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
