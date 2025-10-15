@@ -21,29 +21,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
                         </svg>
                     </div>
-                    <div>
-                        <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                            Demande de Relevé de Notes
-                        </h1>
-                        <div class="mt-2 flex flex-wrap items-center gap-4 text-gray-600 dark:text-gray-300">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span><strong class="text-gray-900 dark:text-white">{{ $student->full_name }}</strong></span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"></path>
-                                </svg>
-                                <span>Code: <strong class="text-gray-900 dark:text-white">{{ $student->apogee }}</strong></span>
-                            </div>
-                        </div>
+                    <div class="flex-1">
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Demande de Relevé de Notes</h1>
+                        <p class="text-gray-600 dark:text-gray-300">Sélectionnez l'année académique pour laquelle vous souhaitez obtenir un relevé</p>
                     </div>
                 </div>
             </div>
 
-            <div class="grid lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {{-- Available Transcripts Section --}}
                 <div class="lg:col-span-2">
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border dark:border-gray-700 overflow-hidden">
@@ -63,14 +48,13 @@
 
                         <div class="p-6">
                             <div class="space-y-4">
-                                @foreach($availableReleves as $index => $releve)
+                                @forelse($availableReleves as $index => $releve)
                                     <div class="group relative overflow-hidden border border-gray-200 dark:border-gray-600 rounded-xl p-6 transition-all duration-300 {{ $releve['disponible'] ? 'hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-lg cursor-pointer bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-750' : 'bg-gray-50 dark:bg-gray-700 opacity-75' }}"
                                         @if($releve['disponible'])
                                             @click="openModal(
                                                 '{{ $releve['academic_year_label'] }} ({{ $releve['semesters'] }})',
                                                 '{{ $releve['year_label'] }}',
-                                                {{ $releve['academic_year_id'] }},
-                                                {{ $releve['filiere_id'] }},
+                                                {{ $releve['academic_year'] }},
                                                 '{{ $releve['semesters'] }}'
                                             )"
                                         @endif>
@@ -106,17 +90,15 @@
                                                 </span>
                                             </div>
                                         </div>
-                                </div>
-                                @endforeach
-
-                                @if(empty($availableReleves))
+                                    </div>
+                                @empty
                                     <div class="text-center py-12">
                                         <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                         </svg>
                                         <p class="text-gray-500 dark:text-gray-400 text-lg">Aucun relevé disponible pour le moment</p>
                                     </div>
-                                @endif
+                                @endforelse
                             </div>
                         </div>
                     </div>
@@ -139,44 +121,42 @@
                             </div>
                         </div>
 
-                        <div class="p-4 max-h-96 overflow-y-auto">
+                        <div class="p-4 max-h-[600px] overflow-y-auto">
                             @forelse($studentDemandes as $demande)
-                                <div class="border border-gray-200 dark:border-gray-600 rounded-xl p-4 mb-3 hover:shadow-md transition-shadow duration-200">
-                                    <div class="flex items-start justify-between mb-3">
+                                <div class="mb-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
+                                    <div class="flex items-start justify-between mb-2">
                                         <div class="flex-1">
-                                            <h4 class="font-bold text-gray-900 dark:text-white text-sm">
-                                                {{ $demande->academicYear->label }}
-                                                @if($demande->semester_id)
-                                                    <span class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded ml-1">
-                                                        S{{ $demande->semester_id }}
-                                                    </span>
-                                                @endif
-                                            </h4>
-                                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                                {{ $demande->student->safs->firstWhere('academic_year_id', $demande->academic_year_id)?->filiere->label_fr ?? '-' }}
+                                            <p class="font-bold text-gray-900 dark:text-white text-sm">
+                                                {{ $demande->academicYear->label ?? $demande->academic_year . '-' . ($demande->academic_year + 1) }}
                                             </p>
-                                                                                    </div>
-                                    </div>
-
-                                    <div class="flex items-center justify-between">
-                                        <span class="px-3 py-1 text-xs font-bold rounded-full {{ $demande->status === 'READY' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : ($demande->status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200' : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200') }}">
-                                            {{ $demande->status === 'READY' ? '✓ Prêt' : ($demande->status === 'PENDING' ? '⏳ En cours' : ucfirst(strtolower($demande->status))) }}
+                                            @if($demande->semester)
+                                                <p class="text-xs text-gray-600 dark:text-gray-400">{{ $demande->semester }}</p>
+                                            @else
+                                                <p class="text-xs text-gray-600 dark:text-gray-400">Année complète</p>
+                                            @endif
+                                        </div>
+                                        <span class="px-2 py-1 text-xs font-bold rounded-full
+                                            {{ $demande->status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200' : '' }}
+                                            {{ $demande->status === 'READY' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : '' }}
+                                            {{ $demande->status === 'PICKED' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : '' }}
+                                            {{ $demande->status === 'COMPLETED' ? 'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-200' : '' }}">
+                                            {{ $demande->status }}
                                         </span>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ $demande->created_at->format('d/m/Y') }}
-                                        </span>
                                     </div>
-
-                                    <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                        Retrait: <span class="font-medium">{{ ucfirst($demande->retrait_type) }}</span>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                        <p>Type: {{ ucfirst($demande->retrait_type) }}</p>
+                                        <p>Demandé le: {{ $demande->created_at->format('d/m/Y') }}</p>
+                                        @if($demande->reference_number)
+                                            <p class="font-mono">Réf: {{ $demande->reference_number }}</p>
+                                        @endif
                                     </div>
                                 </div>
                             @empty
                                 <div class="text-center py-8">
                                     <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
-                                    <p class="text-gray-500 dark:text-gray-400 text-sm">Aucune demande effectuée</p>
+                                    <p class="text-gray-500 dark:text-gray-400 text-sm">Aucune demande</p>
                                 </div>
                             @endforelse
                         </div>
@@ -185,9 +165,25 @@
             </div>
         </div>
 
-        {{-- Enhanced Modal --}}
-        <div x-show="showModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="showModal = false">
-            <div x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-2xl shadow-2xl border dark:border-gray-700 overflow-hidden">
+        {{-- Modal for Request Form --}}
+        <div x-show="showModal"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+             style="display: none;">
+
+            <div @click.away="showModal = false"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-2xl shadow-2xl border dark:border-gray-700 overflow-hidden">
 
                 {{-- Modal Header --}}
                 <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-8 py-6 text-white">
@@ -204,152 +200,131 @@
                     </div>
                 </div>
 
-                <div class="p-8">
-                    {{-- Selected Year Info --}}
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-6">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-lg">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
+                <form method="POST" action="{{ route('student.releve.store') }}">
+                    @csrf
+
+                    <div class="p-8">
+                        {{-- Selected Year Info --}}
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-lg">
+                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-900 dark:text-white" x-text="selectedYearLabel"></p>
+                                    <p class="text-sm text-blue-600 dark:text-blue-400" x-text="selectedLevelLabel"></p>
+                                </div>
                             </div>
+                        </div>
+
+                        {{-- Hidden Field for Academic Year --}}
+                        <input type="hidden" name="academic_year" x-model="selectedAcademicYear">
+
+                        {{-- Form Fields --}}
+                        <div class="space-y-6">
+                            {{-- Semester Selection --}}
                             <div>
-                                <p class="font-bold text-gray-900 dark:text-white" x-text="selectedYearLabel"></p>
-                                <p class="text-sm text-blue-600 dark:text-blue-400" x-text="selectedLevelLabel"></p>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    Période
+                                </label>
+                                <div class="space-y-3">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 dark:border-gray-600 rounded-xl cursor-pointer hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 transition-all">
+                                        <input type="radio" name="semester" value="" class="w-4 h-4 text-blue-600" checked>
+                                        <span class="ml-3 text-gray-900 dark:text-white font-medium">Année complète (<span x-text="selectedSemesters"></span>)</span>
+                                    </label>
+
+                                    <template x-if="selectedSemesters">
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <template x-for="sem in getSemesterOptions()" :key="sem">
+                                                <label class="flex items-center p-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 transition-all">
+                                                    <input type="radio" name="semester" :value="sem" class="w-4 h-4 text-blue-600">
+                                                    <span class="ml-2 text-gray-900 dark:text-white font-medium" x-text="sem"></span>
+                                                </label>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            {{-- Retrait Type --}}
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Type de retrait
+                                </label>
+                                <div class="space-y-3">
+                                    <label class="flex items-start p-4 border-2 border-gray-200 dark:border-gray-600 rounded-xl cursor-pointer hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 transition-all">
+                                        <input type="radio" name="retrait_type" value="temporaire" class="w-4 h-4 text-blue-600 mt-1" required>
+                                        <div class="ml-3">
+                                            <span class="text-gray-900 dark:text-white font-medium block">Temporaire</span>
+                                            <span class="text-sm text-gray-500 dark:text-gray-400">À retourner après utilisation</span>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-start p-4 border-2 border-gray-200 dark:border-gray-600 rounded-xl cursor-pointer hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 transition-all">
+                                        <input type="radio" name="retrait_type" value="definitif" class="w-4 h-4 text-blue-600 mt-1" required>
+                                        <div class="ml-3">
+                                            <span class="text-gray-900 dark:text-white font-medium block">Définitif</span>
+                                            <span class="text-sm text-gray-500 dark:text-gray-400">Conservation permanente</span>
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- Form Fields --}}
-                    <div class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Type de relevé</label>
-                            <div class="grid grid-cols-2 gap-3">
-                                <label class="relative cursor-pointer">
-                                    <input x-model="scope" type="radio" value="year" class="peer sr-only">
-                                    <div class="p-4 border border-gray-300 dark:border-gray-600 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 transition-all duration-200">
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-5 h-5 text-gray-400 peer-checked:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            <span class="font-medium text-gray-900 dark:text-white">Année complète</span>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="relative cursor-pointer">
-                                    <input x-model="scope" type="radio" value="semester" class="peer sr-only">
-                                    <div class="p-4 border border-gray-300 dark:border-gray-600 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 transition-all duration-200">
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-5 h-5 text-gray-400 peer-checked:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                            </svg>
-                                            <span class="font-medium text-gray-900 dark:text-white">Semestre</span>
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div x-show="scope === 'semester'" x-transition class="space-y-3">
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">Choisir le semestre</label>
-                            <select x-model="selectedSemester" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                                <template x-for="s in availableSemesters" :key="s">
-                                    <option :value="s" x-text="'Semestre ' + s"></option>
-                                </template>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Type de retrait</label>
-                            <div class="grid grid-cols-2 gap-3">
-                                <label class="relative cursor-pointer">
-                                    <input x-model="requestType" type="radio" value="temporaire" class="peer sr-only">
-                                    <div class="p-4 border border-gray-300 dark:border-gray-600 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-50 dark:peer-checked:bg-green-900/20 transition-all duration-200">
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-5 h-5 text-gray-400 peer-checked:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            <div>
-                                                <span class="font-medium text-gray-900 dark:text-white block">Temporaire</span>
-                                                <span class="text-xs text-gray-500">À rendre</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="relative cursor-pointer">
-                                    <input x-model="requestType" type="radio" value="definitif" class="peer sr-only">
-                                    <div class="p-4 border border-gray-300 dark:border-gray-600 rounded-xl peer-checked:border-purple-500 peer-checked:bg-purple-50 dark:peer-checked:bg-purple-900/20 transition-all duration-200">
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-5 h-5 text-gray-400 peer-checked:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            <div>
-                                                <span class="font-medium text-gray-900 dark:text-white block">Définitif</span>
-                                                <span class="text-xs text-gray-500">Permanent</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
+                        {{-- Submit Buttons --}}
+                        <div class="flex gap-3 mt-8">
+                            <button type="button"
+                                    @click="showModal = false"
+                                    class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                Annuler
+                            </button>
+                            <button type="submit"
+                                    class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all">
+                                Confirmer la demande
+                            </button>
                         </div>
                     </div>
-
-                    {{-- Hidden Form --}}
-                    <form id="requestForm" method="POST" action="{{ route('student.releve.store') }}" style="display: none;">
-                        @csrf
-                        <input type="hidden" name="academic_year_id" x-bind:value="academicYearId">
-                        <input type="hidden" name="filiere_id" x-bind:value="filiereId">
-                        <input type="hidden" name="retrait_type" x-bind:value="requestType">
-                        <input type="hidden" name="semester_id" x-bind:value="scope === 'semester' ? selectedSemester : ''">
-                    </form>
-
-                    {{-- Action Buttons --}}
-                    <div class="flex gap-4 mt-8">
-                        <button @click="showModal = false" class="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl px-6 py-3 font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
-                            Annuler
-                        </button>
-                        <button @click="confirmRequest()" class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl px-6 py-3 font-bold hover:from-blue-600 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
-                            Confirmer la demande
-                        </button>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
 
+    @push('js')
     <script>
         function transcriptRequest() {
             return {
                 showModal: false,
                 selectedYearLabel: '',
                 selectedLevelLabel: '',
-                academicYearId: '',
-                filiereId: '',
-                requestType: 'temporaire',
-                scope: 'year',
-                selectedSemester: '',
-                availableSemesters: [],
+                selectedAcademicYear: null,
+                selectedSemesters: '',
 
-                openModal(yearLabel, levelLabel, yearId, filiereId, semestersRange) {
+                openModal(yearLabel, levelLabel, academicYear, semesters) {
                     this.selectedYearLabel = yearLabel;
                     this.selectedLevelLabel = levelLabel;
-                    this.academicYearId = yearId;
-                    this.filiereId = filiereId;
-
-                    const [s1, s2] = semestersRange.match(/\d+/g).map(Number);
-                    this.availableSemesters = [s1, s2];
-
-                    this.scope = 'year';
-                    this.selectedSemester = this.availableSemesters[0];
-                    this.requestType = 'temporaire';
+                    this.selectedAcademicYear = academicYear;
+                    this.selectedSemesters = semesters;
                     this.showModal = true;
                 },
 
-                confirmRequest() {
-                    const form = document.getElementById('requestForm');
-                    form.submit();
+                getSemesterOptions() {
+                    // Parse semesters string like "S1-S2" or "S3-S4"
+                    if (!this.selectedSemesters) return [];
+
+                    const parts = this.selectedSemesters.split('-');
+                    if (parts.length !== 2) return [];
+
+                    return [parts[0], parts[1]];
                 }
             }
         }
     </script>
+    @endpush
 @endsection

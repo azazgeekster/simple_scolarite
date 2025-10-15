@@ -28,40 +28,40 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Create Admins
-        $this->createAdmins();
+        // $this->createAdmins();
 
         // 2. Create Departments and Professors
-        $departments = $this->createDepartmentsAndProfessors();
+        // $departments = $this->createDepartmentsAndProfessors();
 
         // 3. Create Filieres
-        $filieres = $this->createFilieres($departments);
+        // $filieres = $this->createFilieres($departments);
 
         // 4. Create Academic Years
-        $academicYears = $this->createAcademicYears();
+        // $academicYears = $this->createAcademicYears();
 
         // 5. Create Modules
-        $modules = $this->createModules($filieres);
+        // $modules = $this->createModules($filieres);
 
         // 6. Create Students
-        $students = $this->createStudents();
+        // $students = $this->createStudents();
 
         // 7. Create Program Enrollments
-        $programEnrollments = $this->createProgramEnrollments($students, $filieres, $academicYears);
+        // $programEnrollments = $this->createProgramEnrollments($students, $filieres, $academicYears);
 
         // 8. Create Semester Enrollments
-        $semesterEnrollments = $this->createSemesterEnrollments($programEnrollments);
+        // $semesterEnrollments = $this->createSemesterEnrollments($programEnrollments);
 
         // 9. Create Module Enrollments
-        $moduleEnrollments = $this->createModuleEnrollments($semesterEnrollments, $modules);
+        // $moduleEnrollments = $this->createModuleEnrollments($semesterEnrollments, $modules);
 
         // 10. Create Module Grades
-        $this->createModuleGrades($moduleEnrollments);
+        // $this->createModuleGrades($moduleEnrollments);
 
         // 11. Create Documents
         $documents = $this->createDocuments();
 
         // 12. Create Demandes
-        $this->createDemandes($students, $documents, $academicYears);
+        // $this->createDemandes($students, $documents, $academicYears);
 
         $this->command->info('Database seeded successfully!');
     }
@@ -582,13 +582,15 @@ class DatabaseSeeder extends Seeder
 
         $documents = [];
 
+        // Documents that require return specification
         $documents[] = Document::create([
-            'slug' => 'attestation_scolarite',
-            'label_fr' => 'Attestation de scolarité',
-            'label_ar' => 'شهادة التسجيل',
-            'label_en' => 'Certificate of Enrollment',
-            'description' => 'Document attestant que l\'étudiant est inscrit',
-            'template_path' => 'documents/attestation_scolarite.blade.php',
+            'slug' => 'bac',
+            'label_fr' => 'BAC (Original)',
+            'label_ar' => 'شهادة الباكالوريا (الأصل)',
+            'label_en' => 'High School Diploma (Original)',
+            'description' => 'Diplôme original du baccalauréat',
+            'template_path' => null,
+            'requires_return' => true, // ✅ Needs temporary/definitive
         ]);
 
         $documents[] = Document::create([
@@ -598,6 +600,18 @@ class DatabaseSeeder extends Seeder
             'label_en' => 'Transcript',
             'description' => 'Relevé officiel des notes de l\'étudiant',
             'template_path' => 'documents/releve_notes.blade.php',
+            'requires_return' => true, // ✅ Needs temporary/definitive
+        ]);
+
+        // Documents that DON'T require return (just given)
+        $documents[] = Document::create([
+            'slug' => 'attestation_scolarite',
+            'label_fr' => 'Attestation de scolarité',
+            'label_ar' => 'شهادة التسجيل',
+            'label_en' => 'Certificate of Enrollment',
+            'description' => 'Document attestant l\'inscription de l\'étudiant',
+            'template_path' => 'documents/attestation_scolarite.blade.php',
+            'requires_return' => false, // ✅ Just given, no return needed
         ]);
 
         $documents[] = Document::create([
@@ -607,11 +621,21 @@ class DatabaseSeeder extends Seeder
             'label_en' => 'Certificate of Success',
             'description' => 'Document attestant la réussite de l\'étudiant',
             'template_path' => 'documents/attestation_reussite.blade.php',
+            'requires_return' => false, // ✅ Just given, no return needed
+        ]);
+
+        $documents[] = Document::create([
+            'slug' => 'convention_stage',
+            'label_fr' => 'Convention de stage',
+            'label_ar' => 'اتفاقية التدريب',
+            'label_en' => 'Internship Agreement',
+            'description' => 'Convention tripartite pour stage',
+            'template_path' => 'documents/convention_stage.blade.php',
+            'requires_return' => false, // ✅ Just given, no return needed
         ]);
 
         return $documents;
     }
-
     private function createDemandes(array $students, array $documents, array $academicYears): void
     {
         $this->command->info('Creating demandes...');

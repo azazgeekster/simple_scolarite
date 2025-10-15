@@ -18,6 +18,7 @@ class Document extends Model
         'label_fr',
         'label_en',
         'template_path',
+        'requires_return'
     ];
 
     // Relationships

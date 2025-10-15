@@ -5,15 +5,13 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\StudentLoginController;
-use App\Http\Controllers\Student\BacController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\DemandeController;
-use App\Http\Controllers\Student\DemandesController;
 use App\Http\Controllers\Student\StudentProfileController;
 use App\Http\Controllers\Student\StudentSituationController;
-use App\Models\Student;
-use Carbon\Carbon;
+
 use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes                                                              |
@@ -36,7 +34,6 @@ Route::group(['prefix' => 'student'], function () {
         Route::get('activate/{token}', [AccountActivationController::class, 'showSetPasswordForm'])->name('student.activate.setpassword');
         Route::post('activate/{token}', [AccountActivationController::class, 'completeActivation'])->name('student.activate.complete');
     });
-
 
     // MIDDLEWARE STUDENT
     Route::middleware(['auth:student', 'verified'])->group(function () {
@@ -81,27 +78,27 @@ Route::group(['prefix' => 'student'], function () {
 });
 
 
-//for google
+    //for google
 
-Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
+    Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
 
-// Route to handle the callback from Google
-Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
-
-
-/// forget and reset password
-Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])
-    ->name('password.request');
-
-Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
-    ->name('password.email');
+    // Route to handle the callback from Google
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 
 
-Route::get('reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])
-    ->name('password.reset');
+    /// forget and reset password
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])
+        ->name('password.request');
 
-Route::post('reset-password', [ResetPasswordController::class, 'reset'])
-    ->name('password.update');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+        ->name('password.email');
+
+
+    Route::get('reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])
+        ->name('password.reset');
+
+    Route::post('reset-password', [ResetPasswordController::class, 'reset'])
+        ->name('password.update');
 
 
 
