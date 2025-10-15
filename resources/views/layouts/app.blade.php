@@ -29,12 +29,19 @@
 
     <!-- RTL Css -->
     <link rel="stylesheet" href="{{asset('../assets/css/rtl.min.css')}}" />
+    @if(app()->getLocale() == 'ar')
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    @endif
     <!-- @bukStyles() -->
     <!-- @bukScripts() -->
 
 </head>
+<html class="min-h-screen flex flex-col bg-gray-100" lang="{{ app()->getLocale() }}"
+    dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
 
-<body class="min-h-screen flex flex-col bg-gray-100">
+{{--
+
+<body> --}}
     <!-- loader Start -->
     <div id="loading">
         <div class="loader simple-loader">
@@ -1049,7 +1056,7 @@
                                             <ul class="p-0 list-group list-group-flush">
                                                 <li class="iq-sub-card list-group-item"><a class="p-0" href="#"><img
                                                             src="../assets/images/Flag/flag-03.png" alt="img-flaf"
-                                                          class="img-fluid me-2"
+                                                            class="img-fluid me-2"
                                                             style="width: 15px;height: 15px;min-width: 15px;" />Spanish</a>
                                                 </li>
                                                 <li class="iq-sub-card list-group-item"><a class="p-0" href="#"><img
@@ -1284,7 +1291,7 @@
             @yield("content")
         </div>
     </main>
-     <a class="btn btn-fixed-end btn-warning btn-icon btn-setting" data-bs-toggle="offcanvas"
+    <a class="btn btn-fixed-end btn-warning btn-icon btn-setting" data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasExample" role="button" aria-controls="offcanvasExample">
         <svg width="24" viewBox="0 0 24 24" class="animated-rotate icon-24" fill="none"
             xmlns="http://www.w3.org/2000/svg">

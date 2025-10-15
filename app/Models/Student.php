@@ -69,7 +69,7 @@ class Student extends Authenticatable implements MustVerifyEmail
         $gender = $this->sexe === 'M' ? 'boy' : 'girl';
 
         if ($this->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->avatar)) {
-            return asset('storage/profile_pictures' . $this->avatar);
+            return asset('storage/' . $this->avatar);
         }
 
         return 'https://avatar.iran.liara.run/public/' . $gender;

@@ -40,25 +40,25 @@ def crop_face(image_bytes, padding_ratio=0.25):
 
     return b64_encoded, "Face cropped and encoded successfully"
 
-
 @app.route('/crop-photo', methods=['POST'])
 def crop_photo():
-    print('AVATAR: '+request.files)
+    print("FILES:", request.files)
+    print("FORM:", request.form)
+
     if 'avatar' not in request.files:
         return jsonify({'success': False, 'message': 'No file uploaded'}), 400
+
     photo = request.files['avatar']
-    base64_image, message = crop_face(photo.read())
+    image_bytes = photo.read()
+    print(f"Received {len(image_bytes)} bytes")
+    base64_image, message = crop_face(image_bytes)
 
     if not base64_image:
         return jsonify({'success': False, 'message': message}), 400
 
-    return jsonify({
-        'success': True,
-        'message': message,
-        'cropped_base64': base64_image
-    }), 200
+    return jsonify({'success': True, 'message': message, 'cropped_base64': base64_image}), 200
 
 
 if __name__ == '__main__':
     print("Starting Face Validator API on port 5001")
-    app.run(port=5001)
+    app.run(port=5001, debug=True)

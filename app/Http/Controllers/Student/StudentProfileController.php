@@ -59,14 +59,13 @@ class StudentProfileController extends Controller
 
         // Send to Python API for face detection + cropping
         $response = Http::timeout(30)
-            ->asMultipart()
-            ->attach(
-                'avatar',
-                file_get_contents($photo->path()),
-                $photo->getClientOriginalName()
-            )
-            ->post('http://127.0.0.1:5001/crop-photo');
-
+        ->asMultipart()
+        ->attach(
+            'avatar',
+            fopen($photo->getRealPath(), 'r'),
+            $photo->getClientOriginalName()
+        )
+        ->post('http://127.0.0.1:5001/crop-photo');
 
         if (! $response->ok() || ! $response->json('success')) {
             return back()->with('error', $response->json('message') ?? 'Invalid photo');
@@ -76,7 +75,7 @@ class StudentProfileController extends Controller
 
         // Decode Base64 and store image
         $imageData = base64_decode($base64Image);
-        $filename = 'profile_pictures/'.Str::uuid().'.jpg';
+        $filename = 'students_avatars/'.Str::uuid().'.jpg';
         Storage::disk('public')->put($filename, $imageData);
 
         // Delete old photo

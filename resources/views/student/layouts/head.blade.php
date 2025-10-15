@@ -6,6 +6,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Noto+Kufi+Arabic:wght@100..900&display=swap"
+        rel="stylesheet">
+
     <!-- <link rel="stylesheet" href="https://flowbite-admin-dashboard.vercel.app//app.css"> -->
 
     <link rel="apple-touch-icon" sizes="180x180"
@@ -44,10 +48,18 @@
         href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
         rel="stylesheet">
     <style>
-        html {
-            font-family: "DM Sans", sans-serif;
-            font-optical-sizing: auto;
-        }
+            body {
+        font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-optical-sizing: auto;
+    }
+
+    /* Arabic font */
+    body.rtl,
+    [dir="rtl"],
+    .font-arabic {
+        font-family: 'Noto Kufi Arabic', sans-serif;
+        font-optical-sizing: auto;
+    }
     </style>
 
     @vite('resources/css/app.css')

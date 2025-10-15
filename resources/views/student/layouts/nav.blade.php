@@ -594,6 +594,7 @@
                         </path>
                     </svg>
                 </button>
+                <x-language-switcher />
 
                 <div class="z-20 z-50 hidden max-w-sm my-4 overflow-hidden text-base list-none bg-white divide-y divide-gray-100 rounded shadow-lg dark:divide-gray-600 dark:bg-gray-700"
                     id="notification-dropdown">
@@ -732,6 +733,7 @@
                             </div>
                         </a>
                     </div>
+
                     <a href="#"
                         class="block py-2 text-base font-normal text-center text-gray-900 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:text-white dark:hover:underline">
                         <div class="inline-flex items-center ">

@@ -1,6 +1,8 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+
 @include('student.layouts.head')
+
 @stack('css')
 <body class="bg-gray-100 min-h-screen flex flex-col" x-data="{ isDark: false }" x-init="
     if (!('isDark' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -15,7 +17,7 @@
         <div class="fixed inset-0 z-10 hidden bg-gray-900/50 dark:bg-gray-900/90" id="sidebarBackdrop"></div>
 
         <div id="main-content" class="flex flex-col w-full h-screen overflow-y-auto bg-gray-50 lg:ml-72 dark:bg-gray-900">
-            <main class="flex-grow px-6 pt-6 pb-6">
+            <main class="flex-grow px-6 pt-6 pb-6 {{ app()->getLocale() == 'ar' ? 'mr-64 ml-0' : 'ml-64 mr-0' }}"" >
                 @yield('main_content')
             </main>
 

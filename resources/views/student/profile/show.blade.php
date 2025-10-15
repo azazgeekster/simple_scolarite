@@ -276,31 +276,67 @@
     <x-flash-message type="error" />
 
     <!-- Streamlined Hero Notice -->
-    <section class="relative bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-gray-800 dark:to-gray-900">
-        <div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
+    <section class="relative bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-gray-800 dark:to-gray-900"
+    dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+<div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
 
-        <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-            <div class="bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20 rounded-2xl p-6 lg:p-8">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-amber-400/20 rounded-xl flex items-center justify-center">
-                            <svg class="w-6 h-6 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-white text-lg font-semibold mb-1">Profile Verification Required</h3>
-                        <p class="text-white/80 text-sm">Please review and verify your personal information to ensure accuracy.</p>
-                    </div>
-                    <button class="flex-shrink-0 px-6 py-2.5 bg-white hover:bg-white/90 text-blue-600 font-semibold rounded-lg transition-colors duration-200 text-sm">
-                        Verify Now
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
+<div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+   <div class="bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20 rounded-2xl p-6 lg:p-8">
 
+       <!-- Header -->
+       <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-6">
+           <div class="flex-shrink-0">
+               <div class="w-12 h-12 bg-amber-400/20 rounded-xl flex items-center justify-center">
+                   <svg class="w-6 h-6 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
+                       <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                   </svg>
+               </div>
+           </div>
+           <div class="flex-1">
+               <h3 class="text-white text-lg font-semibold mb-1">{{ __('messages.profile_verification_required') }}</h3>
+               <p class="text-white/80 text-sm">{{ __('messages.review_information') }}</p>
+           </div>
+       </div>
+
+       <!-- Warning Points -->
+       <div class="bg-white/5 rounded-xl p-5 border border-white/10 space-y-3">
+           <div class="flex items-start gap-3 text-white/90">
+               <svg class="w-5 h-5 text-amber-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+               </svg>
+               <p class="text-sm leading-relaxed">{{ __('messages.one_time_edit') }}</p>
+           </div>
+
+           <div class="flex items-start gap-3 text-white/90">
+               <svg class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+               </svg>
+               <p class="text-sm leading-relaxed">{{ __('messages.invalid_documents_warning') }}</p>
+           </div>
+
+           <div class="flex items-start gap-3 text-white/90">
+               <svg class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                   <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+               </svg>
+               <p class="text-sm leading-relaxed">{{ __('messages.final_approval') }}</p>
+           </div>
+
+           <div class="flex items-start gap-3 text-white/90">
+               <svg class="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+               </svg>
+               <p class="text-sm leading-relaxed">{{ __('messages.no_responsibility') }}</p>
+           </div>
+       </div>
+
+       <!-- Call to Action -->
+       <div class="mt-5 text-center">
+           <p class="text-white/70 text-sm">⚠️ {{ __('messages.double_check') }}</p>
+       </div>
+
+   </div>
+</div>
+</section>
     <!-- Main Profile Container -->
     <section class="py-8 lg:py-12 bg-gray-50 dark:bg-gray-900">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
