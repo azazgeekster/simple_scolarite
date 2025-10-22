@@ -7,14 +7,103 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {{-- Page Header --}}
-        <div class="mb-8">
+        {{-- Page Header with Year Selector --}}
+<div class="mb-8">
+    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div>
             <h1 class="text-4xl font-bold text-gray-900 mb-2">
                 Ma Situation Pédagogique
             </h1>
             <p class="text-gray-600">
-                Année universitaire {{ $enrollment->academicYear->label }}
+                Consultez votre parcours académique et vos modules
             </p>
         </div>
+
+        {{-- Year Selector Dropdown --}}
+        @if($allEnrollments->count() > 0)
+            <div class="flex-shrink-0">
+                <form method="GET" action="{{ route('student.mysituation') }}">
+                    <label for="year-select" class="block text-sm font-medium text-gray-700 mb-2">
+                        Année universitaire
+                    </label>
+                    <div class="relative">
+                        <select name="year"
+                                id="year-select"
+                                onchange="this.form.submit()"
+                                class="block w-full md:w-80 pl-4 pr-10 py-3 text-base border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 rounded-xl shadow-sm transition-all duration-200 hover:border-gray-400 cursor-pointer appearance-none">
+                            @foreach($allEnrollments as $historyEnrollment)
+                                <option value="{{ $historyEnrollment->academic_year }}"
+                                        {{ $historyEnrollment->academic_year == $enrollment->academic_year ? 'selected' : '' }}>
+                                    {{ $historyEnrollment->academic_year }}-{{ $historyEnrollment->academic_year + 1 }} -
+                                    {{ $historyEnrollment->filiere->label_fr }}
+                                    ({{ $historyEnrollment->year_in_program }}{{ $historyEnrollment->year_in_program == 1 ? 'ère' : 'ème' }} année)
+                                    @if($historyEnrollment->academicYear && $historyEnrollment->academicYear->is_current)
+                                        • En cours
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        @else
+            <div class="text-right">
+                <div class="text-sm text-gray-600 mb-1">Année universitaire</div>
+                <div class="text-2xl font-bold text-gray-900">
+                    {{ $enrollment->academic_year }}-{{ $enrollment->academic_year + 1 }}
+                </div>
+            </div>
+        @endif
+    </div>
+
+    {{-- Mini Timeline Indicator (Optional but nice) --}}
+    @if($allEnrollments->count() > 1)
+        <div class="mt-6 bg-white rounded-xl shadow-sm p-4 border border-gray-200">
+            <div class="flex items-center justify-between text-sm mb-3">
+                <span class="font-medium text-gray-700">Mon parcours</span>
+                <span class="text-gray-500">{{ $allEnrollments->count() }} année(s)</span>
+            </div>
+            <div class="flex items-center gap-2 overflow-x-auto pb-2">
+                @foreach($allEnrollments->reverse() as $historyEnrollment)
+                    <a href="{{ route('student.mysituation', ['year' => $historyEnrollment->academic_year]) }}"
+                       class="group relative flex-shrink-0 transition-all duration-200"
+                       title="{{ $historyEnrollment->academic_year }}-{{ $historyEnrollment->academic_year + 1 }}">
+                        <div class="flex flex-col items-center">
+                            {{-- Year Dot --}}
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-200
+                                        {{ $historyEnrollment->academic_year == $enrollment->academic_year
+                                           ? 'bg-blue-600 text-white ring-4 ring-blue-200 scale-110'
+                                           : 'bg-gray-200 text-gray-600 group-hover:bg-gray-300' }}">
+                                {{ $historyEnrollment->year_in_program }}
+                            </div>
+                            {{-- Year Label --}}
+                            <div class="mt-1 text-xs font-medium whitespace-nowrap
+                                        {{ $historyEnrollment->academic_year == $enrollment->academic_year
+                                           ? 'text-blue-600'
+                                           : 'text-gray-500' }}">
+                                {{ $historyEnrollment->academic_year }}
+                            </div>
+                            {{-- Current Badge --}}
+                            @if($historyEnrollment->academicYear && $historyEnrollment->academicYear->is_current)
+                                <span class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse ring-2 ring-white"></span>
+                            @endif
+                        </div>
+                    </a>
+
+                    {{-- Connector Line --}}
+                    @if(!$loop->last)
+                        <div class="h-0.5 w-6 bg-gray-300 flex-shrink-0 -mx-1 mb-4"></div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+    @endif
+</div>
 
         {{-- Student Enrollment Card --}}
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-8 border border-gray-100">
@@ -249,7 +338,7 @@
                 </div>
 
                 {{-- Semester Footer --}}
-                <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                {{-- <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-6 text-sm text-gray-600">
                             <div class="flex items-center">
@@ -271,38 +360,36 @@
                             </div>
                             @endif
                         </div>
-                        <button onclick="window.print()"
-                                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                            </svg>
-                            Imprimer
-                        </button>
+
                     </div>
-                </div>
+                </div> --}}
             </div>
             @endforeach
         </div>
 
         {{-- Info Card --}}
-        <div class="mt-8 bg-blue-50 border-l-4 border-blue-400 rounded-lg p-6 shadow-sm">
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-sm font-semibold text-blue-900 mb-2">À propos de votre situation pédagogique</h3>
-                    <div class="text-sm text-blue-800 space-y-1">
-                        <p>• Cette page présente les modules que vous devez étudier cette année universitaire</p>
-                        <p>• Pour consulter vos notes et résultats, rendez-vous dans la section "Mes Notes"</p>
-                        <p>• Les emplois du temps seront communiqués par votre département</p>
-                        <p>• Pour toute question sur votre inscription, contactez le service de scolarité</p>
-                    </div>
-                </div>
+     {{-- Info Card --}}
+<div class="mt-8 bg-blue-50 border-l-4 border-blue-400 rounded-lg p-6 shadow-sm">
+    <div class="flex items-start">
+        <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <div class="ml-4">
+            <h3 class="text-sm font-semibold text-blue-900 mb-2">À propos de votre situation pédagogique</h3>
+            <div class="text-sm text-blue-800 space-y-1">
+                <p>• Cette page présente les modules que vous devez étudier cette année universitaire</p>
+                @if($allEnrollments->count() > 1)
+                    <p>• Utilisez le menu déroulant ci-dessus pour consulter vos inscriptions des années précédentes</p>
+                @endif
+                <p>• Pour consulter vos notes et résultats, rendez-vous dans la section "Mes Notes"</p>
+                <p>• Les emplois du temps seront communiqués par votre département</p>
+                <p>• Pour toute question sur votre inscription, contactez le service de scolarité</p>
             </div>
         </div>
+    </div>
+</div>
 
     </div>
 </div>

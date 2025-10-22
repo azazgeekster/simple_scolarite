@@ -125,7 +125,7 @@ class Demande extends Model
         }
 
         // Format: REQ-2025-00001
-        return $prefix . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
+        return $prefix.str_pad($newNumber, 5, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -145,7 +145,7 @@ class Demande extends Model
 
         $newNumber = $count + 1;
 
-        return $prefix . str_pad($newNumber, 2, '0', STR_PAD_LEFT);
+        return $prefix.str_pad($newNumber, 2, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -169,7 +169,7 @@ class Demande extends Model
             $newNumber = 1;
         }
 
-        return $prefix . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
+        return $prefix.str_pad($newNumber, 5, '0', STR_PAD_LEFT);
     }
 
     // ==========================================
@@ -241,7 +241,7 @@ class Demande extends Model
     {
         $this->status = 'COMPLETED';
 
-        if ($this->isTemporaire() && !$this->returned_at) {
+        if ($this->isTemporaire() && ! $this->returned_at) {
             $this->returned_at = now();
         }
 
@@ -273,7 +273,7 @@ class Demande extends Model
      */
     public function isOverdue(): bool
     {
-        if (!$this->isTemporaire() || !$this->must_return_by) {
+        if (! $this->isTemporaire() || ! $this->must_return_by) {
             return false;
         }
 
@@ -285,7 +285,7 @@ class Demande extends Model
      */
     public function getDaysUntilReturn(): ?int
     {
-        if (!$this->isTemporaire() || !$this->must_return_by || $this->returned_at) {
+        if (! $this->isTemporaire() || ! $this->must_return_by || $this->returned_at) {
             return null;
         }
 
@@ -297,7 +297,7 @@ class Demande extends Model
      */
     public function getDaysOverdue(): int
     {
-        if (!$this->isOverdue()) {
+        if (! $this->isOverdue()) {
             return 0;
         }
 
@@ -307,9 +307,9 @@ class Demande extends Model
     /**
      * Set return deadline (for temporary retraits)
      */
-    public function setReturnDeadline(int $days = 15): bool
+    public function setReturnDeadline(int $days = 2): bool
     {
-        if (!$this->isTemporaire()) {
+        if (! $this->isTemporaire()) {
             return false;
         }
 
@@ -322,7 +322,7 @@ class Demande extends Model
      */
     public function requestExtension(int $additionalDays): bool
     {
-        if (!$this->isTemporaire() || $this->returned_at) {
+        if (! $this->isTemporaire() || $this->returned_at) {
             return false;
         }
 
@@ -336,7 +336,7 @@ class Demande extends Model
      */
     public function approveExtension(): bool
     {
-        if (!$this->extension_requested_at || !$this->extension_days) {
+        if (! $this->extension_requested_at || ! $this->extension_days) {
             return false;
         }
 
@@ -356,7 +356,7 @@ class Demande extends Model
      */
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'PENDING' => 'En attente',
             'READY' => 'Prêt',
             'PICKED' => 'Retiré',
@@ -370,7 +370,7 @@ class Demande extends Model
      */
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'PENDING' => 'yellow',
             'READY' => 'blue',
             'PICKED' => 'green',
@@ -384,7 +384,7 @@ class Demande extends Model
      */
     public function getProcessingTimeAttribute(): ?int
     {
-        if (!$this->processed_at) {
+        if (! $this->processed_at) {
             return null;
         }
 
@@ -491,13 +491,13 @@ class Demande extends Model
      */
     public function scopeSearch($query, string $search)
     {
-        return $query->where(function($q) use ($search) {
+        return $query->where(function ($q) use ($search) {
             $q->where('reference_number', 'LIKE', "%{$search}%")
-              ->orWhereHas('student', function($sq) use ($search) {
-                  $sq->where('cne', 'LIKE', "%{$search}%")
-                    ->orWhere('prenom', 'LIKE', "%{$search}%")
-                    ->orWhere('nom', 'LIKE', "%{$search}%");
-              });
+                ->orWhereHas('student', function ($sq) use ($search) {
+                    $sq->where('cne', 'LIKE', "%{$search}%")
+                        ->orWhere('prenom', 'LIKE', "%{$search}%")
+                        ->orWhere('nom', 'LIKE', "%{$search}%");
+                });
         });
     }
 
@@ -507,5 +507,43 @@ class Demande extends Model
     public function scopeRecent($query, int $days = 30)
     {
         return $query->where('created_at', '>=', now()->subDays($days));
+    }
+
+
+    /**
+     * Check if demande can still be cancelled
+     */
+    public function canBeCancelled(): bool
+    {
+        if ($this->status !== 'PENDING') {
+            return false;
+        }
+
+        // Can cancel within 30 minutes of creation
+        $cancellationDeadline = $this->created_at->addMinutes(5);
+        return now()->isBefore($cancellationDeadline);
+    }
+
+    /**
+     * Get remaining time to cancel in minutes
+     */
+    public function getRemainingCancellationTime(): int
+    {
+        if ($this->status !== 'PENDING') {
+            return 0;
+        }
+
+        $cancellationDeadline = $this->created_at->addMinutes(5);
+        $remaining = now()->diffInMinutes($cancellationDeadline, false);
+
+        return max(0, $remaining);
+    }
+
+    /**
+     * Check if document requires return
+     */
+    public function requiresReturn(): bool
+    {
+        return $this->document && $this->document->requires_return;
     }
 }

@@ -39,6 +39,7 @@ Route::group(['prefix' => 'student'], function () {
     Route::middleware(['auth:student', 'verified'])->group(function () {
         // LOGIN things
         Route::get('dashboard', [DashboardController::class, 'index'])->name('student.dashboard');
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('student.dashboard');
         Route::post('logout', [StudentLoginController::class, 'logout'])->name('student.logout');
 
         // PROFILE

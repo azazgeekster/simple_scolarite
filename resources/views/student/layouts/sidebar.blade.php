@@ -38,18 +38,7 @@
                     </a>
                 </li>
 
-                <!-- Convocation -->
-                <li>
-                    <a href="{{ route('student.mysituation') }}"
-                        class="group flex items-center px-4 py-3 text-slate-700 rounded-xl hover:bg-amber-50 hover:text-amber-700 dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-amber-400 transition-all duration-200 hover:shadow-sm hover:translate-x-1">
-                        <div class="flex items-center justify-center w-10 h-10 bg-amber-100 group-hover:bg-amber-200 dark:bg-slate-700 dark:group-hover:bg-slate-600 rounded-lg transition-colors duration-200">
-                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.03v13m0-13c-2.819-.831-4.715-1.076-8.029-1.023A.99.99 0 0 0 3 6v11c0 .563.466 1.014 1.03 1.007 3.122-.043 5.018.212 7.97 1.023m0-13c2.819-.831 4.715-1.076 8.029-1.023A.99.99 0 0 1 21 6v11c0 .563-.466 1.014-1.03 1.007-3.122-.043-5.018.212-7.97 1.023"/>
-                            </svg>
-                        </div>
-                        <span class="ml-4 font-medium">Convocation</span>
-                    </a>
-                </li>
+
 
                 <!-- Relevé de notes -->
                 <li>

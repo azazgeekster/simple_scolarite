@@ -29,71 +29,71 @@ class DemandeController extends Controller
         return view('student.demandes.index', compact('demandes', 'documents', 'years'));
     }
     public function store(Request $request)
-{
-    // Get the document to check if it requires return specification
-    $document = Document::findOrFail($request->document_id);
+    {
+        // Get the document to check if it requires return specification
+        $document = Document::findOrFail($request->document_id);
 
-    // Build validation rules
-    $rules = [
-        'document_id' => 'required|exists:documents,id',
-    ];
+        // Build validation rules
+        $rules = [
+            'document_id' => 'required|exists:documents,id',
+        ];
 
-    // Only require retrait_type if document requires return
-    if ($document->requires_return) {
-        $rules['retrait_type'] = 'required|in:temporaire,definitif';
-    }
-
-    $request->validate($rules, [
-        'retrait_type.required' => 'Veuillez sélectionner un type de retrait.',
-        'retrait_type.in' => 'Le type de retrait sélectionné est invalide.',
-    ]);
-
-    $student = auth('student')->user();
-
-    // Get current academic year
-    $currentYear = now()->year;
-    $academicYear = AcademicYear::where('start_year', '<=', $currentYear)
-        ->where('end_year', '>=', $currentYear)
-        ->first();
-
-    if (!$academicYear) {
-        return back()->with('error', 'Aucune année académique active trouvée.');
-    }
-
-    // Check for duplicate requests
-    $alreadyToday = $student->demandes()
-        ->where('document_id', $request->document_id)
-        ->whereDate('created_at', now()->toDateString())
-        ->exists();
-
-    if ($alreadyToday) {
-        return back()->with('error', 'Vous avez déjà effectué cette demande aujourd\'hui.');
-    }
-
-    // Create demande
-    $demandeData = [
-        'document_id' => $request->document_id,
-        'academic_year' => $academicYear->start_year,
-        'status' => 'PENDING',
-    ];
-
-    // Only set retrait_type if document requires return
-    if ($document->requires_return) {
-        $demandeData['retrait_type'] = $request->retrait_type;
-
-        // Set return deadline if temporary
-        if ($request->retrait_type === 'temporaire') {
-            $demandeData['must_return_by'] = now()->addDays(7);
+        // Only require retrait_type if document requires return
+        if ($document->requires_return) {
+            $rules['retrait_type'] = 'required|in:temporaire,definitif';
         }
-    } else {
-        // For documents that don't require return, set as definitif by default
-        $demandeData['retrait_type'] = 'definitif';
+
+        $request->validate($rules, [
+            'retrait_type.required' => 'Veuillez sélectionner un type de retrait.',
+            'retrait_type.in' => 'Le type de retrait sélectionné est invalide.',
+        ]);
+
+        $student = auth('student')->user();
+
+        // Get current academic year
+        $currentYear = now()->year;
+        $academicYear = AcademicYear::where('start_year', '<=', $currentYear)
+            ->where('end_year', '>=', $currentYear)
+            ->first();
+
+        if (! $academicYear) {
+            return back()->with('error', 'Aucune année académique active trouvée.');
+        }
+
+        // Check for duplicate requests
+        $alreadyToday = $student->demandes()
+            ->where('document_id', $request->document_id)
+            ->whereDate('created_at', now()->toDateString())
+            ->exists();
+
+        if ($alreadyToday) {
+            return back()->with('error', 'Vous avez déjà effectué cette demande aujourd\'hui.');
+        }
+
+        // Create demande
+        $demandeData = [
+            'document_id' => $request->document_id,
+            'academic_year' => $academicYear->start_year,
+            'status' => 'PENDING',
+        ];
+
+        // Only set retrait_type if document requires return
+        if ($document->requires_return) {
+            $demandeData['retrait_type'] = $request->retrait_type;
+
+            // Set return deadline if temporary
+            if ($request->retrait_type === 'temporaire') {
+                $demandeData['must_return_by'] = now()->addDays(2);
+            }
+        } else {
+            // For documents that don't require return, set as definitif by default
+            $demandeData['retrait_type'] = 'definitif';
+        }
+
+        $student->demandes()->create($demandeData);
+
+        return back()->with('success', 'Votre demande a été soumise avec succès.');
     }
-
-    $student->demandes()->create($demandeData);
-
-    return back()->with('success', 'Votre demande a été soumise avec succès.');
-}
 
     public function print(Demande $demande)
     {
@@ -111,9 +111,15 @@ class DemandeController extends Controller
     {
         $student = auth('student')->user();
 
+        // Check ownership and status
         if ($demande->student_id !== $student->id || $demande->status !== 'PENDING') {
-            abort(403);
+            abort(403, 'Vous ne pouvez pas annuler cette demande.');
         }
+
+        // Check if cancellation is still allowed (within 30 minutes of creation)
+        if(!$demande->canBeCancelled())
+            return back()->with('error', 'L\'annulation de cette demande n\'est pas permise');
+
 
         $demande->delete();
 
@@ -195,11 +201,11 @@ class DemandeController extends Controller
 
             return [
                 'academic_year' => $enrollment->academic_year, // Use start_year directly
-                'academic_year_label' => "{$enrollment->academic_year}-" . ($enrollment->academic_year + 1),
+                'academic_year_label' => "{$enrollment->academic_year}-".($enrollment->academic_year + 1),
                 'semesters' => "S{$startSemester}-S{$endSemester}",
                 'filiere_label' => $enrollment->filiere->label_fr,
                 'filiere_id' => $enrollment->filiere->id,
-                'year_label' => $this->getOrdinal($yearInProgram) . ' année ' . ucfirst($enrollment->filiere->level),
+                'year_label' => $this->getOrdinal($yearInProgram).' année '.ucfirst($enrollment->filiere->level),
                 'disponible' => $isPastYear,
                 'enrollment_status' => $enrollment->enrollment_status,
             ];
@@ -207,90 +213,72 @@ class DemandeController extends Controller
 
         // Get student's previous transcript requests
         $studentDemandes = $student->demandes()
-            ->where('document_id', 1) // Relevé de notes
+            ->where('document_id', 7) // Relevé de notes
             ->with(['document', 'academicYear'])
             ->latest()
             ->get();
-
+        // dd($student->demandes()->where('document_id',1)->get());
         return view('student.demandes.releve', compact('student', 'availableReleves', 'studentDemandes'));
     }
 
     /**
      * Store a new transcript request
      */
- public function store_releve(Request $request)
-{
-    \Log::info('Saving transcript demande', $request->all());
+    public function store_releve(Request $request)
+    {
+        \Log::info('Saving transcript demande', $request->all());
 
-    // Get the document
-    $document = Document::where('slug', 'releve_notes')->first();
+        // Get the document
+        $document = Document::where('slug', 'releve_notes')->first();
 
-    if (!$document) {
-        return back()->with('error', 'Document non trouvé.');
-    }
-
-    // Build validation rules
-    $rules = [
-        'academic_year' => ['required', 'exists:academic_years,start_year'],
-        'semester' => ['nullable', 'in:S1,S2,S3,S4,S5,S6'],
-    ];
-
-    // Only require retrait_type if document requires return
-    if ($document->requires_return) {
-        $rules['retrait_type'] = ['required', 'in:temporaire,definitif'];
-    }
-
-    $request->validate($rules);
-
-    $student = auth('student')->user();
-
-    // Check for duplicate
-    $alreadyExists = $student->demandes()
-        ->where('document_id', $document->id)
-        ->where('academic_year', $request->academic_year)
-        ->where(function ($query) use ($request) {
-            if ($request->filled('semester')) {
-                $query->where('semester', $request->semester);
-            } else {
-                $query->whereNull('semester');
-            }
-        })
-        ->exists();
-
-    if ($alreadyExists) {
-        return back()->with('error', 'Une demande pour cette période existe déjà.');
-    }
-
-    // Create demande
-    $demandeData = [
-        'document_id' => $document->id,
-        'academic_year' => $request->academic_year,
-        'semester' => $request->semester,
-        'status' => 'PENDING',
-    ];
-
-    // Only set retrait_type if document requires return
-    if ($document->requires_return) {
-        $demandeData['retrait_type'] = $request->retrait_type;
-
-        if ($request->retrait_type === 'temporaire') {
-            $demandeData['must_return_by'] = now()->addDays(14);
+        if (!$document) {
+            return back()->with('error', 'Document non trouvé.');
         }
-    } else {
-        $demandeData['retrait_type'] = 'definitif';
+
+        // Simple validation - no retrait_type needed
+        $request->validate([
+            'academic_year' => ['required', 'exists:academic_years,start_year'],
+            'semester' => ['nullable', 'in:S1,S2,S3,S4,S5,S6'],
+        ]);
+
+        $student = auth('student')->user();
+
+        // Check for duplicate
+        $alreadyExists = $student->demandes()
+            ->where('document_id', $document->id)
+            ->where('academic_year', $request->academic_year)
+            ->where(function ($query) use ($request) {
+                if ($request->filled('semester')) {
+                    $query->where('semester', $request->semester);
+                } else {
+                    $query->whereNull('semester');
+                }
+            })
+            ->exists();
+
+        if ($alreadyExists) {
+            return back()->with('error', 'Une demande pour cette période existe déjà.');
+        }
+
+        // Create demande - always definitif for relevés
+        $demande = $student->demandes()->create([
+            'document_id' => $document->id,
+            'academic_year' => $request->academic_year,
+            'semester' => $request->semester,
+            'status' => 'PENDING',
+            'retrait_type' => 'permanent', // Always definitif, no choice needed
+        ]);
+        \Log::info("Demande: ".$demande);
+
+        return back()->with('success', 'Votre demande a été soumise avec succès. ');
     }
-
-    $demande = $student->demandes()->create($demandeData);
-
-    return back()->with('success', 'Votre demande a été soumise avec succès. Référence: ' . $demande->reference_number);
-}
 
     /**
      * Get ordinal number in French
      */
     private function getOrdinal($number)
     {
-        return match($number) {
+        return match ($number) {
             1 => '1ère',
             2 => '2ème',
             3 => '3ème',
