@@ -1,9 +1,10 @@
-{{-- <aside id="logo-sidebar"
+<aside id="logo-sidebar"
     class="fixed top-0 left-0 z-40 w-72 h-screen pt-20 transition-all duration-300 -translate-x-full bg-gradient-to-b from-slate-50 to-white border-r border-slate-200/60 shadow-xl sm:translate-x-0 dark:from-slate-900 dark:to-slate-800 dark:border-slate-700/50 backdrop-blur-sm"
     aria-label="Sidebar">
- --}}
 
- <aside class="fixed top-0 {{ app()->getLocale() == 'ar' ? 'right-0' : 'left-0' }} h-screen w-64 bg-white dark:bg-gray-800 shadow-lg z-40">
+
+ {{-- <aside  id="logo-sidebar"
+ class="fixed top-0 {{ app()->getLocale() == 'ar' ? 'right-0' : 'left-0' }} h-screen w-64 bg-white dark:bg-gray-800 shadow-lg z-40"> --}}
 
 
     <!-- Sidebar Header -->

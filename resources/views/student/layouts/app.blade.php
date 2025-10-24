@@ -3,7 +3,6 @@
 
 @include('student.layouts.head')
 
-@stack('css')
 <body class="bg-gray-100 min-h-screen flex flex-col" x-data="{ isDark: false }" x-init="
     if (!('isDark' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       localStorage.setItem('isDark', JSON.stringify(true));

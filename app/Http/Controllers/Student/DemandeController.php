@@ -19,14 +19,19 @@ class DemandeController extends Controller
     {
         $student = auth('student')->user();
     }
+    // In the index method, add this:
     public function index()
     {
         $student = auth('student')->user();
         $demandes = $student->demandes()->with(['document', 'academicYear'])->latest()->get();
+
+        // Add overdue check
+        $overdueDemandes = $demandes->filter(fn ($d) => $d->isOverdue());
+
         $documents = Document::all();
         $years = AcademicYear::orderByDesc('start_year')->get();
 
-        return view('student.demandes.index', compact('demandes', 'documents', 'years'));
+        return view('student.demandes.index', compact('demandes', 'documents', 'years', 'overdueDemandes'));
     }
     public function store(Request $request)
     {
@@ -49,6 +54,19 @@ class DemandeController extends Controller
         ]);
 
         $student = auth('student')->user();
+
+        // Check for overdue documents
+        $hasOverdue = $student->demandes()
+            ->where('retrait_type', 'temporaire')
+            ->whereNotNull('must_return_by')
+            ->where('must_return_by', '<', now())
+            ->whereNull('returned_at')
+            ->exists();
+
+
+            if ($hasOverdue) {
+                return back()->with('error', 'Vous avez des documents en retard. Veuillez les retourner avant de faire une nouvelle demande.');
+            }
 
         // Get current academic year
         $currentYear = now()->year;
@@ -117,7 +135,7 @@ class DemandeController extends Controller
         }
 
         // Check if cancellation is still allowed (within 30 minutes of creation)
-        if(!$demande->canBeCancelled())
+        if (! $demande->canBeCancelled())
             return back()->with('error', 'L\'annulation de cette demande n\'est pas permise');
 
 
@@ -231,7 +249,7 @@ class DemandeController extends Controller
         // Get the document
         $document = Document::where('slug', 'releve_notes')->first();
 
-        if (!$document) {
+        if (! $document) {
             return back()->with('error', 'Document non trouvé.');
         }
 

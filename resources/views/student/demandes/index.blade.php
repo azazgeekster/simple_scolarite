@@ -1,6 +1,24 @@
 @extends("student.layouts.app")
 
 @section("main_content")
+@if($overdueDemandes->count() > 0)
+<div class="mb-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-lg">
+    <div class="flex items-start gap-3">
+        <svg class="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/>
+        </svg>
+        <div class="flex-1">
+            <h3 class="text-sm font-bold text-red-800 dark:text-red-200">
+                ⚠️ Documents en retard ({{ $overdueDemandes->count() }})
+            </h3>
+            <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+                Vous avez {{ $overdueDemandes->count() }} document(s) qui n'ont pas été retournés dans les délais.
+                Veuillez les retourner immédiatement à la scolarité pour éviter des pénalités.
+            </p>
+        </div>
+    </div>
+</div>
+@endif
     <div
         class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -415,15 +433,24 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                                    @if($demande->status === 'PENDING') bg-yellow-100 text-yellow-800 dark:bg-yellow-300 dark:text-yellow-900
-                                                    @elseif($demande->status === 'PROCESSING') bg-blue-100 text-blue-800 dark:bg-blue-300 dark:text-blue-900
-                                                    @elseif($demande->status === 'READY') bg-indigo-100 text-indigo-800 dark:bg-indigo-300 dark:text-indigo-900
-                                                    @elseif($demande->status === 'COMPLETED') bg-green-100 text-green-800 dark:bg-green-300 dark:text-green-900
-                                                    @elseif($demande->status === 'PICKED') bg-red-100 text-red-800 dark:bg-red-300 dark:text-red-900
-                                                    @endif">
-                                            {{ ucfirst(strtolower(str_replace('_', ' ', $demande->status))) }}
-                                        </span>
+                                        @if($demande->isOverdue())
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 flex items-center gap-1">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/>
+                                                </svg>
+                                                En retard ({{ $demande->getDaysOverdue() }} jours)
+                                            </span>
+                                        @else
+                                            <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                                        @if($demande->status === 'PENDING') bg-yellow-100 text-yellow-800 dark:bg-yellow-300 dark:text-yellow-900
+                                                        @elseif($demande->status === 'PROCESSING') bg-blue-100 text-blue-800 dark:bg-blue-300 dark:text-blue-900
+                                                        @elseif($demande->status === 'READY') bg-indigo-100 text-indigo-800 dark:bg-indigo-300 dark:text-indigo-900
+                                                        @elseif($demande->status === 'COMPLETED') bg-green-100 text-green-800 dark:bg-green-300 dark:text-green-900
+                                                        @elseif($demande->status === 'PICKED') bg-red-100 text-red-800 dark:bg-red-300 dark:text-red-900
+                                                        @endif">
+                                                {{ ucfirst(strtolower(str_replace('_', ' ', $demande->status))) }}
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex space-x-2">
