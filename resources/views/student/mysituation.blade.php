@@ -21,36 +21,61 @@
 
         {{-- Year Selector Dropdown --}}
         @if($allEnrollments->count() > 0)
-            <div class="flex-shrink-0">
-                <form method="GET" action="{{ route('student.mysituation') }}">
-                    <label for="year-select" class="block text-sm font-medium text-gray-700 mb-2">
-                        Année universitaire
-                    </label>
-                    <div class="relative">
-                        <select name="year"
-                                id="year-select"
-                                onchange="this.form.submit()"
-                                class="block w-full md:w-80 pl-4 pr-10 py-3 text-base border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 rounded-xl shadow-sm transition-all duration-200 hover:border-gray-400 cursor-pointer appearance-none">
-                            @foreach($allEnrollments as $historyEnrollment)
-                                <option value="{{ $historyEnrollment->academic_year }}"
-                                        {{ $historyEnrollment->academic_year == $enrollment->academic_year ? 'selected' : '' }}>
-                                    {{ $historyEnrollment->academic_year }}-{{ $historyEnrollment->academic_year + 1 }} -
-                                    {{ $historyEnrollment->filiere->label_fr }}
-                                    ({{ $historyEnrollment->year_in_program }}{{ $historyEnrollment->year_in_program == 1 ? 'ère' : 'ème' }} année)
-                                    @if($historyEnrollment->academicYear && $historyEnrollment->academicYear->is_current)
-                                        • En cours
-                                    @endif
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
+        <div class="flex-shrink-0">
+            <form method="GET" action="{{ route('student.mysituation') }}" class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+                <label for="year-select" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="text-base font-semibold">Année universitaire</span>
+                    </span>
+                </label>
+
+                <div class="relative group">
+                    <select name="year" id="year-select" onchange="this.form.submit()"
+                        class="block w-full md:w-96 pl-4 pr-11 py-3 text-sm font-medium
+                               border-2 border-gray-200 dark:border-gray-700
+                               bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900
+                               text-gray-900 dark:text-gray-100
+                               rounded-xl shadow-sm
+                               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                               hover:border-blue-400 dark:hover:border-blue-500
+                               hover:shadow-md transition-all duration-300 cursor-pointer appearance-none">
+                        @foreach($allEnrollments as $historyEnrollment)
+                            <option value="{{ $historyEnrollment->academic_year }}"
+                                    {{ $historyEnrollment->academic_year == $enrollment->academic_year ? 'selected' : '' }}>
+                                {{ $historyEnrollment->academic_year }}-{{ $historyEnrollment->academic_year + 1 }}
+                                • {{ $historyEnrollment->filiere->label_fr }}
+                                • {{ $historyEnrollment->year_in_program }}{{ $historyEnrollment->year_in_program == 1 ? 'ère' : 'ème' }} année
+                                @if($historyEnrollment->academicYear && $historyEnrollment->academicYear->is_current)
+                                    ✓ En cours
+                                @endif
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <!-- Dropdown Icon -->
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                        <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-500 transition-colors duration-300"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
                     </div>
-                </form>
-            </div>
+                </div>
+
+                <!-- Helper Text -->
+                <p class="mt-3 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Sélectionnez une année pour afficher vos informations académiques
+                </p>
+            </form>
+        </div>
+
         @else
             <div class="text-right">
                 <div class="text-sm text-gray-600 mb-1">Année universitaire</div>
@@ -112,7 +137,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
                         <div class="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center border-4 border-white/30">
-                            <span class="text-3xl font-bold text-white">{{ $enrollment->year_label }}</span>
+                            <span class="text-3xl font-bold text-white">{{ $enrollment->year_labels }}</span>
                         </div>
                         <div class="text-white">
                             <h2 class="text-2xl font-bold">{{ $student->full_name }}</h2>
@@ -195,6 +220,7 @@
                             <span class="text-gray-500">Niveau:</span>
                             <span class="font-semibold">{{ $enrollment->year_label }}</span>
                         </div>
+
                         @if($enrollment->enrollment_date)
                         <div class="text-xs text-gray-500 mt-1">
                             Inscrit le {{ $enrollment->enrollment_date->format('d/m/Y') }}

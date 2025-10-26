@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\StudentLoginController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\DemandeController;
+use App\Http\Controllers\Student\GradesController;
 use App\Http\Controllers\Student\StudentProfileController;
 use App\Http\Controllers\Student\StudentSituationController;
 
@@ -39,7 +40,7 @@ Route::group(['prefix' => 'student'], function () {
     Route::middleware(['auth:student', 'verified'])->group(function () {
         // LOGIN things
         Route::get('dashboard', [DashboardController::class, 'index'])->name('student.dashboard');
-        Route::get('dashboard', [DashboardController::class, 'index'])->name('student.dashboard');
+        // Route::get('dashboard', [DashboardController::class, 'index'])->name('student.dashboard');
         Route::post('logout', [StudentLoginController::class, 'logout'])->name('student.logout');
 
         // PROFILE
@@ -50,6 +51,10 @@ Route::group(['prefix' => 'student'], function () {
         Route::post('/profile/update-photo', [StudentProfileController::class, 'updatePhoto'])->name('profile.update.photo');
         ///profile  photo delete
         Route::delete('/photo', [StudentProfileController::class, 'deletePhoto'])->name('studentprofile.delete.photo');
+
+        // Grades
+        Route::get('/grades', [GradesController::class, 'index'])
+        ->name('student.grades');
 
 
         // DOCUMENTS REQUESTS:

@@ -43,7 +43,7 @@ return new class extends Migration
             $table->string('avatar')->nullable(); // Profile photo
             $table->timestamps(); // created_at and updated_at timestamps
             $table->softDeletes(); // deleted_at for soft deletes
-        });
+        }); 
     }
 
     /**

@@ -89,4 +89,23 @@ class StudentProgramEnrollment extends Model
     {
         return sprintf('%d-%d', $this->academic_year, $this->academic_year + 1);
     }
+    public function getYearLabelAttribute(): string
+    {
+        if (!$this->year_in_program) {
+            return 'Année non définie';
+        }
+
+        $ordinal = match($this->year_in_program) {
+            1 => '1ère',
+            2 => '2ème',
+            3 => '3ème',
+            4 => '4ème',
+            5 => '5ème',
+            default => "{$this->year_in_program}ème"
+        };
+
+        $level = $this->filiere ? ucfirst($this->filiere->level) : '';
+
+        return $level ? "{$ordinal} année {$level}" : "{$ordinal} année";
+    }
 }
