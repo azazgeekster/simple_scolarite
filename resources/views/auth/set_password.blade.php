@@ -1,41 +1,128 @@
 @extends('auth.layouts.app')
 
-@section('title')
-    Student | Set Password For First Time
-@endsection
+@section('title', 'Set Your Password')
 
 @section('content')
-    <section class="py-26 bg-white dark:bg-gray-900">
-        <div class="container px-4 mx-auto">
-            <div class="max-w-md mx-auto py-8">
-                <x-flash-message type="status" />
-                <x-flash-message type="error" />
+<div class="relative min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-indigo-100 via-white to-blue-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 transition-colors duration-300">
 
-                <form method="POST" action="{{ route('student.activate.complete', $token) }}"
-                    class="bg-white shadow-lg border-2 border-gray-300 dark:bg-gray-800 dark:border-gray-600 rounded-lg p-8 mx-auto">
-                    @csrf
-                    <div class="text-center mb-6">
-                        <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">{{ __("Set Your Password") }}</h2>
-                    </div>
-                    <div class="mb-6">
-                        <label for="password" class="block mb-2 font-bold text-gray-900 dark:text-white">Password</label>
-                        <input type="password" name="password" id="password" placeholder="**********" required
-                            class="w-full p-3 rounded border-2 border-blue-600 bg-white dark:bg-gray-700 dark:border-blue-600 text-lg font-semibold placeholder-gray-500 dark:placeholder-gray-400">
-                        @error('password')<p class="mt-2 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>@enderror
-                    </div>
-                    <div class="mb-6">
-                        <label for="password_confirmation"
-                            class="block mb-2 font-bold text-gray-900 dark:text-white">Confirm Password</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation"
-                            placeholder="**********" required
-                            class="w-full p-3 rounded border-2 border-blue-600 bg-white dark:bg-gray-700 dark:border-blue-600 text-lg font-semibold placeholder-gray-500 dark:placeholder-gray-400">
-                    </div>
-                    <button type="submit"
-                        class="w-full py-3 px-6 bg-blue-800 hover:bg-blue-900 text-white font-bold rounded transition duration-200 dark:bg-blue-600 dark:hover:bg-blue-700">Activate
-                        Account</button>
-                </form>
+    <!-- Animated Blobs -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-32 -left-32 w-96 h-96 bg-indigo-400 dark:bg-indigo-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 animate-blob"></div>
+        <div class="absolute top-40 right-0 w-96 h-96 bg-blue-400 dark:bg-blue-800 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+    </div>
 
-            </div>
+    <!-- Set Password Card -->
+    <div class="relative w-full max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl rounded-3xl p-8 z-10">
+
+        <!-- Logo & Title -->
+        <div class="text-center mb-8">
+          
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Set Your Password</h1>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Create a secure password for your account</p>
         </div>
-    </section>
+
+        <!-- Flash Messages -->
+        <x-flash-message type="status"/>
+        <x-flash-message type="error"/>
+
+        <!-- Set Password Form -->
+        <form method="POST" action="{{ route('student.activate.complete', $token) }}" x-data="{ loading: false }" @submit="loading = true" class="space-y-5">
+            @csrf
+
+            <!-- Password -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </span>
+                    <input type="password" name="password" id="password" required
+                        placeholder="••••••••"
+                        class="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition">
+                </div>
+                @error('password')
+                <p class="text-xs text-red-600 dark:text-red-400 mt-1.5 flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    {{ $message }}
+                </p>
+                @enderror
+            </div>
+
+            <!-- Confirm Password -->
+            <div>
+                <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Confirm Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </span>
+                    <input type="password" name="password_confirmation" id="password_confirmation" required
+                        placeholder="••••••••"
+                        class="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition">
+                </div>
+            </div>
+
+            <!-- Password Requirements Info -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-3">
+                <div class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="text-xs text-blue-800 dark:text-blue-300">
+                        <p class="font-semibold mb-1">Password must contain:</p>
+                        <ul class="space-y-0.5 list-disc list-inside">
+                            <li>At least 8 characters</li>
+                            <li>One uppercase letter</li>
+                            <li>One lowercase letter</li>
+                            <li>One number</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" :disabled="loading"
+                class="w-full py-3.5 text-sm font-semibold text-white rounded-xl bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
+                <svg x-show="loading" x-cloak class="inline animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                </svg>
+                <span x-text="loading ? 'Activating...' : 'Activate Account'">Activate Account</span>
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-sm">
+            <p class="text-gray-600 dark:text-gray-400">
+                Need help?
+                <a href="{{ route('student.loginform') }}" class="text-indigo-600 dark:text-indigo-400 font-semibold hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">Contact support</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.1); }
+  66% { transform: translate(-20px, 10px) scale(0.9); }
+}
+.animate-blob { animation: blob 8s infinite ease-in-out; }
+.animation-delay-2000 { animation-delay: 2s; }
+[x-cloak] { display: none !important; }
+</style>
 @endsection
+
+@push('css')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf/notyf.min.css">
+@endpush
+
+@push('js')
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/notyf/notyf.min.js"></script>
+@endpush

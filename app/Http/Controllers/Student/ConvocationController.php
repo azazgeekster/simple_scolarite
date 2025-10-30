@@ -184,15 +184,12 @@ class ConvocationController extends Controller
                     public_path('fonts'),
                 ]),
                 'fontdata' => $fontData + [
-                    'tajawal' => [
-                        'R' => 'Tajawal/Tajawal-Regular.ttf',
-                        'B' => 'Tajawal/Tajawal-Bold.ttf',
-                    ],
+
                     'roboto'=>[
                      'R'=>'roboto/roboto.ttf',
                     ]
                 ],
-                'default_font' => 'tajawal',
+                'default_font' => 'roboto',
             ]);
 
 
