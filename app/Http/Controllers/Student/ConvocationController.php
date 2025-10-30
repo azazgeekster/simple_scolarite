@@ -97,11 +97,22 @@ class ConvocationController extends Controller
         }
 
         $photoPath = public_path('storage/'.$student->avatar);
-         $photoBase64 ='';
-        if (file_exists($photoPath)) {
-            $photoData = base64_encode(file_get_contents($photoPath));
-            $photoMime = mime_content_type($photoPath);
-            $photoBase64 = 'data:'.$photoMime.';base64,'.$photoData;
+        if (!empty($student->avatar)) {
+            $photoPath = public_path('storage/' . $student->avatar);
+            if (file_exists($photoPath)) {
+                try {
+                    $photoData = base64_encode(file_get_contents($photoPath));
+                    $photoMime = mime_content_type($photoPath);
+                    $photoBase64 = 'data:' . $photoMime . ';base64,' . $photoData;
+                } catch (\Exception $e) {
+                    Log::error('Error encoding avatar: ' . $e->getMessage());
+                    return redirect()->route('student.exams.convocation')
+                        ->with('error', 'Erreur lors du traitement de votre photo de profil.');
+                }
+            } else {
+                return redirect()->route('student.exams.convocation')
+                    ->with('error', 'Photo de profil introuvable. Veuillez la mettre à jour.');
+            }
         }
 
 

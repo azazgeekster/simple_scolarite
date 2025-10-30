@@ -25,13 +25,65 @@
             </div>
         </div>
 
+        {{-- Alert for missing avatar --}}
+        @if(empty($student->avatar))
+        <div class="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 dark:border-yellow-600 rounded-lg p-6 shadow-sm">
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <div class="flex-1">
+                    <h3 class="text-base font-bold text-yellow-900 dark:text-yellow-300 mb-2">Photo de profil requise</h3>
+                    <p class="text-sm text-yellow-800 dark:text-yellow-300 mb-3">
+                        Vous devez définir votre photo de profil avant de pouvoir télécharger votre convocation d'examen.
+                    </p>
+                    <a href="{{ route('student.profile.edit') }}"
+                       class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-semibold rounded-lg transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Ajouter une photo
+                    </a>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- Flash Messages --}}
+        @if(session('error'))
+        <div class="mb-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 dark:border-red-600 rounded-lg p-6 shadow-sm">
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <p class="text-sm text-red-800 dark:text-red-300">{{ session('error') }}</p>
+            </div>
+        </div>
+        @endif
+
+        @if(session('message'))
+        <div class="mb-6 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 dark:border-green-600 rounded-lg p-6 shadow-sm">
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <p class="text-sm text-green-800 dark:text-green-300">{{ session('message') }}</p>
+            </div>
+        </div>
+        @endif
+
         {{-- Student Info Card --}}
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
             <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div class="flex items-center gap-4 flex-1">
+                    @if($student->avatar)
+                    <img src="{{ asset('storage/' . $student->avatar) }}" alt="Avatar"
+                         class="w-14 h-14 rounded-xl object-cover shadow-lg ring-2 ring-blue-500">
+                    @else
                     <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
                         {{ substr($student->prenom, 0, 1) }}{{ substr($student->nom, 0, 1) }}
                     </div>
+                    @endif
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">
                             {{ $student->full_name }}
@@ -75,6 +127,16 @@
                             </p>
                         </div>
                     </div>
+
+                    @if(empty($student->avatar))
+                    <button disabled
+                       class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gray-400 dark:bg-gray-600 text-white font-bold rounded-xl shadow-lg cursor-not-allowed opacity-60">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        <span>Télécharger convocation </span>
+                    </button>
+                    @else
                     <a href="{{ route('student.convocations.download') }}"
                        class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group">
                         <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,9 +144,12 @@
                         </svg>
                         <span>Télécharger ma convocation</span>
                     </a>
+                    @endif
                 </div>
             </div>
         </div>
+
+        
 
         {{-- Exams List by Session/Season --}}
         @php
