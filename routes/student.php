@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\StudentLoginController;
+use App\Http\Controllers\Student\ConvocationController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\DemandeController;
 use App\Http\Controllers\Student\GradesController;
@@ -55,6 +56,15 @@ Route::group(['prefix' => 'student'], function () {
         // Grades
         Route::get('/grades', [GradesController::class, 'index'])
         ->name('student.grades');
+
+
+        //exams
+
+        Route::get('/convocations', [App\Http\Controllers\Student\ConvocationController::class, 'index'])
+        ->name('student.convocations');
+
+    Route::get('/convocations/download', [App\Http\Controllers\Student\ConvocationController::class, 'download'])
+        ->name('student.convocations.download');
 
 
         // DOCUMENTS REQUESTS:
