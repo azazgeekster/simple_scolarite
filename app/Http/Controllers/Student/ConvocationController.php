@@ -283,46 +283,59 @@ class ConvocationController extends Controller
 
     /**
      * Get upcoming exams for student
-     * This is a mock - you'll need to adapt based on your exam scheduling system
      */
     private function getUpcomingExams($student, $enrollment)
     {
-        // Mock data - replace with actual exam scheduling queries
-        // You might have an Exam or ExamSchedule model
+        // Get module IDs for the student's filiere and year
+        $moduleIds = \App\Models\Module::where('filiere_id', $enrollment->filiere_id)
+            ->where('year_in_program', $enrollment->year_in_program)
+            ->pluck('id');
 
-        $semesters = $enrollment->getSemestersForYear();
+        // Get published upcoming exams for these modules
+        $dbExams = \App\Models\Exam::published()
+            ->upcoming()
+            ->whereIn('module_id', $moduleIds)
+            ->with(['module', 'academicYear'])
+            ->orderBy('exam_date')
+            ->orderBy('start_time')
+            ->get();
+
+        // Transform to array format expected by convocation PDF
         $exams = [];
+        foreach ($dbExams as $exam) {
+            // Determine season based on semester (S1,S3,S5 = Automne, S2,S4,S6 = Printemps)
+            $semesterNum = intval(substr($exam->semester, 1));
+            $season = ($semesterNum % 2 == 1) ? 'Automne' : 'Printemps';
+            $season_ar = ($semesterNum % 2 == 1) ? 'الخريفية' : 'الربيعية';
 
-        foreach ($semesters as $semester) {
-            // Get modules for this semester
-            $modules = \App\Models\Module::where('filiere_id', $enrollment->filiere_id)
-                ->where('year_in_program', $enrollment->year_in_program)
-                ->where('semester', $semester)
-                ->with('professor')
-                ->get();
+            // Calculate duration
+            $startTime = \Carbon\Carbon::parse($exam->start_time);
+            $endTime = \Carbon\Carbon::parse($exam->end_time);
+            $durationMinutes = $startTime->diffInMinutes($endTime);
+            $hours = floor($durationMinutes / 60);
+            $minutes = $durationMinutes % 60;
+            $duration = sprintf('%dh%02d', $hours, $minutes);
 
-            foreach ($modules as $module) {
-                $exams[] = [
-                    'id' => 'exam_'.$module->id,
-                    'module_id' => $module->id,
-                    'module_code' => $module->code,
-                    'module_label' => $module->label,
-                    'module_label_ar' => $module->label_ar,
-                    'semester' => $semester,
-                    'session' => 'Normale', // or 'Rattrapage'
-                    'session_ar' => 'العادية', // or 'الاستدراكية'
-                    'season' => 'Automne', // Automne/Printemps
-                    'season_ar' => 'الخريفية', // or 'الربيعية'
-                    'date' => now()->addDays(rand(10, 30)),
-                    'time' => '09:00',
-                    'duration' => '2h00',
-                    'room' => 'Salle '.rand(101, 350),
-                    'building' => 'Bâtiment A',
-                    'exam_number' => rand(1000, 9999),
-                ];
-            }
+            $exams[] = [
+                'id' => $exam->id,
+                'module_id' => $exam->module_id,
+                'module_code' => $exam->module->code,
+                'module_label' => $exam->module->label,
+                'module_label_ar' => $exam->module->label_ar ?? $exam->module->label,
+                'semester' => $exam->semester,
+                'session' => $exam->session_type === 'normal' ? 'Normale' : 'Rattrapage',
+                'session_ar' => $exam->session_type === 'normal' ? 'العادية' : 'الاستدراكية',
+                'season' => $season,
+                'season_ar' => $season_ar,
+                'date' => $exam->exam_date,
+                'time' => $startTime->format('H:i'),
+                'duration' => $duration,
+                'room' => $exam->local ?? 'À définir',
+                'building' => 'Bâtiment A', // You might want to add this to the Exam model
+                'exam_number' => $exam->id, // Using exam ID as exam number
+            ];
         }
 
-        return collect($exams)->sortBy('date');
+        return collect($exams);
     }
 }

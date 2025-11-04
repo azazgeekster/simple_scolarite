@@ -23,6 +23,8 @@ class Reclammation extends Model
         // 'reviewed_at',
     ];
 
+    protected $table = "reclamations";
+
     protected $casts = [
         'student_id' => 'integer',
         'module_grade_id' => 'integer',
@@ -47,7 +49,7 @@ class Reclammation extends Model
         return $this->belongsTo(Module::class, 'module_id');
     }
 
- 
+
     // Scopes
     public function scopePending($query)
     {

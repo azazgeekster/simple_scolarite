@@ -21,16 +21,20 @@ use App\Http\Controllers\Admin\DashboardController;
 
 Route::group(['prefix' => 'admin'], function () {
     Route::middleware('guest:admin')->group(function () {
-        Route::get('login', [AdminLoginController::class, 'showLoginForm'])->name('admin.loginform');
-        Route::post('login', [AdminLoginController::class, 'login'])->name('admin.login');
+        Route::get('login', [AdminLoginController::class, 'showLoginForm'])->name('loginform');
+        Route::post('login', [AdminLoginController::class, 'login'])->name('login');
     });
 
-    Route::middleware('auth:admin')->group(function () {
-        Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+
+    
+    Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/', function () {
             return redirect()->route('admin.dashboard');  // Redirect /admin to dashboard
         });
-        Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
+
+
+        Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
     });
 });
 

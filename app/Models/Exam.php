@@ -17,7 +17,8 @@ class Exam extends Model
         'local',
         'academic_year',
         'semester',
-        // 'published_at',
+        'is_published',
+        'published_at',
     ];
 
     protected $casts = [
@@ -27,8 +28,8 @@ class Exam extends Model
         'end_time' => 'datetime',
         'academic_year' => 'integer',
         // 'supervisor_id' => 'integer',
-        // 'is_published' => 'boolean',
-        // 'published_at' => 'datetime',
+        'is_published' => 'boolean',
+        'published_at' => 'datetime',
     ];
 
     // Relationships

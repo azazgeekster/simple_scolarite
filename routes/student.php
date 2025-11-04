@@ -9,7 +9,9 @@ use App\Http\Controllers\Student\ConvocationController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\DemandeController;
 use App\Http\Controllers\Student\GradesController;
+use App\Http\Controllers\Student\StudentExamController;
 use App\Http\Controllers\Student\StudentProfileController;
+use App\Http\Controllers\Student\StudentReclamationController;
 use App\Http\Controllers\Student\StudentSituationController;
 
 use Illuminate\Support\Facades\Route;
@@ -55,18 +57,34 @@ Route::group(['prefix' => 'student'], function () {
 
         // Grades
         Route::get('/grades', [GradesController::class, 'index'])
-        ->name('student.grades');
+            ->name('student.grades');
 
 
         //exams
+        Route::get('exams', [StudentExamController::class, 'index'])
+            ->name('exams.index');
+        Route::get('exams/{exam}', [StudentExamController::class, 'show'])
+            ->name('exams.show');
+        Route::get('exams/{exam}/convocation', [StudentExamController::class, 'convocation'])
+            ->name('exams.convocation');
 
         Route::get('/convocations', [App\Http\Controllers\Student\ConvocationController::class, 'index'])
-        ->name('student.convocations');
+            ->name('student.convocations');
 
-    Route::get('/convocations/download', [App\Http\Controllers\Student\ConvocationController::class, 'download'])
-        ->name('student.convocations.download');
+        Route::get('/convocations/download', [App\Http\Controllers\Student\ConvocationController::class, 'download'])
+            ->name('student.convocations.download');
 
-
+            /// RECLAMMATIONS
+        Route::get('reclamations', [StudentReclamationController::class, 'index'])
+            ->name('reclamations.index');
+        Route::get('reclamations/create/{moduleGrade}', [StudentReclamationController::class, 'create'])
+            ->name('reclamations.create');
+        Route::post('reclamations/{moduleGrade}', [StudentReclamationController::class, 'store'])
+            ->name('reclamations.store');
+        Route::get('reclamations/{reclamation}', [StudentReclamationController::class, 'show'])
+            ->name('reclamations.show');
+        Route::delete('reclamations/{reclamation}', [StudentReclamationController::class, 'destroy'])
+            ->name('reclamations.destroy');
         // DOCUMENTS REQUESTS:
         Route::get('/document/request', [DemandeController::class, 'index'])->name('student.demande.index');
         Route::post('/document/retrait', [DemandeController::class, 'store'])->name('student.demande.store');
@@ -94,27 +112,27 @@ Route::group(['prefix' => 'student'], function () {
 });
 
 
-    //for google
+//for google
 
-    Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
+Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
 
-    // Route to handle the callback from Google
-    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
-
-
-    /// forget and reset password
-    Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])
-        ->name('password.request');
-
-    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
-        ->name('password.email');
+// Route to handle the callback from Google
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 
 
-    Route::get('reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])
-        ->name('password.reset');
+/// forget and reset password
+Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])
+    ->name('password.request');
 
-    Route::post('reset-password', [ResetPasswordController::class, 'reset'])
-        ->name('password.update');
+Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+    ->name('password.email');
+
+
+Route::get('reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])
+    ->name('password.reset');
+
+Route::post('reset-password', [ResetPasswordController::class, 'reset'])
+    ->name('password.update');
 
 
 

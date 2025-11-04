@@ -159,6 +159,7 @@
                                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Module</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Note</th>
                                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Statut</th>
+                                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -199,6 +200,15 @@
                                                     {{ $status['label'] }}
                                                 </span>
                                             </td>
+                                            <td class="px-4 py-4 text-right">
+                                                <a href="{{ route('reclamations.create', $grade) }}"
+                                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors duration-200">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                    </svg>
+                                                    Réclamation
+                                                </a>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -221,15 +231,24 @@
                                             {{ number_format($grade->final_grade, 2) }}
                                         </div>
                                     </div>
-                                    @php $status = $grade->validation_status ?? ['label' => 'Non noté', 'color' => 'gray']; @endphp
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold
-                                        @if($status['color'] === 'green') bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400
-                                        @elseif($status['color'] === 'yellow') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400
-                                        @elseif($status['color'] === 'gray') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
-                                        @else bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400
-                                        @endif">
-                                        {{ $status['label'] }}
-                                    </span>
+                                    <div class="flex items-center justify-between gap-3">
+                                        @php $status = $grade->validation_status ?? ['label' => 'Non noté', 'color' => 'gray']; @endphp
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold
+                                            @if($status['color'] === 'green') bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400
+                                            @elseif($status['color'] === 'yellow') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400
+                                            @elseif($status['color'] === 'gray') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
+                                            @else bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400
+                                            @endif">
+                                            {{ $status['label'] }}
+                                        </span>
+                                        <a href="{{ route('reclamations.create', $grade) }}"
+                                           class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                            </svg>
+                                            Réclamation
+                                        </a>
+                                    </div>
                                 </div>
                             @endforeach
                         </div>
@@ -256,6 +275,7 @@
                                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Module</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Note</th>
                                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Statut</th>
+                                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-orange-100 dark:divide-orange-900/20">
@@ -292,6 +312,15 @@
                                                     {{ $status['label'] }}
                                                 </span>
                                             </td>
+                                            <td class="px-4 py-4 text-right">
+                                                <a href="{{ route('reclamations.create', $grade) }}"
+                                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors duration-200">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                    </svg>
+                                                    Réclamation
+                                                </a>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -314,14 +343,23 @@
                                             {{ number_format($grade->final_grade, 2) }}
                                         </div>
                                     </div>
-                                    @php $status = $grade->validation_status ?? ['label' => 'Non noté', 'color' => 'gray']; @endphp
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold
-                                        @if($status['color'] === 'blue') bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400
-                                        @elseif($status['color'] === 'gray') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
-                                        @else bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400
-                                        @endif">
-                                        {{ $status['label'] }}
-                                    </span>
+                                    <div class="flex items-center justify-between gap-3">
+                                        @php $status = $grade->validation_status ?? ['label' => 'Non noté', 'color' => 'gray']; @endphp
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold
+                                            @if($status['color'] === 'blue') bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400
+                                            @elseif($status['color'] === 'gray') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
+                                            @else bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400
+                                            @endif">
+                                            {{ $status['label'] }}
+                                        </span>
+                                        <a href="{{ route('reclamations.create', $grade) }}"
+                                           class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                            </svg>
+                                            Réclamation
+                                        </a>
+                                    </div>
                                 </div>
                             @endforeach
                         </div>

@@ -36,8 +36,8 @@ return new class extends Migration
 
             // Additional information
             // $table->text('instructions')->nullable();
-            // $table->boolean('is_published')->default(false)->comment('Show to students');
-            // $table->timestamp('published_at')->nullable();
+            $table->boolean('is_published')->default(false)->comment('Show to students');
+            $table->timestamp('published_at')->nullable();
 
             $table->timestamps();
 
