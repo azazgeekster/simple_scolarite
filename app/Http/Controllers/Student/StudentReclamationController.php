@@ -107,7 +107,7 @@ class StudentReclamationController extends Controller
                 ->route('reclamations.create', $moduleGrade)
                 ->withErrors($validator)
                 ->withInput();
-        }
+        } 
 
         $validated = $validator->validated();
 

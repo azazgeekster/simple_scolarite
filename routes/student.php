@@ -71,6 +71,9 @@ Route::group(['prefix' => 'student'], function () {
         Route::get('/convocations', [App\Http\Controllers\Student\ConvocationController::class, 'index'])
             ->name('student.convocations');
 
+        Route::get('/convocations/history', [App\Http\Controllers\Student\ConvocationController::class, 'history'])
+            ->name('student.convocations.history');
+
         Route::get('/convocations/download', [App\Http\Controllers\Student\ConvocationController::class, 'download'])
             ->name('student.convocations.download');
 

@@ -101,11 +101,6 @@ class Student extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(StudentProgramEnrollment::class, 'student_id', 'id');
     }
 
-    public function semesterEnrollments()
-    {
-        return $this->hasMany(StudentSemesterEnrollment::class, 'student_id', 'id');
-    }
-
     public function moduleEnrollments()
     {
         return $this->hasMany(StudentModuleEnrollment::class, 'student_id', 'id');

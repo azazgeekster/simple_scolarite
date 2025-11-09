@@ -15,7 +15,7 @@ use Mpdf\Mpdf;
 
 class ConvocationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $student = Auth::guard('student')->user();
 
@@ -29,10 +29,29 @@ class ConvocationController extends Controller
             return view('student.convocations.no-enrollment', compact('student'));
         }
 
-        // Get upcoming exams for current enrollment
-        $exams = $this->getUpcomingExams($student, $enrollment);
+        // Get current session convocation (normal or rattrapage)
+        $currentSession = $this->getCurrentAvailableSession($student, $enrollment);
 
-        return view('student.exams.convocation', compact('student', 'enrollment', 'exams'));
+        if (!$currentSession) {
+            return view('student.exams.convocation', [
+                'student' => $student,
+                'enrollment' => $enrollment,
+                'exams' => collect([]),
+                'currentSession' => null,
+                'hasExams' => false
+            ]);
+        }
+
+        // Get exams for current session only
+        $exams = $this->getUpcomingExams($student, $enrollment, $currentSession['session_type']);
+
+        return view('student.exams.convocation', [
+            'student' => $student,
+            'enrollment' => $enrollment,
+            'exams' => $exams,
+            'currentSession' => $currentSession,
+            'hasExams' => $exams->isNotEmpty()
+        ]);
     }
 
     public function download(Request $request)
@@ -282,19 +301,70 @@ class ConvocationController extends Controller
     }
 
     /**
-     * Get upcoming exams for student
+     * Determine which session convocation is currently available
      */
-    private function getUpcomingExams($student, $enrollment)
+    private function getCurrentAvailableSession($student, $enrollment)
     {
-        // Get module IDs for the student's filiere and year
-        $moduleIds = \App\Models\Module::where('filiere_id', $enrollment->filiere_id)
-            ->where('year_in_program', $enrollment->year_in_program)
-            ->pluck('id');
+        // Get module IDs that the student is actually enrolled in this year
+        // This includes modules from their current year AND retakes from previous years
+        $moduleIds = $student->moduleEnrollments()
+            ->where('program_enrollment_id', $enrollment->id)
+            ->pluck('module_id')
+            ->unique();
 
-        // Get published upcoming exams for these modules
-        $dbExams = \App\Models\Exam::published()
-            ->upcoming()
+        // Check if there are published normal session exams
+        $normalExams = \App\Models\Exam::published()
+            ->where('session_type', 'normal')
+            ->where('exam_date', '>=', now()->toDateString())
             ->whereIn('module_id', $moduleIds)
+            ->where('academic_year', $enrollment->academic_year)
+            ->exists();
+
+        if ($normalExams) {
+            return [
+                'session_type' => 'normal',
+                'session_label' => 'Session Normale',
+                'session_label_ar' => 'الدورة العادية',
+            ];
+        }
+
+        // Check if normal session is finished and rattrapage is published
+        $rattrapageExams = \App\Models\Exam::published()
+            ->where('session_type', 'rattrapage')
+            ->where('exam_date', '>=', now()->toDateString())
+            ->whereIn('module_id', $moduleIds)
+            ->where('academic_year', $enrollment->academic_year)
+            ->exists();
+
+        if ($rattrapageExams) {
+            return [
+                'session_type' => 'rattrapage',
+                'session_label' => 'Session de Rattrapage',
+                'session_label_ar' => 'دورة الاستدراك',
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Get upcoming exams for student for a specific session
+     */
+    private function  getUpcomingExams($student, $enrollment, $sessionType = 'normal')
+    {
+        // Get module IDs that the student is actually enrolled in this year
+        // This includes modules from their current year AND retakes from previous years
+        $moduleIds = $student->moduleEnrollments()
+            ->where('program_enrollment_id', $enrollment->id)
+            ->pluck('module_id')
+            ->unique();
+
+        // Get published upcoming exams for these modules and specific session
+        $dbExams = \App\Models\Exam::published()
+            ->where('session_type', $sessionType)
+            ->where('exam_date', '>=', now()->toDateString())
+            ->whereIn('module_id', $moduleIds)
+            ->where('academic_year', $enrollment->academic_year)
             ->with(['module', 'academicYear'])
             ->orderBy('exam_date')
             ->orderBy('start_time')
@@ -333,6 +403,163 @@ class ConvocationController extends Controller
                 'room' => $exam->local ?? 'À définir',
                 'building' => 'Bâtiment A', // You might want to add this to the Exam model
                 'exam_number' => $exam->id, // Using exam ID as exam number
+            ];
+        }
+
+        return collect($exams);
+    }
+
+    /**
+     * Show convocation history
+     */
+    public function history(Request $request)
+    {
+        $student = Auth::guard('student')->user();
+
+        // Get all enrollments with academic years
+        $allEnrollments = $student->programEnrollments()
+            ->with(['filiere', 'academicYear'])
+            ->orderBy('academic_year', 'desc')
+            ->get();
+
+        // Add computed properties (like in StudentSituationController)
+        $allEnrollments->transform(function ($enrollment) {
+            $enrollment->year_label = $this->getYearLabel($enrollment->year_in_program, $enrollment->filiere->level ?? 'Licence');
+            $enrollment->academic_year_label = $enrollment->academic_year . '-' . ($enrollment->academic_year + 1);
+            return $enrollment;
+        });
+
+        if ($allEnrollments->isEmpty()) {
+            return view('student.exams.convocation-history', [
+                'student' => $student,
+                'allEnrollments' => $allEnrollments,
+                'enrollment' => null,
+                'sessions' => collect([])
+            ]);
+        }
+
+        // Get selected enrollment year
+        $selectedYear = $request->get('year');
+
+        if ($selectedYear) {
+            $enrollment = $allEnrollments->firstWhere('academic_year', $selectedYear);
+        } else {
+            // Default to current year
+            $enrollment = $allEnrollments->firstWhere(function($e) {
+                return $e->academicYear && $e->academicYear->is_current;
+            }) ?? $allEnrollments->first();
+        }
+
+        if (!$enrollment) {
+            return view('student.exams.convocation-history', [
+                'student' => $student,
+                'allEnrollments' => $allEnrollments,
+                'enrollment' => null,
+                'sessions' => collect([])
+            ]);
+        }
+
+        // Get module IDs that the student was actually enrolled in for that year
+        // This matches the logic in convocation index() - includes retakes
+        $moduleIds = $student->moduleEnrollments()
+            ->where('program_enrollment_id', $enrollment->id)
+            ->pluck('module_id')
+            ->unique();
+
+        // Get all exams (past and future) for this enrollment grouped by session
+        $normalExams = \App\Models\Exam::published()
+            ->where('session_type', 'normal')
+            ->whereIn('module_id', $moduleIds)
+            ->where('academic_year', $enrollment->academic_year)
+            ->with(['module'])
+            ->orderBy('exam_date')
+            ->orderBy('start_time')
+            ->get();
+
+        $rattrapageExams = \App\Models\Exam::published()
+            ->where('session_type', 'rattrapage')
+            ->whereIn('module_id', $moduleIds)
+            ->where('academic_year', $enrollment->academic_year)
+            ->with(['module'])
+            ->orderBy('exam_date')
+            ->orderBy('start_time')
+            ->get();
+
+        $sessions = collect();
+
+        if ($normalExams->isNotEmpty()) {
+            $sessions->push([
+                'type' => 'normal',
+                'label' => 'Session Normale',
+                'label_ar' => 'الدورة العادية',
+                'exams' => $this->transformExamsToArray($normalExams),
+                'is_past' => $normalExams->last()->exam_date < now()->toDateString()
+            ]);
+        }
+
+        if ($rattrapageExams->isNotEmpty()) {
+            $sessions->push([
+                'type' => 'rattrapage',
+                'label' => 'Session de Rattrapage',
+                'label_ar' => 'دورة الاستدراك',
+                'exams' => $this->transformExamsToArray($rattrapageExams),
+                'is_past' => $rattrapageExams->last()->exam_date < now()->toDateString()
+            ]);
+        }
+
+        return view('student.exams.convocation-history', [
+            'student' => $student,
+            'allEnrollments' => $allEnrollments,
+            'enrollment' => $enrollment,
+            'sessions' => $sessions
+        ]);
+    }
+
+    /**
+     * Get formatted year label (helper for history page)
+     */
+    private function getYearLabel(int $yearInProgram, string $level): string
+    {
+        $ordinal = match($yearInProgram) {
+            1 => '1ère',
+            2 => '2ème',
+            3 => '3ème',
+            4 => '4ème',
+            5 => '5ème',
+            default => "{$yearInProgram}ème"
+        };
+
+        $levelLabel = ucfirst($level);
+        return "{$ordinal} année {$levelLabel}";
+    }
+
+    /**
+     * Transform exam collection to array format
+     */
+    private function transformExamsToArray($dbExams)
+    {
+        $exams = [];
+        foreach ($dbExams as $exam) {
+            $semesterNum = intval(substr($exam->semester, 1));
+            $season = ($semesterNum % 2 == 1) ? 'Automne' : 'Printemps';
+
+            $startTime = \Carbon\Carbon::parse($exam->start_time);
+            $endTime = \Carbon\Carbon::parse($exam->end_time);
+            $durationMinutes = $startTime->diffInMinutes($endTime);
+            $hours = floor($durationMinutes / 60);
+            $minutes = $durationMinutes % 60;
+            $duration = sprintf('%dh%02d', $hours, $minutes);
+
+            $exams[] = [
+                'id' => $exam->id,
+                'module_code' => $exam->module->code,
+                'module_label' => $exam->module->label,
+                'semester' => $exam->semester,
+                'date' => $exam->exam_date,
+                'time' => $startTime->format('H:i'),
+                'duration' => $duration,
+                'room' => $exam->local ?? 'À définir',
+                'building' => 'Bâtiment A',
             ];
         }
 

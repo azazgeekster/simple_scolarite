@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register model observers for data integrity
+        \App\Models\ModuleGrade::observe(\App\Observers\ModuleGradeObserver::class);
+        \App\Models\StudentModuleEnrollment::observe(\App\Observers\StudentModuleEnrollmentObserver::class);
     }
 }

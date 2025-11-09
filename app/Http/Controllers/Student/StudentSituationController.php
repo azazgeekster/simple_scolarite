@@ -29,15 +29,6 @@ class StudentSituationController extends Controller
 
         // Add computed properties to each enrollment
         $allEnrollments->transform(function ($enrollment) {
-            // Add year_label (e.g., "1ère année Licence", "2ème année Master")
-            $enrollment->year_label = $this->getYearLabel($enrollment->year_in_program, $enrollment->filiere->level);
-
-            // Add cycle label if needed (Licence/Master/Doctorat)
-            $enrollment->cycle_label = $this->getCycleLabel($enrollment->filiere->level);
-
-            // Add academic_year_label (already exists as accessor but make it explicit)
-            $enrollment->academic_year_label = $enrollment->getAcademicYearLabelAttribute();
-
             // Add status badge info
             $enrollment->status_badge = $this->getStatusBadge($enrollment->enrollment_status);
 
@@ -85,9 +76,55 @@ class StudentSituationController extends Controller
             $modules = Module::where('filiere_id', $currentEnrollment->filiere_id)
                 ->where('year_in_program', $currentEnrollment->year_in_program)
                 ->where('semester', $semesterCode)
-                ->with('professor')
+                ->with(['professor', 'prerequisite'])
                 ->orderBy('code')
                 ->get();
+
+            // Enrich each module with enrollment status
+            $modules->each(function($module) use ($student, $currentEnrollment) {
+                // Check if student has an enrollment for this module
+                $moduleEnrollment = $student->moduleEnrollments()
+                    ->where('module_id', $module->id)
+                    ->where('program_enrollment_id', $currentEnrollment->id)
+                    ->with('grade')
+                    ->first();
+
+                if ($moduleEnrollment) {
+                    $module->enrollment_status = 'enrolled';
+                    $module->attempt_number = $moduleEnrollment->attempt_number;
+
+                    // Student Situation shows enrollment only, NOT grades
+                    // Grades are shown separately in the Grades section when published
+                    $module->validation_status = 'enrolled';
+                } else {
+                    $module->enrollment_status = 'not_enrolled';
+                    $module->validation_status = 'not_started';
+                }
+
+                // Check if module is blocked by prerequisite
+                // Note: Prerequisite validation uses published grades only
+                if ($module->prerequisite_id && $module->prerequisite) {
+                    // Validate that the prerequisite relationship is valid based on semester rules
+                    if ($module->isValidPrerequisite($module->prerequisite)) {
+                        // Check if prerequisite was validated (using published grades only)
+                        $prerequisiteValidated = $student->grades()
+                            ->where('module_id', $module->prerequisite_id)
+                            ->where('is_final', true)
+                            ->where('is_published', true) // Only check published grades
+                            ->where('final_grade', '>=', 10)
+                            ->exists();
+
+                        $module->prerequisite_validated = $prerequisiteValidated;
+                        if (!$prerequisiteValidated && $module->enrollment_status === 'not_enrolled') {
+                            $module->validation_status = 'blocked';
+                        }
+                    } else {
+                        // Invalid prerequisite relationship - ignore it
+                        $module->prerequisite_validated = true;
+                        $module->invalid_prerequisite = true;
+                    }
+                }
+            });
 
             $modulesBySemester[$semesterCode] = $modules;
         }
@@ -110,38 +147,6 @@ class StudentSituationController extends Controller
                 'optional_modules' => $optionalModules,
             ]
         ]);
-    }
-
-    /**
-     * Get formatted year label (e.g., "1ère année Licence")
-     */
-    private function getYearLabel(int $yearInProgram, string $level): string
-    {
-        $ordinal = match($yearInProgram) {
-            1 => '1ère',
-            2 => '2ème',
-            3 => '3ème',
-            4 => '4ème',
-            5 => '5ème',
-            default => "{$yearInProgram}ème"
-        };
-
-        $levelLabel = ucfirst($level);
-
-        return "{$ordinal} année {$levelLabel}";
-    }
-
-    /**
-     * Get cycle label from level (Licence/Master/Doctorat)
-     */
-    private function getCycleLabel(string $level): string
-    {
-        return match(strtolower($level)) {
-            'licence', 'license' => 'Licence',
-            'master' => 'Master',
-            'doctorat', 'doctorate' => 'Doctorat',
-            default => ucfirst($level)
-        };
     }
 
     /**

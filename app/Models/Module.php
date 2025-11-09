@@ -90,4 +90,50 @@ class Module extends Model
     {
         return $this->exam_percentage / 100;
     }
+
+    /**
+     * Check if the prerequisite relationship is valid based on semester rules
+     * S1 and S2 have no prerequisites
+     * S3 can have prerequisites from S1
+     * S4 can have prerequisites from S2
+     * S5 can have prerequisites from S3
+     * S6 can have prerequisites from S4
+     */
+    public function isValidPrerequisite(Module $prerequisite): bool
+    {
+        $validPrerequisites = [
+            'S1' => [],           // S1 has no prerequisites
+            'S2' => [],           // S2 has no prerequisites
+            'S3' => ['S1'],       // S3 can have prerequisites from S1
+            'S4' => ['S2'],       // S4 can have prerequisites from S2
+            'S5' => ['S3'],       // S5 can have prerequisites from S3
+            'S6' => ['S4'],       // S6 can have prerequisites from S4
+        ];
+
+        $allowedSemesters = $validPrerequisites[$this->semester] ?? [];
+
+        return in_array($prerequisite->semester, $allowedSemesters);
+    }
+
+    /**
+     * Get allowed prerequisite semesters for this module
+     */
+    public function getAllowedPrerequisiteSemesters(): array
+    {
+        return match($this->semester) {
+            'S3' => ['S1'],
+            'S4' => ['S2'],
+            'S5' => ['S3'],
+            'S6' => ['S4'],
+            default => [],
+        };
+    }
+
+    /**
+     * Check if this module can have prerequisites based on its semester
+     */
+    public function canHavePrerequisites(): bool
+    {
+        return in_array($this->semester, ['S3', 'S4', 'S5', 'S6']);
+    }
 }

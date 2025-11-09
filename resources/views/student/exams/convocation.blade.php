@@ -108,7 +108,25 @@
             </div>
         </div>
 
+        {{-- Current Session Info --}}
+        @if($currentSession)
+        <div class="mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold">{{ $currentSession['session_label'] }}</h2>
+                    <p class="text-indigo-100 text-sm mt-1">{{ $currentSession['session_label_ar'] }}</p>
+                </div>
+            </div>
+        </div>
+        @endif
+
         {{-- Download Section --}}
+        @if($hasExams)
         <div class="mb-8">
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -120,7 +138,7 @@
                         </div>
                         <div>
                             <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                                Convocation Complète
+                                Convocation - {{ $currentSession['session_label'] ?? 'Examens' }}
                             </h3>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
                                 {{ $exams->count() }} examen(s) à passer
@@ -149,15 +167,9 @@
             </div>
         </div>
 
-        
+        @endif
 
-        {{-- Exams List by Session/Season --}}
-        @php
-            $examsBySession = $exams->groupBy(function($exam) {
-                return $exam['session'] . ' - ' . $exam['season'];
-            });
-        @endphp
-
+        {{-- Exams List --}}
         @if($exams->isEmpty())
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-12 text-center border border-gray-200 dark:border-gray-700">
                 <div class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -166,29 +178,17 @@
                     </svg>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Aucune convocation disponible</h3>
-                <p class="text-gray-600 dark:text-gray-400">Les convocations d'examens seront disponibles prochainement</p>
+                <p class="text-gray-600 dark:text-gray-400">
+                    @if(!$currentSession)
+                        Les convocations d'examens seront disponibles prochainement
+                    @else
+                        Aucun examen programmé pour {{ $currentSession['session_label'] }}
+                    @endif
+                </p>
             </div>
         @else
-            @foreach($examsBySession as $sessionLabel => $sessionExams)
             <div class="mb-6">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-
-                    {{-- Session Header --}}
-                    <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-750 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-blue-500 dark:bg-blue-600 rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $sessionLabel }}</h3>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ $sessionExams->count() }} examen(s)</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     {{-- Exams Table --}}
                     <div class="overflow-x-auto">
@@ -203,7 +203,7 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
-                                @foreach($sessionExams as $exam)
+                                @foreach($exams as $exam)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
                                     <td class="px-6 py-4">
                                         <div class="flex items-start gap-3">
@@ -253,7 +253,18 @@
 
                 </div>
             </div>
-            @endforeach
+        @endif
+
+        {{-- History Link --}}
+        @if($hasExams || $currentSession)
+        <div class="mt-6 text-center">
+            <a href="{{ route('student.convocations.history') }}" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Consulter l'historique des convocations
+            </a>
+        </div>
         @endif
 
         {{-- Important Info --}}

@@ -14,7 +14,6 @@ use App\Models\Filiere;
 use App\Models\AcademicYear;
 use App\Models\Module;
 use App\Models\StudentProgramEnrollment;
-use App\Models\StudentSemesterEnrollment;
 use App\Models\StudentModuleEnrollment;
 use App\Models\ModuleGrade;
 use App\Models\Document;
@@ -28,40 +27,37 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Create Admins
-        // $this->createAdmins();
+        $this->createAdmins();
 
         // 2. Create Departments and Professors
-        // $departments = $this->createDepartmentsAndProfessors();
+        $departments = $this->createDepartmentsAndProfessors();
 
         // 3. Create Filieres
-        // $filieres = $this->createFilieres($departments);
+        $filieres = $this->createFilieres($departments);
 
         // 4. Create Academic Years
-        // $academicYears = $this->createAcademicYears();
+        $academicYears = $this->createAcademicYears();
 
         // 5. Create Modules
-        // $modules = $this->createModules($filieres);
+        $modules = $this->createModules($filieres);
 
         // 6. Create Students
-        // $students = $this->createStudents();
+        $students = $this->createStudents();
 
         // 7. Create Program Enrollments
-        // $programEnrollments = $this->createProgramEnrollments($students, $filieres, $academicYears);
+        $programEnrollments = $this->createProgramEnrollments($students, $filieres, $academicYears);
 
-        // 8. Create Semester Enrollments
-        // $semesterEnrollments = $this->createSemesterEnrollments($programEnrollments);
+        // 8. Create Module Enrollments (now linked directly to program enrollments)
+        $moduleEnrollments = $this->createModuleEnrollments($programEnrollments, $modules);
 
-        // 9. Create Module Enrollments
-        // $moduleEnrollments = $this->createModuleEnrollments($semesterEnrollments, $modules);
+        // 9. Create Module Grades
+        $this->createModuleGrades($moduleEnrollments);
 
-        // 10. Create Module Grades
-        // $this->createModuleGrades($moduleEnrollments);
-
-        // 11. Create Documents
+        // 10. Create Documents
         $documents = $this->createDocuments();
 
-        // 12. Create Demandes
-        // $this->createDemandes($students, $documents, $academicYears);
+        // 11. Create Demandes
+        $this->createDemandes($students, $documents, $academicYears);
 
         $this->command->info('Database seeded successfully!');
     }
@@ -240,7 +236,8 @@ class DatabaseSeeder extends Seeder
             'cc_percentage' => 40,
             'exam_percentage' => 60,
             'professor_id' => Professor::first()->id,
-            'prerequisite_id' => $modules[0]->id,
+            // S2 cannot have prerequisites (only S3, S4, S5, S6 can)
+            // 'prerequisite_id' => null,
         ]);
 
         // Modules for Math - L1
@@ -471,76 +468,55 @@ class DatabaseSeeder extends Seeder
         return $enrollments;
     }
 
-    private function createSemesterEnrollments(array $programEnrollments): array
-    {
-        $this->command->info('Creating semester enrollments...');
-
-        $semesterEnrollments = [];
-
-        foreach ($programEnrollments as $enrollment) {
-            // Create S1 enrollment
-            $semesterEnrollments[] = StudentSemesterEnrollment::create([
-                'program_enrollment_id' => $enrollment->id,
-                'semester' => 'S1',
-                'enrollment_status' => 'in_progress',
-            ]);
-
-            // Create S2 enrollment
-            $semesterEnrollments[] = StudentSemesterEnrollment::create([
-                'program_enrollment_id' => $enrollment->id,
-                'semester' => 'S2',
-                'enrollment_status' => 'registered',
-            ]);
-        }
-
-        return $semesterEnrollments;
-    }
-
-    private function createModuleEnrollments(array $semesterEnrollments, array $modules): array
+    private function createModuleEnrollments(array $programEnrollments, array $modules): array
     {
         $this->command->info('Creating module enrollments...');
 
         $moduleEnrollments = [];
 
-        // Get S1 semester enrollments (first 3)
-        $s1Enrollments = array_slice($semesterEnrollments, 0, 3);
+        // Get first 3 program enrollments
+        $enrollments = array_slice($programEnrollments, 0, 3);
 
         // Student 1 & 2 - Informatique S1 modules
-        foreach ([$s1Enrollments[0], $s1Enrollments[1]] as $semEnrollment) {
-            $student = $semEnrollment->programEnrollment->student;
+        foreach ([$enrollments[0], $enrollments[1]] as $programEnrollment) {
+            $student = $programEnrollment->student;
 
             // INFO101
             $moduleEnrollments[] = StudentModuleEnrollment::create([
-                'semester_enrollment_id' => $semEnrollment->id,
+                'program_enrollment_id' => $programEnrollment->id,
                 'student_id' => $student->id,
+                'semester' => 'S1',
                 'module_id' => $modules[0]->id,
                 'attempt_number' => 1,
             ]);
 
             // INFO102
             $moduleEnrollments[] = StudentModuleEnrollment::create([
-                'semester_enrollment_id' => $semEnrollment->id,
+                'program_enrollment_id' => $programEnrollment->id,
                 'student_id' => $student->id,
+                'semester' => 'S1',
                 'module_id' => $modules[1]->id,
                 'attempt_number' => 1,
             ]);
         }
 
         // Student 3 - Math S1 modules
-        $student3 = $s1Enrollments[2]->programEnrollment->student;
+        $student3 = $enrollments[2]->student;
 
         // MATH101
         $moduleEnrollments[] = StudentModuleEnrollment::create([
-            'semester_enrollment_id' => $s1Enrollments[2]->id,
+            'program_enrollment_id' => $enrollments[2]->id,
             'student_id' => $student3->id,
+            'semester' => 'S1',
             'module_id' => $modules[3]->id,
             'attempt_number' => 1,
         ]);
 
         // MATH102
         $moduleEnrollments[] = StudentModuleEnrollment::create([
-            'semester_enrollment_id' => $s1Enrollments[2]->id,
+            'program_enrollment_id' => $enrollments[2]->id,
             'student_id' => $student3->id,
+            'semester' => 'S1',
             'module_id' => $modules[4]->id,
             'attempt_number' => 1,
         ]);
@@ -557,7 +533,7 @@ class DatabaseSeeder extends Seeder
         // Grade first 4 module enrollments (leave some ungraded)
         for ($i = 0; $i < min(4, count($moduleEnrollments)); $i++) {
             $enrollment = $moduleEnrollments[$i];
-            $student = $enrollment->semesterEnrollment->programEnrollment->student;
+            $student = $enrollment->programEnrollment->student;
 
             $cc = rand(80, 190) / 10; // 8.0 to 19.0
             $exam = rand(80, 190) / 10; // 8.0 to 19.0

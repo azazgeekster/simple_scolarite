@@ -133,12 +133,15 @@
         {{-- Student Enrollment Card --}}
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-8 border border-gray-100">
             {{-- Card Header --}}
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
+            <div class="bg-gradient-to-r from-blue-700 to-blue-500 px-8 py-6">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
                         <div class="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center border-4 border-white/30">
-                            <span class="text-3xl font-bold text-white">{{ $enrollment->year_labels }}</span>
+                            <span class="text-3xl font-bold text-white uppercase">
+                                {{ substr($student->prenom, 0, 1) }}{{ substr($student->nom, 0, 1) }}
+                            </span>
                         </div>
+
                         <div class="text-white">
                             <h2 class="text-2xl font-bold">{{ $student->full_name }}</h2>
                             <p class="text-blue-100 mt-1">CNE: {{ $student->cne }} • Apogée: {{ $student->apogee }}</p>
@@ -236,7 +239,8 @@
             @foreach($modulesBySemester as $semesterCode => $modules)
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
                 {{-- Semester Header --}}
-                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+
+                <div class="bg-gradient-to-r from-blue-700 to-blue-500 px-6 py-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
                             <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center">
@@ -268,9 +272,9 @@
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                     Professeur Responsable
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                {{-- <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                     Crédits
-                                </th>
+                                </th> --}}
                                 <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                     Type
                                 </th>
@@ -296,13 +300,71 @@
                                         {{ $module->label_ar }}
                                     </div>
                                     @endif
+
+                                    {{-- Module Status Badges --}}
+                                    <div class="mt-2 flex flex-wrap gap-2">
+                                        {{-- Validation Status --}}
+                                        @if(isset($module->validation_status))
+                                            @if($module->validation_status === 'validated')
+                                                <span class="inline-flex items-center text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    Validé ({{ number_format($module->validated_grade, 2) }}/20)
+                                                    @if($module->validated_session === 'rattrapage')
+                                                        - Après Ratt.
+                                                    @endif
+                                                </span>
+                                            @elseif($module->validation_status === 'retake')
+                                                <span class="inline-flex items-center text-xs font-semibold text-orange-700 bg-orange-100 px-2 py-1 rounded">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    Rattrapage ({{ number_format($module->previous_grade, 2) }}/20)
+                                                </span>
+                                            @elseif($module->validation_status === 'blocked')
+                                                <span class="inline-flex items-center text-xs font-semibold text-red-700 bg-red-100 px-2 py-1 rounded">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    Bloqué
+                                                </span>
+                                            @elseif($module->validation_status === 'in_progress')
+                                                <span class="inline-flex items-center text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-1 rounded">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    En cours
+                                                </span>
+                                            @endif
+                                        @endif
+
+                                        {{-- Attempt Number if retake --}}
+                                        @if(isset($module->attempt_number) && $module->attempt_number > 1)
+                                            <span class="inline-flex items-center text-xs font-semibold text-purple-700 bg-purple-100 px-2 py-1 rounded">
+                                                Tentative {{ $module->attempt_number }}
+                                            </span>
+                                        @endif
+                                    </div>
+
                                     {{-- Prerequisite info --}}
                                     @if($module->prerequisite)
-                                    <div class="mt-2 inline-flex items-center text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded">
+                                    <div class="mt-2 inline-flex items-center text-xs @if(isset($module->prerequisite_validated) && !$module->prerequisite_validated) text-red-600 bg-red-50 @else text-orange-600 bg-orange-50 @endif px-2 py-1 rounded">
                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                                         </svg>
                                         Prérequis: {{ $module->prerequisite->code }}
+                                        @if(isset($module->prerequisite_validated))
+                                            @if($module->prerequisite_validated)
+                                                <svg class="w-3 h-3 ml-1 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                            @else
+                                                <svg class="w-3 h-3 ml-1 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                                </svg>
+                                            @endif
+                                        @endif
                                     </div>
                                     @endif
                                 </td>
@@ -330,11 +392,11 @@
                                 </td>
 
                                 {{-- Credits --}}
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                {{-- <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-800 font-bold text-sm">
                                         {{ $module->credits ?? 3 }}
                                     </span>
-                                </td>
+                                </td> --}}
 
                                 {{-- Type --}}
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -393,29 +455,103 @@
             @endforeach
         </div>
 
-        {{-- Info Card --}}
-     {{-- Info Card --}}
-<div class="mt-8 bg-blue-50 border-l-4 border-blue-400 rounded-lg p-6 shadow-sm">
-    <div class="flex items-start">
-        <div class="flex-shrink-0">
-            <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-        </div>
-        <div class="ml-4">
-            <h3 class="text-sm font-semibold text-blue-900 mb-2">À propos de votre situation pédagogique</h3>
-            <div class="text-sm text-blue-800 space-y-1">
-                <p>• Cette page présente les modules que vous devez étudier cette année universitaire</p>
-                @if($allEnrollments->count() > 1)
-                    <p>• Utilisez le menu déroulant ci-dessus pour consulter vos inscriptions des années précédentes</p>
-                @endif
-                <p>• Pour consulter vos notes et résultats, rendez-vous dans la section "Mes Notes"</p>
-                <p>• Les emplois du temps seront communiqués par votre département</p>
-                <p>• Pour toute question sur votre inscription, contactez le service de scolarité</p>
+        {{-- Info Cards --}}
+        <div class="mt-8 space-y-4">
+            {{-- Status Legend --}}
+            {{-- <div class="bg-gradient-to-br from-purple-50 to-blue-50 border-l-4 border-purple-400 rounded-lg p-6 shadow-sm">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-sm font-bold text-purple-900 mb-3">Légende des statuts de validation</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            <div class="flex items-start gap-2">
+                                <span class="inline-flex items-center text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded mt-0.5">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Validé
+                                </span>
+                                <span class="text-gray-700 flex-1">Module réussi (note ≥ 10/20) en session normale ou de rattrapage</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="inline-flex items-center text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-1 rounded mt-0.5">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                    </svg>
+                                    En cours
+                                </span>
+                                <span class="text-gray-700 flex-1">Module en cours d'étude cette année (première tentative)</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="inline-flex items-center text-xs font-semibold text-orange-700 bg-orange-100 px-2 py-1 rounded mt-0.5">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Rattrapage
+                                </span>
+                                <span class="text-gray-700 flex-1">Module non validé l'année précédente, à repasser cette année</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="inline-flex items-center text-xs font-semibold text-red-700 bg-red-100 px-2 py-1 rounded mt-0.5">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Bloqué
+                                </span>
+                                <span class="text-gray-700 flex-1">Module non accessible car le prérequis n'est pas validé</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> --}}
+
+            {{-- Prerequisites Explanation --}}
+            <div class="bg-gradient-to-br from-orange-50 to-yellow-50 border-l-4 border-orange-400 rounded-lg p-6 shadow-sm">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-sm font-bold text-orange-900 mb-2">Système de prérequis entre semestres homologues</h3>
+                        <div class="text-sm text-orange-800 space-y-1.5">
+                            <p>• Les modules ont des relations de prérequis entre semestres homologues : <strong>S1→S3→S5</strong> et <strong>S2→S4→S6</strong></p>
+                            <p>• Si un module du S1 n'est pas validé, vous devez le repasser en S3 et le module homologue du S3 sera bloqué</p>
+                            <p>• Exemple : Si vous échouez au module M1 du S1, vous repasserez M1 en S3, mais vous ne pourrez pas suivre le module M7 du S3 qui dépend de M1</p>
+                            <p>• Les modules avec prérequis sont clairement indiqués avec un badge orange ou rouge selon leur statut de validation</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- General Information --}}
+            <div class="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-6 shadow-sm">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-semibold text-blue-900 mb-2">À propos de votre situation pédagogique</h3>
+                        <div class="text-sm text-blue-800 space-y-1">
+                            <p>• Cette page présente les modules que vous devez étudier cette année universitaire</p>
+                            @if($allEnrollments->count() > 1)
+                                <p>• Utilisez le menu déroulant ci-dessus pour consulter vos inscriptions des années précédentes</p>
+                            @endif
+                            <p>• Pour consulter vos notes et résultats, rendez-vous dans la section "Mes Notes"</p>
+                            <p>• Les convocations d'examens seront disponibles avant chaque session (normale et rattrapage)</p>
+                            <p>• Pour toute question sur votre inscription, contactez le service de scolarité</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
     </div>
 </div>

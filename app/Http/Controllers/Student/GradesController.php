@@ -37,19 +37,30 @@ class GradesController extends Controller
             return view('student.grades.no-enrollment', compact('student'));
         }
 
+        // Get module IDs that the student is actually enrolled in this year
+        // This includes modules from their current year AND retakes from previous years
+        $enrolledModuleIds = $student->moduleEnrollments()
+            ->where('program_enrollment_id', $enrollment->id)
+            ->pluck('module_id')
+            ->unique();
+
         // Get grades grouped by semester and session
         $gradesBySemester = [];
 
         foreach ($enrollment->getSemestersForYear() as $semester) {
-            // Get all grades for this semester
+            // Get all PUBLISHED grades for modules the student is enrolled in for this semester
+            // Filter by academic year through the enrollment relationship
             $allGrades = ModuleGrade::where('student_id', $student->id)
-                ->whereHas('module', function($q) use ($enrollment, $semester) {
-                    $q->where('filiere_id', $enrollment->filiere_id)
-                      ->where('year_in_program', $enrollment->year_in_program)
-                      ->where('semester', $semester);
+                ->whereIn('module_id', $enrolledModuleIds)
+                ->whereHas('module', function($q) use ($semester) {
+                    $q->where('semester', $semester);
+                })
+                ->whereHas('moduleEnrollment.programEnrollment', function($q) use ($enrollment) {
+                    $q->where('id', $enrollment->id); // Only grades for this program enrollment (academic year)
                 })
                 ->with(['module.professor'])
                 ->where('is_final', true)
+                ->where('is_published', true) // ONLY SHOW PUBLISHED GRADES
                 ->whereNotNull('final_grade') // Only grades that have been entered
                 ->get();
 

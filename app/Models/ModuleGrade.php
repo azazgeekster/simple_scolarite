@@ -24,6 +24,9 @@ class ModuleGrade extends Model
         'graded_date',
         'graded_by',
         'is_final',
+        'is_published',
+        'published_at',
+        'published_by',
         'remarks',
     ];
 
@@ -36,6 +39,9 @@ class ModuleGrade extends Model
         'graded_date' => 'date',
         'graded_by' => 'integer',
         'is_final' => 'boolean',
+        'is_published' => 'boolean',
+        'published_at' => 'datetime',
+        'published_by' => 'integer',
     ];
 
     // Relationships
@@ -84,6 +90,16 @@ class ModuleGrade extends Model
     public function scopeFinalOnly($query)
     {
         return $query->where('is_final', true);
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where('is_published', true);
+    }
+
+    public function scopeUnpublished($query)
+    {
+        return $query->where('is_published', false);
     }
 
     // Grade Calculation

@@ -18,6 +18,8 @@ class StudentProgramEnrollment extends Model
         'academic_year',
         'registration_year',
         'year_in_program',
+        'diploma_level',
+        'diploma_year',
         'enrollment_status',
         'enrollment_date',
         'notes',
@@ -29,6 +31,7 @@ class StudentProgramEnrollment extends Model
         'academic_year' => 'integer',
         'registration_year' => 'integer',
         'year_in_program' => 'integer',
+        'diploma_year' => 'integer',
         'enrollment_date' => 'date',
     ];
 
@@ -48,9 +51,9 @@ class StudentProgramEnrollment extends Model
         return $this->belongsTo(AcademicYear::class, 'academic_year', 'start_year');
     }
 
-    public function semesterEnrollments()
+    public function moduleEnrollments()
     {
-        return $this->hasMany(StudentSemesterEnrollment::class, 'program_enrollment_id');
+        return $this->hasMany(StudentModuleEnrollment::class, 'program_enrollment_id');
     }
 
     // Scopes
@@ -75,13 +78,54 @@ class StudentProgramEnrollment extends Model
         return $this->enrollment_status === 'active';
     }
 
-    public function getSemestersForYear(): array
+    public function getSemestersForDiplomaYear(): array
     {
-        return match($this->year_in_program) {
+        // Based on diploma_year if available, otherwise fallback to year_in_program
+        $year = $this->diploma_year ?? $this->year_in_program;
+
+        return match($year) {
             1 => ['S1', 'S2'],
             2 => ['S3', 'S4'],
             3 => ['S5', 'S6'],
+            4 => ['S7', 'S8'],
+            5 => ['S9', 'S10'],
             default => [],
+        };
+    }
+
+    /**
+     * Alias for getSemestersForDiplomaYear() for backward compatibility
+     */
+    public function getSemestersForYear(): array
+    {
+        return $this->getSemestersForDiplomaYear();
+    }
+
+    public function getDiplomaLevelLabelAttribute(): string
+    {
+        return match($this->diploma_level) {
+            'deug' => 'DEUG',
+            'licence' => 'Licence',
+            'master' => 'Master',
+            'doctorat' => 'Doctorat',
+            default => 'Non défini',
+        };
+    }
+
+    /**
+     * Get cycle label from diploma_level or filiere level (Licence/Master/Doctorat)
+     */
+    public function getCycleLabelAttribute(): string
+    {
+        // Use diploma_level if set, otherwise fall back to filiere level
+        $level = $this->diploma_level ?? ($this->filiere ? strtolower($this->filiere->level) : '');
+
+        return match($level) {
+            'licence', 'license' => 'Licence',
+            'deug', 'DEUG' => 'DEUG',
+            'master' => 'Master',
+            'doctorat', 'doctorate' => 'Doctorat',
+            default => ucfirst($level)
         };
     }
 
@@ -91,20 +135,25 @@ class StudentProgramEnrollment extends Model
     }
     public function getYearLabelAttribute(): string
     {
-        if (!$this->year_in_program) {
+        $year = $this->diploma_year ?? $this->year_in_program;
+
+        if (!$year) {
             return 'Année non définie';
         }
 
-        $ordinal = match($this->year_in_program) {
+        $ordinal = match($year) {
             1 => '1ère',
             2 => '2ème',
             3 => '3ème',
             4 => '4ème',
             5 => '5ème',
-            default => "{$this->year_in_program}ème"
+            default => "{$year}ème"
         };
 
-        $level = $this->filiere ? ucfirst($this->filiere->level) : '';
+        // Use diploma_level if set, otherwise fall back to filiere level
+        $level = $this->diploma_level
+            ? $this->diploma_level_label
+            : ($this->filiere ? ucfirst($this->filiere->level) : '');
 
         return $level ? "{$ordinal} année {$level}" : "{$ordinal} année";
     }

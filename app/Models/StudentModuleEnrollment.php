@@ -15,21 +15,30 @@ class StudentModuleEnrollment extends Model
 
     protected $fillable = [
         'student_id',
-        'semester_enrollment_id',
+        'program_enrollment_id',
+        'semester',
         'module_id',
+        'registration_year',
         'attempt_number',
     ];
 
     protected $casts = [
-        'semester_enrollment_id' => 'integer',
+        'student_id' => 'integer',
+        'program_enrollment_id' => 'integer',
         'module_id' => 'integer',
+        'registration_year' => 'integer',
         'attempt_number' => 'integer',
     ];
 
     // Relationships
-    public function semesterEnrollment()
+    public function programEnrollment()
     {
-        return $this->belongsTo(StudentSemesterEnrollment::class, 'semester_enrollment_id');
+        return $this->belongsTo(StudentProgramEnrollment::class, 'program_enrollment_id');
+    }
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'student_id');
     }
 
     public function module()
@@ -42,16 +51,15 @@ class StudentModuleEnrollment extends Model
         return $this->hasOne(ModuleGrade::class, 'module_enrollment_id');
     }
 
-    // Access student through semester enrollment
-    public function getStudentAttribute()
-    {
-        return $this->semesterEnrollment?->student;
-    }
-
     // Scopes
     public function scopeForModule($query, int $moduleId)
     {
         return $query->where('module_id', $moduleId);
+    }
+
+    public function scopeForSemester($query, string $semester)
+    {
+        return $query->where('semester', $semester);
     }
 
     public function scopeFirstAttempt($query)

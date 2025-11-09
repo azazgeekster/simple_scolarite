@@ -4,12 +4,13 @@
 @include('student.layouts.head')
 
 <body class="bg-gray-100 min-h-screen flex flex-col" x-data="{ isDark: false }" x-init="
-    if (!('isDark' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      localStorage.setItem('isDark', JSON.stringify(true));
+    // Set light mode as default
+    if (!('isDark' in localStorage)) {
+      localStorage.setItem('isDark', JSON.stringify(false));
     }
     isDark = JSON.parse(localStorage.getItem('isDark'));
     $watch('isDark', value => localStorage.setItem('isDark', JSON.stringify(value)))" x-cloak
-    >
+    :class="{ 'dark': isDark }">
     @include('student.layouts.nav')
     @include('student.layouts.sidebar')
     <div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900 min-h-screen">
