@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AdminForgotPasswordController;
 use App\Http\Controllers\Auth\AdminResetPasswordController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ExamImportController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes                                                              |
@@ -40,6 +41,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::redirect('/', '/admin/dashboard'); // Redirect /admin → /admin/dashboard
         Route::post('logout', [AdminLoginController::class, 'logout'])->name('logout');
+
+        // Exam import routes (Super Admin only)
+        Route::get('exams/import', [ExamImportController::class, 'showImportForm'])->name('exams.import');
+        Route::post('exams/import', [ExamImportController::class, 'import'])->name('exams.import.process');
+        Route::get('exams/download-template', [ExamImportController::class, 'downloadTemplate'])->name('exams.download-template');
+        Route::post('exams/export-rattrapage-candidates', [ExamImportController::class, 'exportRattrapageCandidates'])->name('exams.export-rattrapage-candidates');
+        Route::post('exams/toggle-session-publication', [ExamImportController::class, 'toggleSessionPublication'])->name('exams.toggle-session-publication');
     });
 });
 

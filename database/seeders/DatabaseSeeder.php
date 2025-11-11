@@ -29,6 +29,9 @@ class DatabaseSeeder extends Seeder
         // 1. Create Admins
         $this->createAdmins();
 
+        // 1.5. Setup Roles and Permissions (must run after admins are created)
+        $this->call(SuperAdminSeeder::class);
+
         // 2. Create Departments and Professors
         $departments = $this->createDepartmentsAndProfessors();
 

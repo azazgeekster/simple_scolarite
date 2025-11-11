@@ -116,6 +116,21 @@ class Student extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Demande::class, 'student_id', 'id');
     }
 
+    /**
+     * Exam convocations for this student (through module enrollments)
+     */
+    public function examConvocations()
+    {
+        return $this->hasManyThrough(
+            ExamConvocation::class,
+            StudentModuleEnrollment::class,
+            'student_id', // Foreign key on student_module_enrollments table
+            'student_module_enrollment_id', // Foreign key on exam_convocations table
+            'id', // Local key on students table
+            'id' // Local key on student_module_enrollments table
+        );
+    }
+
     // Helper Methods
     public function currentProgramEnrollment()
     {

@@ -109,6 +109,15 @@
                                 Exam Schedule
                             </a>
                         </li>
+                        {{-- @if(auth('admin')->check() && auth('admin')->user()->hasRole('Super Admin')) --}}
+                        <li>
+                            <a href="{{ route('admin.exams.import') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exams.import') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
+                                <span class="w-2 h-2 bg-purple-400 rounded-full mr-3"></span>
+                                Import Exams
+                            </a>
+                        </li>
+
+                        {{-- @endif --}}
                         <li>
                             <a href="#" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200">
                                 <span class="w-2 h-2 bg-green-400 rounded-full mr-3"></span>

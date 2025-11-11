@@ -19,37 +19,55 @@ class ConvocationController extends Controller
     {
         $student = Auth::guard('student')->user();
 
-        // Get current enrollment
-        $enrollment = $student->programEnrollments()
-            ->with(['filiere.department', 'academicYear'])
-            ->whereHas('academicYear', fn ($q) => $q->where('is_current', true))
-            ->first();
+        // Get all enrollments for year dropdown
+        $allEnrollments = $student->programEnrollments()
+            ->with(['filiere', 'academicYear'])
+            ->orderBy('academic_year', 'desc')
+            ->get();
 
-        if (! $enrollment) {
+        if ($allEnrollments->isEmpty()) {
             return view('student.convocations.no-enrollment', compact('student'));
         }
 
-        // Get current session convocation (normal or rattrapage)
-        $currentSession = $this->getCurrentAvailableSession($student, $enrollment);
+        // Get selected year or default to current
+        $selectedYear = $request->get('year');
+        if ($selectedYear) {
+            $enrollment = $allEnrollments->firstWhere('academic_year', $selectedYear);
+        } else {
+            $enrollment = $allEnrollments->firstWhere(function($e) {
+                return $e->academicYear && $e->academicYear->is_current;
+            }) ?? $allEnrollments->first();
+        }
 
-        if (!$currentSession) {
+        if (!$enrollment) {
+            return view('student.convocations.no-enrollment', compact('student'));
+        }
+
+        // Get current session and season for this enrollment
+        $currentSessionInfo = $this->getCurrentAvailableSession($student, $enrollment);
+
+        if (!$currentSessionInfo) {
             return view('student.exams.convocation', [
                 'student' => $student,
                 'enrollment' => $enrollment,
+                'allEnrollments' => $allEnrollments,
                 'exams' => collect([]),
                 'currentSession' => null,
+                'currentSeason' => null,
                 'hasExams' => false
             ]);
         }
 
-        // Get exams for current session only
-        $exams = $this->getUpcomingExams($student, $enrollment, $currentSession['session_type']);
+        // Get exams for current session and season
+        $exams = $this->getExamsForSession($student, $enrollment, $currentSessionInfo['session_type'], $currentSessionInfo['season']);
 
         return view('student.exams.convocation', [
             'student' => $student,
             'enrollment' => $enrollment,
+            'allEnrollments' => $allEnrollments,
             'exams' => $exams,
-            'currentSession' => $currentSession,
+            'currentSession' => $currentSessionInfo,
+            'currentSeason' => $currentSessionInfo['season'] ?? null,
             'hasExams' => $exams->isNotEmpty()
         ]);
     }
@@ -302,45 +320,55 @@ class ConvocationController extends Controller
 
     /**
      * Determine which session convocation is currently available
+     * Returns session info with season
+     * Now uses explicit convocations from exam_convocations table
      */
     private function getCurrentAvailableSession($student, $enrollment)
     {
-        // Get module IDs that the student is actually enrolled in this year
-        // This includes modules from their current year AND retakes from previous years
-        $moduleIds = $student->moduleEnrollments()
-            ->where('program_enrollment_id', $enrollment->id)
-            ->pluck('module_id')
-            ->unique();
+        // Determine current season based on today's date and semesters
+        $currentSeason = $this->getCurrentSeason();
 
-        // Check if there are published normal session exams
+        // Check for published normal session exams where student has convocation
         $normalExams = \App\Models\Exam::published()
             ->where('session_type', 'normal')
+            ->where('season', $currentSeason)
             ->where('exam_date', '>=', now()->toDateString())
-            ->whereIn('module_id', $moduleIds)
             ->where('academic_year', $enrollment->academic_year)
-            ->exists();
+            ->whereHas('convocations.studentModuleEnrollment', function($query) use ($student) {
+                $query->where('student_id', $student->id);
+            })
+            ->first();
 
         if ($normalExams) {
             return [
                 'session_type' => 'normal',
+                'season' => $currentSeason,
                 'session_label' => 'Session Normale',
                 'session_label_ar' => 'الدورة العادية',
+                'season_label' => $currentSeason === 'autumn' ? 'Automne' : 'Printemps',
+                'season_label_ar' => $currentSeason === 'autumn' ? 'الخريفية' : 'الربيعية',
             ];
         }
 
-        // Check if normal session is finished and rattrapage is published
+        // Check for rattrapage session where student has convocation
         $rattrapageExams = \App\Models\Exam::published()
             ->where('session_type', 'rattrapage')
+            ->where('season', $currentSeason)
             ->where('exam_date', '>=', now()->toDateString())
-            ->whereIn('module_id', $moduleIds)
             ->where('academic_year', $enrollment->academic_year)
-            ->exists();
+            ->whereHas('convocations.studentModuleEnrollment', function($query) use ($student) {
+                $query->where('student_id', $student->id);
+            })
+            ->first();
 
         if ($rattrapageExams) {
             return [
                 'session_type' => 'rattrapage',
+                'season' => $currentSeason,
                 'session_label' => 'Session de Rattrapage',
                 'session_label_ar' => 'دورة الاستدراك',
+                'season_label' => $currentSeason === 'autumn' ? 'Automne' : 'Printemps',
+                'season_label_ar' => $currentSeason === 'autumn' ? 'الخريفية' : 'الربيعية',
             ];
         }
 
@@ -348,24 +376,105 @@ class ConvocationController extends Controller
     }
 
     /**
+     * Determine current academic season based on date
+     * Autumn: September - January (S1, S3, S5)
+     * Spring: February - June (S2, S4, S6)
+     */
+    private function getCurrentSeason(): string
+    {
+        $month = now()->month;
+
+        // Autumn: September (9) to January (1)
+        // Spring: February (2) to August (8)
+        return ($month >= 9 || $month <= 1) ? 'autumn' : 'spring';
+    }
+
+    /**
+     * Get exams for a specific session and season
+     * Now uses explicit convocations from exam_convocations table
+     */
+    private function getExamsForSession($student, $enrollment, $sessionType, $season)
+    {
+        // Get exams where this student has an explicit convocation
+        $dbExams = \App\Models\Exam::published()
+            ->where('session_type', $sessionType)
+            ->where('season', $season)
+            // ->where('exam_date', '>=', now()->toDateString())
+            ->where('academic_year', $enrollment->academic_year)
+            ->whereHas('convocations.studentModuleEnrollment', function($query) use ($student) {
+                $query->where('student_id', $student->id);
+            })
+            ->with(['module', 'academicYear', 'convocations' => function($query) use ($student) {
+                $query->whereHas('studentModuleEnrollment', function($q) use ($student) {
+                    $q->where('student_id', $student->id);
+                });
+            }])
+            ->orderBy('exam_date')
+            ->orderBy('start_time')
+            ->get();
+
+        return $this->transformExamsToArrayWithDetails($dbExams);
+    }
+
+    /**
+     * Transform exams to array format with full details
+     */
+    private function transformExamsToArrayWithDetails($dbExams)
+    {
+        $exams = [];
+        foreach ($dbExams as $exam) {
+            $startTime = \Carbon\Carbon::parse($exam->start_time);
+            $endTime = \Carbon\Carbon::parse($exam->end_time);
+            $durationMinutes = $startTime->diffInMinutes($endTime);
+            $hours = floor($durationMinutes / 60);
+            $minutes = $durationMinutes % 60;
+            $duration = sprintf('%dh%02d', $hours, $minutes);
+
+            // Get the convocation for this student (should only be one)
+            $convocation = $exam->convocations->first();
+
+            $exams[] = [
+                'id' => $exam->id,
+                'module_id' => $exam->module_id,
+                'module_code' => $exam->module->code,
+                'module_label' => $exam->module->label,
+                'module_label_ar' => $exam->module->label_ar ?? $exam->module->label,
+                'semester' => $exam->semester,
+                'session' => $exam->session_type === 'normal' ? 'Normale' : 'Rattrapage',
+                'session_ar' => $exam->session_type === 'normal' ? 'العادية' : 'الاستدراكية',
+                'season' => $exam->season === 'autumn' ? 'Automne' : 'Printemps',
+                'season_ar' => $exam->season === 'autumn' ? 'الخريفية' : 'الربيعية',
+                'date' => $exam->exam_date,
+                'time' => $startTime->format('H:i'),
+                'duration' => $duration,
+                'room' => $convocation->location ?? $exam->local ?? 'À définir',
+                'building' => 'Bâtiment A',
+                'exam_number' => $convocation->n_examen ?? $exam->id,
+            ];
+        }
+
+        return collect($exams);
+    }
+
+    /**
      * Get upcoming exams for student for a specific session
+     * Now uses explicit convocations from exam_convocations table
      */
     private function  getUpcomingExams($student, $enrollment, $sessionType = 'normal')
     {
-        // Get module IDs that the student is actually enrolled in this year
-        // This includes modules from their current year AND retakes from previous years
-        $moduleIds = $student->moduleEnrollments()
-            ->where('program_enrollment_id', $enrollment->id)
-            ->pluck('module_id')
-            ->unique();
-
-        // Get published upcoming exams for these modules and specific session
+        // Get published upcoming exams where student has explicit convocation
         $dbExams = \App\Models\Exam::published()
             ->where('session_type', $sessionType)
             ->where('exam_date', '>=', now()->toDateString())
-            ->whereIn('module_id', $moduleIds)
             ->where('academic_year', $enrollment->academic_year)
-            ->with(['module', 'academicYear'])
+            ->whereHas('convocations.studentModuleEnrollment', function($query) use ($student) {
+                $query->where('student_id', $student->id);
+            })
+            ->with(['module', 'academicYear', 'convocations' => function($query) use ($student) {
+                $query->whereHas('studentModuleEnrollment', function($q) use ($student) {
+                    $q->where('student_id', $student->id);
+                });
+            }])
             ->orderBy('exam_date')
             ->orderBy('start_time')
             ->get();
@@ -459,28 +568,33 @@ class ConvocationController extends Controller
             ]);
         }
 
-        // Get module IDs that the student was actually enrolled in for that year
-        // This matches the logic in convocation index() - includes retakes
-        $moduleIds = $student->moduleEnrollments()
-            ->where('program_enrollment_id', $enrollment->id)
-            ->pluck('module_id')
-            ->unique();
-
-        // Get all exams (past and future) for this enrollment grouped by session
+        // Get all exams (past and future) where student has explicit convocation
         $normalExams = \App\Models\Exam::published()
             ->where('session_type', 'normal')
-            ->whereIn('module_id', $moduleIds)
             ->where('academic_year', $enrollment->academic_year)
-            ->with(['module'])
+            ->whereHas('convocations.studentModuleEnrollment', function($query) use ($student) {
+                $query->where('student_id', $student->id);
+            })
+            ->with(['module', 'convocations' => function($query) use ($student) {
+                $query->whereHas('studentModuleEnrollment', function($q) use ($student) {
+                    $q->where('student_id', $student->id);
+                });
+            }])
             ->orderBy('exam_date')
             ->orderBy('start_time')
             ->get();
 
         $rattrapageExams = \App\Models\Exam::published()
             ->where('session_type', 'rattrapage')
-            ->whereIn('module_id', $moduleIds)
             ->where('academic_year', $enrollment->academic_year)
-            ->with(['module'])
+            ->whereHas('convocations.studentModuleEnrollment', function($query) use ($student) {
+                $query->where('student_id', $student->id);
+            })
+            ->with(['module', 'convocations' => function($query) use ($student) {
+                $query->whereHas('studentModuleEnrollment', function($q) use ($student) {
+                    $q->where('student_id', $student->id);
+                });
+            }])
             ->orderBy('exam_date')
             ->orderBy('start_time')
             ->get();

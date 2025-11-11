@@ -1,16 +1,13 @@
 <!doctype html>
-<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
-
+<html lang="{{ app()->getLocale() }}"
+      dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}"
+      x-data="{ isDark: localStorage.getItem('isDark') === 'true' }"
+      x-init="$watch('isDark', value => localStorage.setItem('isDark', String(value)))"
+      x-cloak
+      :class="{ 'dark': isDark }">
 @include('admin.layouts.head')
 
-<body class="bg-gray-100 min-h-screen flex flex-col" x-data="{ isDark: false }" x-init="
-    // Set light mode as default
-    if (!('isDark' in localStorage)) {
-      localStorage.setItem('isDark', JSON.stringify(false));
-    }
-    isDark = JSON.parse(localStorage.getItem('isDark'));
-    $watch('isDark', value => localStorage.setItem('isDark', JSON.stringify(value)))" x-cloak
-    :class="{ 'dark': isDark }">
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
     @include('admin.layouts.nav')
     @include('admin.layouts.sidebar')

@@ -51,6 +51,11 @@ class StudentModuleEnrollment extends Model
         return $this->hasOne(ModuleGrade::class, 'module_enrollment_id');
     }
 
+    public function examConvocations()
+    {
+        return $this->hasMany(ExamConvocation::class);
+    }
+
     // Scopes
     public function scopeForModule($query, int $moduleId)
     {

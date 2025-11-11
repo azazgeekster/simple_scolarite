@@ -6,22 +6,72 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-6 sm:py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {{-- Header --}}
+        {{-- Header with Year Selector --}}
         <div class="mb-8">
-            <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                            Convocations d'Examens
+                        </h1>
+                        <p class="text-gray-600 dark:text-gray-400">
+                            Téléchargez vos convocations pour les examens à venir
+                        </p>
+                    </div>
                 </div>
-                <div class="flex-1">
-                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                        Convocations d'Examens
-                    </h1>
-                    <p class="text-gray-600 dark:text-gray-400">
-                        Téléchargez vos convocations pour les examens à venir
-                    </p>
+
+                {{-- Year Selector Dropdown --}}
+                @if($allEnrollments->count() > 1)
+                <div class="flex-shrink-0">
+                    <form method="GET" action="{{ route('student.exams.convocation') }}" class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-4 border border-gray-100 dark:border-gray-700">
+                        <label for="year-select" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <span>Année universitaire</span>
+                            </span>
+                        </label>
+
+                        <div class="relative group">
+                            <select name="year" id="year-select" onchange="this.form.submit()"
+                                class="block w-full md:w-80 pl-3 pr-10 py-2.5 text-sm font-medium
+                                       border-2 border-gray-200 dark:border-gray-700
+                                       bg-white dark:bg-gray-800
+                                       text-gray-900 dark:text-gray-100
+                                       rounded-xl shadow-sm
+                                       focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500
+                                       hover:border-red-400 dark:hover:border-red-500
+                                       transition-all duration-300 cursor-pointer appearance-none">
+                                @foreach($allEnrollments as $historyEnrollment)
+                                    <option value="{{ $historyEnrollment->academic_year }}"
+                                            {{ $historyEnrollment->academic_year == $enrollment->academic_year ? 'selected' : '' }}>
+                                        {{ $historyEnrollment->academic_year }}-{{ $historyEnrollment->academic_year + 1 }}
+                                        • {{ $historyEnrollment->filiere->label_fr }}
+                                        @if($historyEnrollment->academicYear && $historyEnrollment->academicYear->is_current)
+                                            ✓ En cours
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <!-- Dropdown Icon -->
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+                                <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-red-500 transition-colors duration-300"
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </form>
                 </div>
+                @endif
             </div>
         </div>
 
@@ -199,7 +249,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase hidden md:table-cell">Date</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase hidden md:table-cell">Heure</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase hidden lg:table-cell">Salle</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase hidden lg:table-cell">Bâtiment</th>
+                                    {{-- <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase hidden lg:table-cell">Bâtiment</th> --}}
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
@@ -228,7 +278,7 @@
                                                 {{-- Mobile info --}}
                                                 <div class="md:hidden mt-2 space-y-1 text-xs text-gray-600 dark:text-gray-400">
                                                     <div>📅 {{ $exam['date']->format('d/m/Y') }} à {{ $exam['time'] }}</div>
-                                                    <div>🏢 {{ $exam['room'] }} - {{ $exam['building'] }}</div>
+                                                    {{-- <div>🏢 {{ $exam['room'] }} - {{ $exam['building'] }}</div> --}}
                                                 </div>
                                             </div>
                                         </div>
@@ -242,9 +292,9 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white hidden lg:table-cell">
                                         {{ $exam['room'] }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white hidden lg:table-cell">
+                                    {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white hidden lg:table-cell">
                                         {{ $exam['building'] }}
-                                    </td>
+                                    </td> --}}
                                 </tr>
                                 @endforeach
                             </tbody>
