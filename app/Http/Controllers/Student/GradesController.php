@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\ModuleGrade;
+use App\Models\StudentModuleEnrollment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -37,54 +38,43 @@ class GradesController extends Controller
             return view('student.grades.no-enrollment', compact('student'));
         }
 
-        // Get module IDs that the student is actually enrolled in this year
-        // This includes modules from their current year AND retakes from previous years
-        $enrolledModuleIds = $student->moduleEnrollments()
-            ->where('program_enrollment_id', $enrollment->id)
-            ->pluck('module_id')
-            ->unique();
-
-        // Get grades grouped by semester and session
+        // Get module enrollments with grades (MUCH more efficient with final_grade in enrollments)
         $gradesBySemester = [];
 
         foreach ($enrollment->getSemestersForYear() as $semester) {
-            // Get all PUBLISHED grades for modules the student is enrolled in for this semester
-            // Filter by academic year through the enrollment relationship
-            $allGrades = ModuleGrade::where('student_id', $student->id)
-                ->whereIn('module_id', $enrolledModuleIds)
+            // Get all module enrollments for this semester with published grades
+            $moduleEnrollments = StudentModuleEnrollment::where('student_id', $student->id)
+                ->where('program_enrollment_id', $enrollment->id)
                 ->whereHas('module', function($q) use ($semester) {
                     $q->where('semester', $semester);
                 })
-                ->whereHas('moduleEnrollment.programEnrollment', function($q) use ($enrollment) {
-                    $q->where('id', $enrollment->id); // Only grades for this program enrollment (academic year)
-                })
-                ->with(['module.professor'])
-                ->where('is_final', true)
-                ->where('is_published', true) // ONLY SHOW PUBLISHED GRADES
-                ->whereNotNull('final_grade') // Only grades that have been entered
+                ->whereNotNull('final_grade') // Only show if there's a final grade
+                ->with([
+                    'module.professor',
+                    'grades' => function($q) {
+                        // Load session grades for detail view
+                        $q->where('is_published', true)->whereNotNull('grade');
+                    }
+                ])
                 ->get();
 
-            // Add validation status to each grade
-            $allGrades->transform(function($grade) {
-                $grade->validation_status = $this->getValidationStatus($grade);
-                return $grade;
-            });
+            // Separate grades by session for display
+            $normalGrades = $moduleEnrollments->map(function($enrollment) {
+                return $enrollment->normalGrade;
+            })->filter()->filter(fn($g) => $g->is_published);
 
-            // Separate by session
-            $normalGrades = $allGrades->where('exam_session', 'normal');
-            $rattrapageGrades = $allGrades->where('exam_session', 'rattrapage');
+            $rattrapageGrades = $moduleEnrollments->map(function($enrollment) {
+                return $enrollment->rattrapageGrade;
+            })->filter()->filter(fn($g) => $g->is_published);
 
-            // Calculate overall average (taking best grade for each module)
-            $bestGrades = $allGrades->groupBy('module_id')->map(function($grades) {
-                return $grades->sortByDesc('final_grade')->first();
-            });
-
+            // Calculate stats using final_grade (already calculated!)
             $gradesBySemester[$semester] = [
+                'enrollments' => $moduleEnrollments, // Pass enrollments instead of grades
                 'normal_grades' => $normalGrades,
                 'rattrapage_grades' => $rattrapageGrades,
-                'average' => $bestGrades->isNotEmpty() ? $bestGrades->avg('final_grade') : null,
-                'passed_modules' => $bestGrades->where('final_grade', '>=', 10)->count(),
-                'total_modules' => $bestGrades->count(),
+                'average' => $moduleEnrollments->avg('final_grade'),
+                'passed_modules' => $moduleEnrollments->filter->isPassed()->count(),
+                'total_modules' => $moduleEnrollments->count(),
             ];
         }
 
@@ -96,57 +86,5 @@ class GradesController extends Controller
         ));
     }
 
-    /**
-     * Determine validation status of a grade
-     */
-    private function getValidationStatus($grade): array
-    {
-        // Handle null final_grade
-        if (is_null($grade->final_grade)) {
-            return [
-                'label' => 'Non noté',
-                'color' => 'gray',
-                'icon' => 'question',
-                'passed' => false,
-            ];
-        }
-
-        $finalGrade = $grade->final_grade;
-
-        // Validé (normal or rattrapage)
-        if ($finalGrade >= 10) {
-            if ($grade->exam_session === 'rattrapage') {
-                return [
-                    'label' => 'Validé après rattrapage',
-                    'color' => 'blue',
-                    'icon' => 'check-circle',
-                    'passed' => true,
-                ];
-            }
-            return [
-                'label' => 'Validé',
-                'color' => 'green',
-                'icon' => 'check-circle',
-                'passed' => true,
-            ];
-        }
-
-        // Validé par compensation (8 <= note < 10)
-        if ($finalGrade >= 8 && $finalGrade < 10) {
-            return [
-                'label' => 'Validé par compensation',
-                'color' => 'yellow',
-                'icon' => 'exclamation-circle',
-                'passed' => true,
-            ];
-        }
-
-        // Ajourné (note < 8)
-        return [
-            'label' => 'Ajourné',
-            'color' => 'red',
-            'icon' => 'x-circle',
-            'passed' => false,
-        ];
-    }
+    // Removed getValidationStatus - now using $grade->result field from database
 }

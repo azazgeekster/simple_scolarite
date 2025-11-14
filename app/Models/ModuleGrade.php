@@ -14,16 +14,10 @@ class ModuleGrade extends Model
 
     protected $fillable = [
         'module_enrollment_id',
-        'student_id',
-        'module_id',
-
-        'continuous_assessment',
-        'exam_grade',
-        'final_grade',
-        'exam_session',
-        'graded_date',
-        'graded_by',
-        'is_final',
+        'grade',
+        'result',
+        'session',
+        'exam_status',
         'is_published',
         'published_at',
         'published_by',
@@ -32,13 +26,7 @@ class ModuleGrade extends Model
 
     protected $casts = [
         'module_enrollment_id' => 'integer',
-        'module_id' => 'integer',
-        'continuous_assessment' => 'decimal:2',
-        'exam_grade' => 'decimal:2',
-        'final_grade' => 'decimal:2',
-        'graded_date' => 'date',
-        'graded_by' => 'integer',
-        'is_final' => 'boolean',
+        'grade' => 'decimal:2',
         'is_published' => 'boolean',
         'published_at' => 'datetime',
         'published_by' => 'integer',
@@ -50,14 +38,15 @@ class ModuleGrade extends Model
         return $this->belongsTo(StudentModuleEnrollment::class, 'module_enrollment_id');
     }
 
-    public function module()
+    public function reclamations()
     {
-        return $this->belongsTo(Module::class, 'module_id');
+        return $this->hasMany(Reclamation::class, 'module_grade_id');
     }
 
-    public function gradedByProfessor()
+    // Access module through enrollment
+    public function getModuleAttribute()
     {
-        return $this->belongsTo(Professor::class, 'graded_by');
+        return $this->moduleEnrollment?->module;
     }
 
     // Access student through module enrollment
@@ -69,27 +58,22 @@ class ModuleGrade extends Model
     // Scopes
     public function scopePassed($query)
     {
-        return $query->where('final_grade', '>=', 10);
+        return $query->whereIn('result', ['validé', 'validé après rattrapage']);
     }
 
     public function scopeFailed($query)
     {
-        return $query->where('final_grade', '<', 10);
+        return $query->where('result', 'non validé');
     }
 
     public function scopeNormalSession($query)
     {
-        return $query->where('exam_session', 'normal');
+        return $query->where('session', 'normal');
     }
 
     public function scopeRattrapageSession($query)
     {
-        return $query->where('exam_session', 'rattrapage');
-    }
-
-    public function scopeFinalOnly($query)
-    {
-        return $query->where('is_final', true);
+        return $query->where('session', 'rattrapage');
     }
 
     public function scopePublished($query)
@@ -102,55 +86,76 @@ class ModuleGrade extends Model
         return $query->where('is_published', false);
     }
 
-    // Grade Calculation
-    public function calculateFinalGrade(): ?float
-    {
-        if (is_null($this->continuous_assessment) || is_null($this->exam_grade)) {
-            return null;
-        }
-
-        $module = $this->module;
-        $ccWeight = $module ? ($module->cc_percentage / 100) : 0.4;
-        $examWeight = $module ? ($module->exam_percentage / 100) : 0.6;
-
-        return round(
-            ($this->continuous_assessment * $ccWeight) +
-            ($this->exam_grade * $examWeight),
-            2
-        );
-    }
-
     // Helper Methods
     public function isPassed(): bool
     {
-        return !is_null($this->final_grade) && $this->final_grade >= 10;
+        return in_array($this->result, ['validé', 'validé après rattrapage']);
     }
 
     public function isFailed(): bool
     {
-        return !is_null($this->final_grade) && $this->final_grade < 10;
+        return $this->result === 'non validé';
+    }
+
+    public function isWaitingRattrapage(): bool
+    {
+        return $this->result === 'en attente rattrapage';
     }
 
     public function getMention(): string
     {
-        if (is_null($this->final_grade)) {
+        if (is_null($this->grade)) {
             return 'Non noté';
         }
 
         return match(true) {
-            $this->final_grade >= 16 => 'Très Bien',
-            $this->final_grade >= 14 => 'Bien',
-            $this->final_grade >= 12 => 'Assez Bien',
-            $this->final_grade >= 10 => 'Passable',
+            $this->grade >= 16 => 'Très Bien',
+            $this->grade >= 14 => 'Bien',
+            $this->grade >= 12 => 'Assez Bien',
+            $this->grade >= 10 => 'Passable',
             default => 'Insuffisant',
         };
     }
 
-    public function needsRattrapage(): bool
+    public function isAbsent(): bool
     {
-        return $this->exam_session === 'normal'
-            && $this->isFailed()
-            && $this->final_grade >= 6;
+        return in_array($this->exam_status, ['absent', 'absent justifié']);
+    }
+
+    public function canSubmitReclamation(): bool
+    {
+        return $this->is_published
+            && !$this->hasActiveReclamation()
+            && $this->isReclamationPeriodOpen();
+    }
+
+    /**
+     * Check if réclamation period is still open (24h after publication)
+     */
+    public function isReclamationPeriodOpen(): bool
+    {
+        if (!$this->is_published || !$this->published_at) {
+            return false;
+        }
+
+        // Réclamations open for 24 hours after grade publication
+        $deadline = $this->published_at->addHours(24);
+        return now() <= $deadline;
+    }
+
+    /**
+     * Get réclamation deadline
+     */
+    public function getReclamationDeadline(): ?\Carbon\Carbon
+    {
+        return $this->published_at?->addHours(24);
+    }
+
+    public function hasActiveReclamation(): bool
+    {
+        return $this->reclamations()
+            ->whereIn('status', ['PENDING', 'UNDER_REVIEW'])
+            ->exists();
     }
 
     // Model Events
@@ -158,9 +163,17 @@ class ModuleGrade extends Model
     {
         parent::boot();
 
-        static::saving(function ($grade) {
-            if ($grade->isDirty(['continuous_assessment', 'exam_grade'])) {
-                $grade->final_grade = $grade->calculateFinalGrade();
+        // Automatically update enrollment final grade when grade changes
+        static::saved(function ($moduleGrade) {
+            if ($moduleGrade->moduleEnrollment) {
+                $moduleGrade->moduleEnrollment->calculateFinalGrade();
+            }
+        });
+
+        // Also update when grade is deleted
+        static::deleted(function ($moduleGrade) {
+            if ($moduleGrade->moduleEnrollment) {
+                $moduleGrade->moduleEnrollment->calculateFinalGrade();
             }
         });
     }

@@ -86,7 +86,6 @@ class StudentSituationController extends Controller
                 $moduleEnrollment = $student->moduleEnrollments()
                     ->where('module_id', $module->id)
                     ->where('program_enrollment_id', $currentEnrollment->id)
-                    ->with('grade')
                     ->first();
 
                 if ($moduleEnrollment) {
@@ -106,16 +105,16 @@ class StudentSituationController extends Controller
                 if ($module->prerequisite_id && $module->prerequisite) {
                     // Validate that the prerequisite relationship is valid based on semester rules
                     if ($module->isValidPrerequisite($module->prerequisite)) {
-                        // Check if prerequisite was validated (using published grades only)
-                        $prerequisiteValidated = $student->grades()
+                        // Check if prerequisite was validated (using published grades from module enrollments)
+                        $prerequisiteEnrollment = $student->moduleEnrollments()
                             ->where('module_id', $module->prerequisite_id)
-                            ->where('is_final', true)
-                            ->where('is_published', true) // Only check published grades
+                            ->whereNotNull('final_grade')
                             ->where('final_grade', '>=', 10)
-                            ->exists();
+                            ->whereIn('final_result', ['validé', 'validé après rattrapage'])
+                            ->first();
 
-                        $module->prerequisite_validated = $prerequisiteValidated;
-                        if (!$prerequisiteValidated && $module->enrollment_status === 'not_enrolled') {
+                        $module->prerequisite_validated = $prerequisiteEnrollment !== null;
+                        if (!$module->prerequisite_validated && $module->enrollment_status === 'not_enrolled') {
                             $module->validation_status = 'blocked';
                         }
                     } else {

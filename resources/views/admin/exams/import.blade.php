@@ -83,10 +83,10 @@
                             required
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <option value="autumn" {{ old('season') == 'autumn' ? 'selected' : '' }}>
-                            Automne (S1, S3, S5)
+                            Automne
                         </option>
                         <option value="spring" {{ old('season') == 'spring' ? 'selected' : '' }}>
-                            Printemps (S2, S4, S6)
+                            Printemps 
                         </option>
                     </select>
                     @error('season')
@@ -189,97 +189,21 @@
         </a>
     </div>
 
-    <!-- Exam Publication Management Section -->
-    <div class="mt-8 bg-white dark:bg-gray-800 shadow rounded-lg border-2 border-blue-200 dark:border-blue-900">
-        <div class="p-6">
-            <div class="flex items-start gap-4 mb-6">
-                <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                        Gérer la Publication des Examens
-                    </h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                        Publier ou dépublier les examens par session (normale/rattrapage)
-                    </p>
-                </div>
-            </div>
-
-            <!-- Statistics -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                    <div class="text-xs text-gray-500 dark:text-gray-400">Total Examens</div>
-                    <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $examStats['total'] }}</div>
-                </div>
-                <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                    <div class="text-xs text-green-600 dark:text-green-400">Publiés</div>
-                    <div class="text-2xl font-bold text-green-700 dark:text-green-300">{{ $examStats['published'] }}</div>
-                </div>
-                <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
-                    <div class="text-xs text-yellow-600 dark:text-yellow-400">Non Publiés</div>
-                    <div class="text-2xl font-bold text-yellow-700 dark:text-yellow-300">{{ $examStats['unpublished'] }}</div>
-                </div>
-            </div>
-
-            <!-- Publication Controls -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Normal Session -->
-                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Session Normale</h3>
-                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        Publiés: <span class="font-semibold text-green-600">{{ $examStats['normal_published'] }}</span> |
-                        Non publiés: <span class="font-semibold text-yellow-600">{{ $examStats['normal_unpublished'] }}</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <form action="{{ route('admin.exams.toggle-session-publication') }}" method="POST" class="flex-1">
-                            @csrf
-                            <input type="hidden" name="session_type" value="normal">
-                            <input type="hidden" name="action" value="publish">
-                            <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
-                                Publier Tout
-                            </button>
-                        </form>
-                        <form action="{{ route('admin.exams.toggle-session-publication') }}" method="POST" class="flex-1">
-                            @csrf
-                            <input type="hidden" name="session_type" value="normal">
-                            <input type="hidden" name="action" value="unpublish">
-                            <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700">
-                                Dépublier Tout
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Rattrapage Session -->
-                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Session Rattrapage</h3>
-                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        Publiés: <span class="font-semibold text-green-600">{{ $examStats['rattrapage_published'] }}</span> |
-                        Non publiés: <span class="font-semibold text-yellow-600">{{ $examStats['rattrapage_unpublished'] }}</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <form action="{{ route('admin.exams.toggle-session-publication') }}" method="POST" class="flex-1">
-                            @csrf
-                            <input type="hidden" name="session_type" value="rattrapage">
-                            <input type="hidden" name="action" value="publish">
-                            <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
-                                Publier Tout
-                            </button>
-                        </form>
-                        <form action="{{ route('admin.exams.toggle-session-publication') }}" method="POST" class="flex-1">
-                            @csrf
-                            <input type="hidden" name="session_type" value="rattrapage">
-                            <input type="hidden" name="action" value="unpublish">
-                            <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700">
-                                Dépublier Tout
-                            </button>
-                        </form>
-                    </div>
-                </div>
+    <!-- Info Box - Point to Exam Periods -->
+    <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+                <h3 class="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-1">Gestion de la Publication</h3>
+                <p class="text-xs text-blue-700 dark:text-blue-400">
+                    Pour publier ou dépublier des examens par période, utilisez la page
+                    <a href="{{ route('admin.exam-periods.index') }}" class="font-semibold underline hover:text-blue-600 dark:hover:text-blue-300">
+                        Périodes d'Examens
+                    </a>
+                    qui offre un contrôle plus précis par année universitaire, saison et session.
+                </p>
             </div>
         </div>
     </div>

@@ -9,6 +9,7 @@ class Exam extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'exam_period_id',
         'module_id',
         'session_type',
         'exam_date',
@@ -23,6 +24,7 @@ class Exam extends Model
     ];
 
     protected $casts = [
+        'exam_period_id' => 'integer',
         'module_id' => 'integer',
         'exam_date' => 'date',
         'start_time' => 'datetime',
@@ -34,6 +36,11 @@ class Exam extends Model
     ];
 
     // Relationships
+    public function examPeriod()
+    {
+        return $this->belongsTo(ExamPeriod::class, 'exam_period_id');
+    }
+
     public function module()
     {
         return $this->belongsTo(Module::class, 'module_id');

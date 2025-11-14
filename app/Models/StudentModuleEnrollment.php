@@ -20,6 +20,8 @@ class StudentModuleEnrollment extends Model
         'module_id',
         'registration_year',
         'attempt_number',
+        'final_grade',
+        'final_result',
     ];
 
     protected $casts = [
@@ -28,6 +30,7 @@ class StudentModuleEnrollment extends Model
         'module_id' => 'integer',
         'registration_year' => 'integer',
         'attempt_number' => 'integer',
+        'final_grade' => 'decimal:2',
     ];
 
     // Relationships
@@ -46,9 +49,23 @@ class StudentModuleEnrollment extends Model
         return $this->belongsTo(Module::class, 'module_id');
     }
 
-    public function grade()
+    public function grades()
     {
-        return $this->hasOne(ModuleGrade::class, 'module_enrollment_id');
+        return $this->hasMany(ModuleGrade::class, 'module_enrollment_id');
+    }
+
+    // Get normal session grade
+    public function normalGrade()
+    {
+        return $this->hasOne(ModuleGrade::class, 'module_enrollment_id')
+            ->where('session', 'normal');
+    }
+
+    // Get rattrapage session grade
+    public function rattrapageGrade()
+    {
+        return $this->hasOne(ModuleGrade::class, 'module_enrollment_id')
+            ->where('session', 'rattrapage');
     }
 
     public function examConvocations()
@@ -77,15 +94,36 @@ class StudentModuleEnrollment extends Model
         return $query->where('attempt_number', '>', 1);
     }
 
+    // Scopes for final results
+    public function scopePassed($query)
+    {
+        return $query->whereIn('final_result', ['validé', 'validé après rattrapage']);
+    }
+
+    public function scopeFailed($query)
+    {
+        return $query->where('final_result', 'non validé');
+    }
+
+    public function scopeWaitingRattrapage($query)
+    {
+        return $query->where('final_result', 'en attente rattrapage');
+    }
+
     // Helper Methods
     public function isPassed(): bool
     {
-        return $this->grade && $this->grade->final_grade >= 10;
+        return in_array($this->final_result, ['validé', 'validé après rattrapage']);
     }
 
     public function isFailed(): bool
     {
-        return $this->grade && $this->grade->final_grade < 10;
+        return $this->final_result === 'non validé';
+    }
+
+    public function isWaitingRattrapage(): bool
+    {
+        return $this->final_result === 'en attente rattrapage';
     }
 
     public function isRetake(): bool
@@ -93,8 +131,69 @@ class StudentModuleEnrollment extends Model
         return $this->attempt_number > 1;
     }
 
-    public function getFinalGrade(): ?float
+    public function getMention(): string
     {
-        return $this->grade?->final_grade;
+        if (is_null($this->final_grade)) {
+            return 'Non noté';
+        }
+
+        return match(true) {
+            $this->final_grade >= 16 => 'Très Bien',
+            $this->final_grade >= 14 => 'Bien',
+            $this->final_grade >= 12 => 'Assez Bien',
+            $this->final_grade >= 10 => 'Passable',
+            default => 'Insuffisant',
+        };
+    }
+
+    /**
+     * Calculate and update final grade based on all session grades
+     */
+    public function calculateFinalGrade(): void
+    {
+        $normalGrade = $this->grades()->where('session', 'normal')->first();
+        $rattrapageGrade = $this->grades()->where('session', 'rattrapage')->first();
+
+        // Determine which grade counts
+        $finalGrade = null;
+        $finalResult = null;
+
+        if ($rattrapageGrade && $rattrapageGrade->grade !== null) {
+            // If rattrapage exists, it's the final grade
+            $finalGrade = $rattrapageGrade->grade;
+            $finalResult = $finalGrade >= 10 ? 'validé après rattrapage' : 'non validé';
+        } elseif ($normalGrade && $normalGrade->grade !== null) {
+            // Use normal session grade
+            $finalGrade = $normalGrade->grade;
+
+            if ($finalGrade >= 10) {
+                $finalResult = 'validé';
+            } elseif ($finalGrade >= 6) {
+                $finalResult = 'en attente rattrapage';
+            } else {
+                $finalResult = 'non validé';
+            }
+        }
+
+        // Update enrollment with final grade and result
+        $this->update([
+            'final_grade' => $finalGrade,
+            'final_result' => $finalResult,
+        ]);
+    }
+
+    /**
+     * Get the grade that counts (for display purposes)
+     */
+    public function getCountingGrade(): ?ModuleGrade
+    {
+        // Rattrapage takes precedence
+        $rattrapageGrade = $this->grades()->where('session', 'rattrapage')->first();
+        if ($rattrapageGrade && $rattrapageGrade->grade !== null) {
+            return $rattrapageGrade;
+        }
+
+        // Otherwise return normal
+        return $this->grades()->where('session', 'normal')->first();
     }
 }

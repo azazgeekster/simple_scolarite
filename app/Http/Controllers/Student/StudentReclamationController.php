@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\ModuleGrade;
-use App\Models\Reclammation;
+use App\Models\Reclamation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -18,15 +18,17 @@ class StudentReclamationController extends Controller
     {
         $student = Auth::guard('student')->user();
 
-        $reclamations = Reclammation::forStudent($student->id)
-            ->with(['module', 'moduleGrade'])
-            ->recent()
+        $reclamations = Reclamation::whereHas('moduleGrade.moduleEnrollment', function($q) use ($student) {
+                $q->where('student_id', $student->id);
+            })
+            ->with(['moduleGrade.moduleEnrollment.module'])
+            ->latest()
             ->get();
 
         // Group by status for better organization
         $groupedReclamations = [
-            'active' => $reclamations->filter(fn($r) => !$r->isClosed()),
-            'closed' => $reclamations->filter(fn($r) => $r->isClosed()),
+            'active' => $reclamations->whereIn('status', ['PENDING', 'UNDER_REVIEW']),
+            'closed' => $reclamations->whereIn('status', ['RESOLVED', 'REJECTED']),
         ];
 
         return view('student.reclamations.index', compact('reclamations', 'groupedReclamations'));
@@ -40,22 +42,18 @@ class StudentReclamationController extends Controller
         $student = Auth::guard('student')->user();
 
         // Verify this grade belongs to the student
-        if ($moduleGrade->student_id !== $student->id) {
+        if ($moduleGrade->student->id !== $student->id) {
             abort(403, 'Vous n\'avez pas accès à cette note.');
         }
 
-        // Check if reclamation already exists for this grade
-        $existingReclamation = Reclammation::where('module_grade_id', $moduleGrade->id)
-            ->where('student_id', $student->id)
-            ->first();
-
-        if ($existingReclamation) {
+        // Check if can submit reclamation
+        if (!$moduleGrade->canSubmitReclamation()) {
             return redirect()
-                ->route('reclamations.show', $existingReclamation)
-                ->with('warning', 'Vous avez déjà soumis une réclamation pour ce module.');
+                ->route('grades.index')
+                ->with('error', 'Vous ne pouvez pas soumettre de réclamation pour cette note.');
         }
 
-        $moduleGrade->load('module');
+        $moduleGrade->load('moduleEnrollment.module');
 
         $reclamationTypes = [
             'grade_calculation_error' => 'Erreur de calcul de note',
@@ -76,19 +74,15 @@ class StudentReclamationController extends Controller
         $student = Auth::guard('student')->user();
 
         // Verify this grade belongs to the student
-        if ($moduleGrade->student_id !== $student->id) {
+        if ($moduleGrade->student->id !== $student->id) {
             abort(403, 'Vous n\'avez pas accès à cette note.');
         }
 
-        // Check if reclamation already exists
-        $existingReclamation = Reclammation::where('module_grade_id', $moduleGrade->id)
-            ->where('student_id', $student->id)
-            ->first();
-
-        if ($existingReclamation) {
+        // Check if can submit reclamation
+        if (!$moduleGrade->canSubmitReclamation()) {
             return redirect()
-                ->route('reclamations.show', $existingReclamation)
-                ->with('warning', 'Vous avez déjà soumis une réclamation pour ce module.');
+                ->route('grades.index')
+                ->with('error', 'Vous ne pouvez pas soumettre de réclamation pour cette note.');
         }
 
         $validator = Validator::make($request->all(), [
@@ -107,18 +101,17 @@ class StudentReclamationController extends Controller
                 ->route('reclamations.create', $moduleGrade)
                 ->withErrors($validator)
                 ->withInput();
-        } 
+        }
 
         $validated = $validator->validated();
 
-        $reclamation = Reclammation::create([
-            'student_id' => $student->id,
+        $reclamation = Reclamation::create([
             'module_grade_id' => $moduleGrade->id,
-            'module_id' => $moduleGrade->module_id,
             'reclamation_type' => $validated['reclamation_type'],
             'reason' => $validated['reason'],
+            'session' => $moduleGrade->session,
             'status' => 'PENDING',
-            'original_grade' => $moduleGrade->final_grade,
+            'original_grade' => $moduleGrade->grade,
         ]);
 
         return redirect()
@@ -129,16 +122,16 @@ class StudentReclamationController extends Controller
     /**
      * Display the specified reclamation
      */
-    public function show(Reclammation $reclamation)
+    public function show(Reclamation $reclamation)
     {
         $student = Auth::guard('student')->user();
 
         // Verify this reclamation belongs to the student
-        if ($reclamation->student_id !== $student->id) {
+        if ($reclamation->student->id !== $student->id) {
             abort(403, 'Vous n\'avez pas accès à cette réclamation.');
         }
 
-        $reclamation->load(['module', 'moduleGrade']);
+        $reclamation->load(['moduleGrade.moduleEnrollment.module']);
 
         return view('student.reclamations.show', compact('reclamation'));
     }
@@ -146,12 +139,12 @@ class StudentReclamationController extends Controller
     /**
      * Remove the specified reclamation (only if pending)
      */
-    public function destroy(Reclammation $reclamation)
+    public function destroy(Reclamation $reclamation)
     {
         $student = Auth::guard('student')->user();
 
         // Verify this reclamation belongs to the student
-        if ($reclamation->student_id !== $student->id) {
+        if ($reclamation->student->id !== $student->id) {
             abort(403, 'Vous n\'avez pas accès à cette réclamation.');
         }
 

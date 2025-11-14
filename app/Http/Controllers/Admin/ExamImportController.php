@@ -29,18 +29,7 @@ class ExamImportController extends Controller
         // Get all academic years ordered by start year descending
         $academicYears = \App\Models\AcademicYear::orderBy('start_year', 'desc')->get();
 
-        // Get exam statistics for managing publication
-        $examStats = [
-            'total' => Exam::count(),
-            'published' => Exam::where('is_published', true)->count(),
-            'unpublished' => Exam::where('is_published', false)->count(),
-            'normal_published' => Exam::where('session_type', 'normal')->where('is_published', true)->count(),
-            'normal_unpublished' => Exam::where('session_type', 'normal')->where('is_published', false)->count(),
-            'rattrapage_published' => Exam::where('session_type', 'rattrapage')->where('is_published', true)->count(),
-            'rattrapage_unpublished' => Exam::where('session_type', 'rattrapage')->where('is_published', false)->count(),
-        ];
-
-        return view('admin.exams.import', compact('academicYears', 'examStats'));
+        return view('admin.exams.import', compact('academicYears'));
     }
 
     /**
@@ -383,11 +372,11 @@ class ExamImportController extends Controller
             // Determine semesters based on season
             $semesters = $season === 'autumn' ? ['S1', 'S3', 'S5'] : ['S2', 'S4', 'S6'];
 
-            // Get all published normal session grades with score <10 for this year/season
-            // This includes grades updated by treated réclamations
-            $failedGrades = ModuleGrade::where('exam_session', 'normal')
-                ->where('is_published', true)
-                ->where('final_grade', '<', 10)
+            // Get all module grades for normal session with grade < 10 for this year/season
+            // Using module_grades table which has session-specific grades
+            $failedGrades = ModuleGrade::where('session', 'normal')
+                ->whereNotNull('grade')
+                ->where('grade', '<', 10)
                 ->whereHas('moduleEnrollment.programEnrollment', function ($q) use ($academicYear) {
                     $q->where('academic_year', $academicYear);
                 })
@@ -396,13 +385,13 @@ class ExamImportController extends Controller
                 })
                 ->with([
                     'moduleEnrollment.module',
-                    'moduleEnrollment.programEnrollment.filiere',
-                    'moduleEnrollment.student'
+                    'moduleEnrollment.student',
+                    'moduleEnrollment.programEnrollment.filiere'
                 ])
                 ->get();
 
             if ($failedGrades->isEmpty()) {
-                return back()->with('error', 'Aucun étudiant en échec trouvé pour cette période.');
+                return back()->with('error', 'Aucun étudiant en échec trouvé pour cette période (session normale).');
             }
 
             // Prepare CSV data matching import format (French headers)
@@ -430,7 +419,7 @@ class ExamImportController extends Controller
                     '', // start_time - to be filled manually (format: HH:MM)
                     '', // end_time - to be filled manually (format: HH:MM)
                     '', // local - to be filled manually
-                    'Échec session normale - Note: ' . ($grade->final_grade ?? 'N/A') // observations
+                    'Échec session normale - Note: ' . ($grade->grade ?? 'N/A') . ' - Statut: ' . ($grade->exam_status ?? 'N/A')
                 ];
             }
 

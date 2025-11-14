@@ -1,25 +1,24 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ExamPeriodController;
+use App\Http\Controllers\Admin\ExamImportController;
+use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Auth\AdminForgotPasswordController;
 use App\Http\Controllers\Auth\AdminResetPasswordController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\ExamImportController;
+
 /*
 |--------------------------------------------------------------------------
-| Web Routes                                                              |
+| Admin Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
+| Here is where you can register admin routes for your application.
+| These routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "admin" middleware group.
 |
 */
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
 
 // Admin routes
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -42,15 +41,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::redirect('/', '/admin/dashboard'); // Redirect /admin → /admin/dashboard
         Route::post('logout', [AdminLoginController::class, 'logout'])->name('logout');
 
+        // Exam Periods Management
+        Route::prefix('exam-periods')->name('exam-periods.')->group(function () {
+            Route::get('/', [ExamPeriodController::class, 'index'])->name('index');
+            Route::get('/create', [ExamPeriodController::class, 'create'])->name('create');
+            Route::post('/', [ExamPeriodController::class, 'store'])->name('store');
+            Route::get('/{examPeriod}/edit', [ExamPeriodController::class, 'edit'])->name('edit');
+            Route::put('/{examPeriod}', [ExamPeriodController::class, 'update'])->name('update');
+            Route::delete('/{examPeriod}', [ExamPeriodController::class, 'destroy'])->name('destroy');
+
+            // Special actions
+            Route::post('/{examPeriod}/activate', [ExamPeriodController::class, 'activate'])->name('activate');
+            Route::post('/{examPeriod}/deactivate', [ExamPeriodController::class, 'deactivate'])->name('deactivate');
+            Route::post('/{examPeriod}/publish-exams', [ExamPeriodController::class, 'publishExams'])->name('publish-exams');
+            Route::post('/{examPeriod}/unpublish-exams', [ExamPeriodController::class, 'unpublishExams'])->name('unpublish-exams');
+        });
+
         // Exam import routes (Super Admin only)
         Route::get('exams/import', [ExamImportController::class, 'showImportForm'])->name('exams.import');
         Route::post('exams/import', [ExamImportController::class, 'import'])->name('exams.import.process');
         Route::get('exams/download-template', [ExamImportController::class, 'downloadTemplate'])->name('exams.download-template');
         Route::post('exams/export-rattrapage-candidates', [ExamImportController::class, 'exportRattrapageCandidates'])->name('exams.export-rattrapage-candidates');
         Route::post('exams/toggle-session-publication', [ExamImportController::class, 'toggleSessionPublication'])->name('exams.toggle-session-publication');
+
+        // Messages
+        Route::resource('messages', MessageController::class)->except(['edit', 'update']);
     });
 });
-
 
 // Role & permission management routes (requires role:Admin and auth:admin)
 Route::middleware(['auth:admin', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -65,4 +82,3 @@ Route::middleware(['auth:admin', 'role:Admin'])->prefix('admin')->name('admin.')
     Route::resource('users', App\Http\Controllers\UserController::class);
     Route::get('users/{userId}/delete', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.delete');
 });
-

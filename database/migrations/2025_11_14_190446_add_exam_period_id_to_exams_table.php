@@ -12,7 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('exams', function (Blueprint $table) {
-            //
+            $table->foreignId('exam_period_id')->nullable()->after('id')
+                ->constrained('exam_periods')
+                ->nullOnDelete()
+                ->comment('Links exam to a managed exam period');
+
+            $table->index(['exam_period_id', 'is_published']);
         });
     }
 
@@ -22,7 +27,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('exams', function (Blueprint $table) {
-            //
+            $table->dropForeign(['exam_period_id']);
+            $table->dropIndex(['exam_period_id', 'is_published']);
+            $table->dropColumn('exam_period_id');
         });
     }
 };
