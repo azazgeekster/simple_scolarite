@@ -106,7 +106,17 @@ class MessageController extends Controller
 
         $message->load(['recipient', 'filiere']);
 
-        return view('admin.messages.show', compact('message'));
+        // Get recipient count for bulk messages
+        $recipientCount = null;
+        if ($message->recipient_type !== 'individual') {
+            $recipientCount = Message::where('sender_id', $message->sender_id)
+                ->where('recipient_type', $message->recipient_type)
+                ->where('subject', $message->subject)
+                ->where('created_at', $message->created_at)
+                ->count();
+        }
+
+        return view('admin.messages.show', compact('message', 'recipientCount'));
     }
 
     /**

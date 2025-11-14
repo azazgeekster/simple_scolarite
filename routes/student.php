@@ -9,6 +9,7 @@ use App\Http\Controllers\Student\ConvocationController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\DemandeController;
 use App\Http\Controllers\Student\GradesController;
+use App\Http\Controllers\Student\MessageController;
 use App\Http\Controllers\Student\StudentExamController;
 use App\Http\Controllers\Student\StudentProfileController;
 use App\Http\Controllers\Student\StudentReclamationController;
@@ -110,6 +111,18 @@ Route::group(['prefix' => 'student'], function () {
 
         Route::get('/releve-notes/download', [StudentSituationController::class, 'downloadTranscript'])
             ->name('student.transcript.download');
+
+        // Messages
+        Route::get('/messages', [MessageController::class, 'index'])
+            ->name('student.messages.index');
+        Route::get('/messages/{message}', [MessageController::class, 'show'])
+            ->name('student.messages.show');
+        Route::post('/messages/{message}/mark-read', [MessageController::class, 'markAsRead'])
+            ->name('student.messages.mark-read');
+        Route::post('/messages/{message}/mark-unread', [MessageController::class, 'markAsUnread'])
+            ->name('student.messages.mark-unread');
+        Route::get('/messages/unread/count', [MessageController::class, 'unreadCount'])
+            ->name('student.messages.unread-count');
     });
     Route::view('logout', "auth.logoutpage")->name('student.logoutpage');
 });
