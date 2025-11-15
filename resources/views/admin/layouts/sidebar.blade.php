@@ -104,26 +104,29 @@
 
                     <ul x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform -translate-y-2" class="mt-2 ml-6 space-y-1">
                         <li>
-                            <a href="#" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200">
-                                <span class="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
-                                Exam Schedule
-                            </a>
-                        </li>
-                        <li>
                             <a href="{{ route('admin.exam-periods.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exam-periods.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
                                 <span class="w-2 h-2 bg-indigo-400 rounded-full mr-3"></span>
                                 Exam Periods
                             </a>
                         </li>
-                        {{-- @if(auth('admin')->check() && auth('admin')->user()->hasRole('Super Admin')) --}}
                         <li>
                             <a href="{{ route('admin.exams.import') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exams.import') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
                                 <span class="w-2 h-2 bg-purple-400 rounded-full mr-3"></span>
                                 Import Exams
                             </a>
                         </li>
-
-                        {{-- @endif --}}
+                        <li>
+                            <a href="{{ route('admin.exam-locals.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exam-locals.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
+                                <span class="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
+                                Exam Locals
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.exam-seat-allocation.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exam-seat-allocation.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
+                                <span class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></span>
+                                Seat Allocation
+                            </a>
+                        </li>
                         <li>
                             <a href="#" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200">
                                 <span class="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
@@ -149,6 +152,25 @@
                             </svg>
                         </div>
                         <span class="ml-4 font-medium">Courses</span>
+                    </a>
+                </li>
+
+                <!-- Divider -->
+                <li class="my-6">
+                    <hr class="border-slate-200 dark:border-slate-700">
+                    <p class="px-4 mt-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Communication</p>
+                </li>
+
+                <!-- Messages -->
+                <li>
+                    <a href="{{ route('admin.messages.index') }}"
+                        class="group flex items-center px-4 py-3 text-slate-700 rounded-xl hover:bg-pink-50 hover:text-pink-700 dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-pink-400 transition-all duration-200 hover:shadow-sm hover:translate-x-1 {{ Request::routeIs('admin.messages.*') ? 'bg-pink-50 text-pink-700 dark:bg-slate-700/50 dark:text-pink-400' : '' }}">
+                        <div class="flex items-center justify-center w-10 h-10 bg-pink-100 group-hover:bg-pink-200 dark:bg-slate-700 dark:group-hover:bg-slate-600 rounded-lg transition-colors duration-200">
+                            <svg class="w-5 h-5 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <span class="ml-4 font-medium">Messages</span>
                     </a>
                 </li>
 

@@ -86,6 +86,24 @@ class Exam extends Model
             ->withTimestamps();
     }
 
+    /**
+     * Examination locals assigned to this exam
+     */
+    public function examLocals()
+    {
+        return $this->belongsToMany(ExamLocal::class, 'exam_local', 'exam_id', 'exam_local_id')
+            ->withPivot('allocated_seats', 'seat_start', 'seat_end')
+            ->withTimestamps();
+    }
+
+    /**
+     * Seat assignments for this exam
+     */
+    public function seatAssignments()
+    {
+        return $this->hasMany(ExamSeatAssignment::class);
+    }
+
     // Scopes
     public function scopePublished($query)
     {
@@ -139,5 +157,66 @@ class Exam extends Model
     public function getSeasonLabelArAttribute(): string
     {
         return $this->season === 'autumn' ? 'الخريفية' : 'الربيعية';
+    }
+
+    // Seat Allocation Helper Methods
+
+    /**
+     * Check if seats have been allocated for this exam
+     */
+    public function hasSeatsAllocated(): bool
+    {
+        return $this->seatAssignments()->exists();
+    }
+
+    /**
+     * Get total number of students who need seats
+     */
+    public function getRequiredSeatsCount(): int
+    {
+        // Count students enrolled in the module for this exam's semester
+        return $this->module->studentModuleEnrollments()
+            ->whereHas('student', function($query) {
+                $query->where('current_semester', $this->semester);
+            })
+            ->where('academic_year', $this->academic_year)
+            ->count();
+    }
+
+    /**
+     * Get total allocated seats
+     */
+    public function getAllocatedSeatsCount(): int
+    {
+        return $this->seatAssignments()->count();
+    }
+
+    /**
+     * Check if all required seats have been allocated
+     */
+    public function isFullyAllocated(): bool
+    {
+        return $this->getAllocatedSeatsCount() >= $this->getRequiredSeatsCount();
+    }
+
+    /**
+     * Get allocation progress percentage
+     */
+    public function getAllocationProgress(): float
+    {
+        $required = $this->getRequiredSeatsCount();
+        if ($required === 0) {
+            return 100.0;
+        }
+        return round(($this->getAllocatedSeatsCount() / $required) * 100, 2);
+    }
+
+    /**
+     * Clear all seat allocations for this exam
+     */
+    public function clearSeatAllocations(): void
+    {
+        $this->seatAssignments()->delete();
+        $this->examLocals()->detach();
     }
 }

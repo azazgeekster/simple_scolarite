@@ -13,17 +13,17 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->unsignedMediumInteger('sender_id'); // Admin ID
+            $table->unsignedBigInteger('sender_id'); // Admin ID
             $table->foreign('sender_id')->references('id')->on('admins')->cascadeOnDelete();
 
-            $table->unsignedMediumInteger('recipient_id')->nullable(); // Student ID (null for broadcast)
+            $table->unsignedBigInteger('recipient_id')->nullable(); // Student ID (null for broadcast)
             $table->foreign('recipient_id')->references('id')->on('students')->cascadeOnDelete();
 
             $table->enum('recipient_type', ['individual', 'filiere', 'year', 'all'])
                 ->default('individual')
                 ->comment('Who receives this message');
 
-            $table->unsignedMediumInteger('filiere_id')->nullable(); // For filiere-specific messages
+            $table->unsignedSmallInteger('filiere_id')->nullable(); // For filiere-specific messages
             $table->foreign('filiere_id')->references('id')->on('filieres')->cascadeOnDelete();
 
             $table->integer('year_in_program')->nullable(); // For year-specific messages (1, 2, 3)

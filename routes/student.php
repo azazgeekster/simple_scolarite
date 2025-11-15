@@ -9,6 +9,7 @@ use App\Http\Controllers\Student\ConvocationController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\DemandeController;
 use App\Http\Controllers\Student\GradesController;
+use App\Http\Controllers\Student\MessagesController;
 use App\Http\Controllers\Student\StudentExamController;
 use App\Http\Controllers\Student\StudentProfileController;
 use App\Http\Controllers\Student\StudentReclamationController;
@@ -88,6 +89,17 @@ Route::group(['prefix' => 'student'], function () {
             ->name('reclamations.show');
         Route::delete('reclamations/{reclamation}', [StudentReclamationController::class, 'destroy'])
             ->name('reclamations.destroy');
+
+        // MESSAGES
+        Route::get('messages', [MessagesController::class, 'index'])
+            ->name('student.messages.index');
+        Route::get('messages/{message}', [MessagesController::class, 'show'])
+            ->name('student.messages.show');
+        Route::post('messages/{message}/mark-read', [MessagesController::class, 'markAsRead'])
+            ->name('student.messages.mark-read');
+        Route::post('messages/{message}/mark-unread', [MessagesController::class, 'markAsUnread'])
+            ->name('student.messages.mark-unread');
+
         // DOCUMENTS REQUESTS:
         Route::get('/document/request', [DemandeController::class, 'index'])->name('student.demande.index');
         Route::post('/document/retrait', [DemandeController::class, 'store'])->name('student.demande.store');

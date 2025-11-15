@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExamPeriodController;
 use App\Http\Controllers\Admin\ExamImportController;
+use App\Http\Controllers\Admin\ExamLocalController;
+use App\Http\Controllers\Admin\ExamSeatAllocationController;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Auth\AdminForgotPasswordController;
@@ -63,6 +65,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('exams/download-template', [ExamImportController::class, 'downloadTemplate'])->name('exams.download-template');
         Route::post('exams/export-rattrapage-candidates', [ExamImportController::class, 'exportRattrapageCandidates'])->name('exams.export-rattrapage-candidates');
         Route::post('exams/toggle-session-publication', [ExamImportController::class, 'toggleSessionPublication'])->name('exams.toggle-session-publication');
+
+        // Exam Locals Management
+        Route::resource('exam-locals', ExamLocalController::class);
+        Route::post('exam-locals/{examLocal}/toggle-status', [ExamLocalController::class, 'toggleStatus'])->name('exam-locals.toggle-status');
+
+        // Exam Seat Allocation
+        Route::prefix('exam-seat-allocation')->name('exam-seat-allocation.')->group(function () {
+            Route::get('/', [ExamSeatAllocationController::class, 'index'])->name('index');
+            Route::get('/{exam}', [ExamSeatAllocationController::class, 'show'])->name('show');
+            Route::post('/{exam}/allocate', [ExamSeatAllocationController::class, 'allocate'])->name('allocate');
+            Route::delete('/{exam}/clear', [ExamSeatAllocationController::class, 'clear'])->name('clear');
+            Route::post('/period/{examPeriod}/bulk-allocate', [ExamSeatAllocationController::class, 'bulkAllocate'])->name('bulk-allocate');
+        });
 
         // Messages
         Route::resource('messages', MessageController::class)->except(['edit', 'update']);

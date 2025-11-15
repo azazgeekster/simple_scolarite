@@ -15,6 +15,7 @@ class Message extends Model
         'recipient_type',
         'filiere_id',
         'year_in_program',
+        'semester',
         'subject',
         'message',
         'priority',
@@ -125,9 +126,12 @@ class Message extends Model
     public function getRecipientDescription(): string
     {
         return match($this->recipient_type) {
-            'individual' => $this->recipient ? "Étudiant: {$this->recipient->first_name} {$this->recipient->last_name}" : 'Étudiant individuel',
-            'filiere' => $this->filiere ? "Filière: {$this->filiere->name}" : 'Filière spécifique',
-            'year' => "Année: {$this->year_in_program}",
+            'individual' => $this->recipient ? "Étudiant: {$this->recipient->prenom} {$this->recipient->nom}" : 'Étudiant individuel',
+            'filiere' => $this->filiere ? "Filière: {$this->filiere->label_fr}" : 'Filière spécifique',
+            'year' => "Année {$this->year_in_program}",
+            'semester' => "Semestre {$this->semester}",
+            'filiere_year' => ($this->filiere ? "{$this->filiere->label_fr} - " : '') . "Année {$this->year_in_program}",
+            'filiere_semester' => ($this->filiere ? "{$this->filiere->label_fr} - " : '') . "Semestre {$this->semester}",
             'all' => 'Tous les étudiants',
             default => 'Destinataire inconnu',
         };

@@ -1,11 +1,11 @@
 @extends('admin.layouts.app')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
+<div class="max-w-5xl mx-auto">
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Nouveau Message</h1>
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Envoyer un message aux étudiants
+            Envoyer un message aux étudiants avec ciblage précis
         </p>
     </div>
 
@@ -38,25 +38,37 @@
 
                 <!-- Recipient Type -->
                 <div class="mb-6">
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <label class="block mb-3 text-sm font-medium text-gray-900 dark:text-white">
                         Type de destinataire <span class="text-red-500">*</span>
                     </label>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 {{ old('recipient_type') == 'individual' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700' }}">
-                            <input type="radio" name="recipient_type" value="individual" class="mr-3" {{ old('recipient_type', 'individual') == 'individual' ? 'checked' : '' }} onchange="updateRecipientFields()">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <input type="radio" name="recipient_type" value="individual" class="mr-2" {{ old('recipient_type', 'individual') == 'individual' ? 'checked' : '' }} onchange="updateRecipientFields()">
                             <span class="text-sm font-medium">Individuel</span>
                         </label>
-                        <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 {{ old('recipient_type') == 'filiere' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700' }}">
-                            <input type="radio" name="recipient_type" value="filiere" class="mr-3" {{ old('recipient_type') == 'filiere' ? 'checked' : '' }} onchange="updateRecipientFields()">
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <input type="radio" name="recipient_type" value="filiere" class="mr-2" {{ old('recipient_type') == 'filiere' ? 'checked' : '' }} onchange="updateRecipientFields()">
                             <span class="text-sm font-medium">Filière</span>
                         </label>
-                        <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 {{ old('recipient_type') == 'year' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700' }}">
-                            <input type="radio" name="recipient_type" value="year" class="mr-3" {{ old('recipient_type') == 'year' ? 'checked' : '' }} onchange="updateRecipientFields()">
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <input type="radio" name="recipient_type" value="year" class="mr-2" {{ old('recipient_type') == 'year' ? 'checked' : '' }} onchange="updateRecipientFields()">
                             <span class="text-sm font-medium">Année</span>
                         </label>
-                        <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 {{ old('recipient_type') == 'all' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700' }}">
-                            <input type="radio" name="recipient_type" value="all" class="mr-3" {{ old('recipient_type') == 'all' ? 'checked' : '' }} onchange="updateRecipientFields()">
-                            <span class="text-sm font-medium">Tous</span>
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <input type="radio" name="recipient_type" value="semester" class="mr-2" {{ old('recipient_type') == 'semester' ? 'checked' : '' }} onchange="updateRecipientFields()">
+                            <span class="text-sm font-medium">Semestre</span>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <input type="radio" name="recipient_type" value="filiere_year" class="mr-2" {{ old('recipient_type') == 'filiere_year' ? 'checked' : '' }} onchange="updateRecipientFields()">
+                            <span class="text-sm font-medium">Filière + Année</span>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <input type="radio" name="recipient_type" value="filiere_semester" class="mr-2" {{ old('recipient_type') == 'filiere_semester' ? 'checked' : '' }} onchange="updateRecipientFields()">
+                            <span class="text-sm font-medium">Filière + Semestre</span>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition" style="grid-column: span 2">
+                            <input type="radio" name="recipient_type" value="all" class="mr-2" {{ old('recipient_type') == 'all' ? 'checked' : '' }} onchange="updateRecipientFields()">
+                            <span class="text-sm font-medium">Tous les étudiants</span>
                         </label>
                     </div>
                 </div>
@@ -70,7 +82,7 @@
                         <option value="">Sélectionner un étudiant</option>
                         @foreach($students as $student)
                             <option value="{{ $student->id }}" {{ old('recipient_id') == $student->id ? 'selected' : '' }}>
-                                {{ $student->last_name }} {{ $student->first_name }} ({{ $student->apogee }})
+                                {{ $student->nom }} {{ $student->prenom }} ({{ $student->apogee }})
                             </option>
                         @endforeach
                     </select>
@@ -85,7 +97,7 @@
                         <option value="">Sélectionner une filière</option>
                         @foreach($filieres as $filiere)
                             <option value="{{ $filiere->id }}" {{ old('filiere_id') == $filiere->id ? 'selected' : '' }}>
-                                {{ $filiere->name }}
+                                {{ $filiere->label_fr }}
                             </option>
                         @endforeach
                     </select>
@@ -101,6 +113,22 @@
                         <option value="1" {{ old('year_in_program') == '1' ? 'selected' : '' }}>1ère année</option>
                         <option value="2" {{ old('year_in_program') == '2' ? 'selected' : '' }}>2ème année</option>
                         <option value="3" {{ old('year_in_program') == '3' ? 'selected' : '' }}>3ème année</option>
+                    </select>
+                </div>
+
+                <!-- Semester -->
+                <div id="semester_field" class="mb-6" style="display: none;">
+                    <label for="semester" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        Semestre
+                    </label>
+                    <select name="semester" id="semester" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="">Sélectionner un semestre</option>
+                        <option value="S1" {{ old('semester') == 'S1' ? 'selected' : '' }}>S1</option>
+                        <option value="S2" {{ old('semester') == 'S2' ? 'selected' : '' }}>S2</option>
+                        <option value="S3" {{ old('semester') == 'S3' ? 'selected' : '' }}>S3</option>
+                        <option value="S4" {{ old('semester') == 'S4' ? 'selected' : '' }}>S4</option>
+                        <option value="S5" {{ old('semester') == 'S5' ? 'selected' : '' }}>S5</option>
+                        <option value="S6" {{ old('semester') == 'S6' ? 'selected' : '' }}>S6</option>
                     </select>
                 </div>
 
@@ -140,13 +168,13 @@
                     <input type="text" name="subject" id="subject" value="{{ old('subject') }}" required maxlength="255" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Sujet du message">
                 </div>
 
-                <!-- Message -->
+                <!-- Message with Rich Text Editor -->
                 <div class="mb-6">
                     <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                         Message <span class="text-red-500">*</span>
                     </label>
-                    <textarea name="message" id="message" rows="8" required maxlength="5000" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Écrivez votre message ici...">{{ old('message') }}</textarea>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Maximum 5000 caractères</p>
+                    <textarea name="message" id="message" rows="12" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('message') }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Utilisez l'éditeur pour formater votre message</p>
                 </div>
 
                 <!-- Submit -->
@@ -163,13 +191,46 @@
     </div>
 </div>
 
+<!-- TinyMCE -->
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
+tinymce.init({
+    selector: '#message',
+    height: 400,
+    menubar: false,
+    plugins: [
+        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+        'insertdatetime', 'media', 'table', 'help', 'wordcount'
+    ],
+    toolbar: 'undo redo | blocks | ' +
+        'bold italic underline forecolor | alignleft aligncenter ' +
+        'alignright alignjustify | bullist numlist outdent indent | ' +
+        'removeformat | help',
+    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+});
+
 function updateRecipientFields() {
     const type = document.querySelector('input[name="recipient_type"]:checked').value;
 
-    document.getElementById('individual_field').style.display = type === 'individual' ? 'block' : 'none';
-    document.getElementById('filiere_field').style.display = type === 'filiere' ? 'block' : 'none';
-    document.getElementById('year_field').style.display = type === 'year' ? 'block' : 'none';
+    document.getElementById('individual_field').style.display = 'none';
+    document.getElementById('filiere_field').style.display = 'none';
+    document.getElementById('year_field').style.display = 'none';
+    document.getElementById('semester_field').style.display = 'none';
+
+    if (type === 'individual') {
+        document.getElementById('individual_field').style.display = 'block';
+    } else if (type === 'filiere' || type === 'filiere_year' || type === 'filiere_semester') {
+        document.getElementById('filiere_field').style.display = 'block';
+    }
+    
+    if (type === 'year' || type === 'filiere_year') {
+        document.getElementById('year_field').style.display = 'block';
+    }
+    
+    if (type === 'semester' || type === 'filiere_semester') {
+        document.getElementById('semester_field').style.display = 'block';
+    }
 }
 
 // Initialize on page load

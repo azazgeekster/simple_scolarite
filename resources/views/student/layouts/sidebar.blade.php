@@ -213,6 +213,19 @@
                     <hr class="border-slate-200 dark:border-slate-700">
                 </li>
 
+                <!-- Messages -->
+                <li>
+                    <a href="{{ route('student.messages.index') }}"
+                        class="group flex items-center px-4 py-3 text-slate-700 rounded-xl hover:bg-pink-50 hover:text-pink-700 dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-pink-400 transition-all duration-200 hover:shadow-sm hover:translate-x-1 {{ Request::routeIs('student.messages.*') ? 'bg-pink-50 text-pink-700 dark:bg-slate-700/50 dark:text-pink-400' : '' }}">
+                        <div class="flex items-center justify-center w-10 h-10 bg-pink-100 group-hover:bg-pink-200 dark:bg-slate-700 dark:group-hover:bg-slate-600 rounded-lg transition-colors duration-200">
+                            <svg class="w-5 h-5 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <span class="ml-4 font-medium">Messages</span>
+                    </a>
+                </li>
+
                 <!-- Réinscription -->
                 <li>
                     <a href="{{ route('student.mysituation') }}"
