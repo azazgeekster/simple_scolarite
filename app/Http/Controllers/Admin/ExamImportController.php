@@ -326,7 +326,6 @@ class ExamImportController extends Controller
                     'exam_id' => $exam->id,
                     'student_module_enrollment_id' => $enrollment->id,
                     'n_examen' => $row['n_examen'] ?? null,
-                    'location' => $row['local'] ?? null,
                     'observations' => $row['observations'] ?? null,
                 ]);
 

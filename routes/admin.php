@@ -3,9 +3,10 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExamPeriodController;
 use App\Http\Controllers\Admin\ExamImportController;
-use App\Http\Controllers\Admin\ExamLocalController;
-use App\Http\Controllers\Admin\ExamSeatAllocationController;
+use App\Http\Controllers\Admin\ExamSchedulingController;
+use App\Http\Controllers\Admin\LocalManagementController;
 use App\Http\Controllers\Admin\MessageController;
+use App\Http\Controllers\Admin\ProfileChangeRequestController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Auth\AdminForgotPasswordController;
 use App\Http\Controllers\Auth\AdminResetPasswordController;
@@ -59,6 +60,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{examPeriod}/unpublish-exams', [ExamPeriodController::class, 'unpublishExams'])->name('unpublish-exams');
         });
 
+        // API endpoints (must be before exam-scheduling routes to avoid conflicts)
+        Route::prefix('api')->name('api.')->group(function () {
+            Route::get('/modules', [ExamSchedulingController::class, 'getModules'])->name('modules');
+        });
+
+        // Exam Scheduling (Phase 1)
+        Route::prefix('exam-scheduling')->name('exam-scheduling.')->group(function () {
+            Route::get('/', [ExamSchedulingController::class, 'index'])->name('index');
+            Route::get('/create', [ExamSchedulingController::class, 'create'])->name('create');
+            Route::post('/', [ExamSchedulingController::class, 'store'])->name('store');
+            Route::get('/{exam}/room-allocation', [ExamSchedulingController::class, 'roomAllocation'])->name('room-allocation');
+            Route::post('/{exam}/allocate-rooms', [ExamSchedulingController::class, 'allocateRooms'])->name('allocate-rooms');
+        });
+
+        // Local (Room) Management
+        Route::resource('locals', LocalManagementController::class);
+
         // Exam import routes (Super Admin only)
         Route::get('exams/import', [ExamImportController::class, 'showImportForm'])->name('exams.import');
         Route::post('exams/import', [ExamImportController::class, 'import'])->name('exams.import.process');
@@ -66,21 +84,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('exams/export-rattrapage-candidates', [ExamImportController::class, 'exportRattrapageCandidates'])->name('exams.export-rattrapage-candidates');
         Route::post('exams/toggle-session-publication', [ExamImportController::class, 'toggleSessionPublication'])->name('exams.toggle-session-publication');
 
-        // Exam Locals Management
-        Route::resource('exam-locals', ExamLocalController::class);
-        Route::post('exam-locals/{examLocal}/toggle-status', [ExamLocalController::class, 'toggleStatus'])->name('exam-locals.toggle-status');
-
-        // Exam Seat Allocation
-        Route::prefix('exam-seat-allocation')->name('exam-seat-allocation.')->group(function () {
-            Route::get('/', [ExamSeatAllocationController::class, 'index'])->name('index');
-            Route::get('/{exam}', [ExamSeatAllocationController::class, 'show'])->name('show');
-            Route::post('/{exam}/allocate', [ExamSeatAllocationController::class, 'allocate'])->name('allocate');
-            Route::delete('/{exam}/clear', [ExamSeatAllocationController::class, 'clear'])->name('clear');
-            Route::post('/period/{examPeriod}/bulk-allocate', [ExamSeatAllocationController::class, 'bulkAllocate'])->name('bulk-allocate');
-        });
-
         // Messages
         Route::resource('messages', MessageController::class)->except(['edit', 'update']);
+
+        // Profile Change Requests
+        Route::prefix('profile-change-requests')->name('profile-change-requests.')->group(function () {
+            Route::get('/', [ProfileChangeRequestController::class, 'index'])->name('index');
+            Route::get('/history', [ProfileChangeRequestController::class, 'history'])->name('history');
+            Route::get('/{student}', [ProfileChangeRequestController::class, 'show'])->name('show');
+            Route::post('/{id}/approve', [ProfileChangeRequestController::class, 'approve'])->name('approve');
+            Route::post('/{id}/reject', [ProfileChangeRequestController::class, 'reject'])->name('reject');
+            Route::post('/{student}/approve-all', [ProfileChangeRequestController::class, 'approveAll'])->name('approve-all');
+            Route::post('/{student}/reject-all', [ProfileChangeRequestController::class, 'rejectAll'])->name('reject-all');
+        });
     });
 });
 

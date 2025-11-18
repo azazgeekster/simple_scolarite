@@ -13,7 +13,6 @@ class ExamConvocation extends Model
         'exam_id',
         'student_module_enrollment_id',
         'n_examen',
-        'location',
         'observations',
     ];
 

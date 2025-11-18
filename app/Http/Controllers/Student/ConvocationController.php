@@ -447,7 +447,7 @@ class ConvocationController extends Controller
                 'date' => $exam->exam_date,
                 'time' => $startTime->format('H:i'),
                 'duration' => $duration,
-                'room' => $convocation->location ?? $exam->local ?? 'À définir',
+                'room' => $exam->local ?? 'À définir',
                 'building' => 'Bâtiment A',
                 'exam_number' => $convocation->n_examen ?? $exam->id,
             ];

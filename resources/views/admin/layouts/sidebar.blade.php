@@ -79,6 +79,19 @@
                     </a>
                 </li>
 
+                <!-- Profile Change Requests -->
+                <li>
+                    <a href="{{ route('admin.profile-change-requests.index') }}"
+                        class="group flex items-center px-4 py-3 text-slate-700 rounded-xl hover:bg-teal-50 hover:text-teal-700 dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-teal-400 transition-all duration-200 hover:shadow-sm hover:translate-x-1 {{ Request::routeIs('admin.profile-change-requests.*') ? 'bg-teal-50 text-teal-700 dark:bg-slate-700/50 dark:text-teal-400' : '' }}">
+                        <div class="flex items-center justify-center w-10 h-10 bg-teal-100 group-hover:bg-teal-200 dark:bg-slate-700 dark:group-hover:bg-slate-600 rounded-lg transition-colors duration-200">
+                            <svg class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <span class="ml-4 font-medium">Profile Changes</span>
+                    </a>
+                </li>
+
                 <!-- Divider -->
                 <li class="my-6">
                     <hr class="border-slate-200 dark:border-slate-700">
@@ -110,21 +123,21 @@
                             </a>
                         </li>
                         <li>
+                            <a href="{{ route('admin.exam-scheduling.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exam-scheduling.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
+                                <span class="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
+                                Schedule Exams
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.locals.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.locals.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
+                                <span class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></span>
+                                Manage Rooms
+                            </a>
+                        </li>
+                        <li>
                             <a href="{{ route('admin.exams.import') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exams.import') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
                                 <span class="w-2 h-2 bg-purple-400 rounded-full mr-3"></span>
                                 Import Exams
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.exam-locals.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exam-locals.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
-                                <span class="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
-                                Exam Locals
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.exam-seat-allocation.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exam-seat-allocation.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
-                                <span class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></span>
-                                Seat Allocation
                             </a>
                         </li>
                         <li>
