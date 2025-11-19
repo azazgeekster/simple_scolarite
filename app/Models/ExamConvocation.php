@@ -12,6 +12,7 @@ class ExamConvocation extends Model
     protected $fillable = [
         'exam_id',
         'student_module_enrollment_id',
+        'local_id',
         'n_examen',
         'observations',
     ];
@@ -19,6 +20,8 @@ class ExamConvocation extends Model
     protected $casts = [
         'exam_id' => 'integer',
         'student_module_enrollment_id' => 'integer',
+        'local_id' => 'integer',
+        'n_examen' => 'string',
     ];
 
     // Relationships
@@ -30,6 +33,11 @@ class ExamConvocation extends Model
     public function studentModuleEnrollment()
     {
         return $this->belongsTo(StudentModuleEnrollment::class);
+    }
+
+    public function local()
+    {
+        return $this->belongsTo(Local::class);
     }
 
     // Helper to get student through enrollment

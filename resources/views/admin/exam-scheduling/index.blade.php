@@ -305,13 +305,44 @@
 
                                         <!-- Actions -->
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <a href="{{ route('admin.exam-scheduling.room-allocation', $exam->id) }}"
-                                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 transition-all hover:scale-105 shadow-sm hover:shadow-md">
-                                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                                </svg>
-                                                Manage Rooms
-                                            </a>
+                                            <div class="flex items-center gap-2">
+                                                <!-- Manage Rooms Button -->
+                                                <a href="{{ route('admin.exam-scheduling.room-allocation', $exam->id) }}"
+                                                    class="inline-flex items-center px-3 py-2 border border-transparent rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 transition-all hover:scale-105 shadow-sm hover:shadow-md"
+                                                    title="Manage room allocations">
+                                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                                    </svg>
+                                                    Rooms
+                                                </a>
+
+                                                @if($exam->roomAllocations->isNotEmpty())
+                                                    <!-- Download PV Button -->
+                                                    <a href="{{ route('admin.exam-scheduling.download-pv', $exam->id) }}"
+                                                        class="inline-flex items-center px-3 py-2 border border-transparent rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 transition-all hover:scale-105 shadow-sm hover:shadow-md"
+                                                        title="Download PV (Procès-Verbal)">
+                                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                        </svg>
+                                                        PV
+                                                    </a>
+                                                @endif
+
+                                                <!-- Delete Button -->
+                                                <form action="{{ route('admin.exam-scheduling.destroy', $exam->id) }}" method="POST" class="inline-block"
+                                                    onsubmit="return confirm('Are you sure you want to delete this exam? This action cannot be undone.\n\nModule: {{ $exam->module->label }}\nDate: {{ $exam->exam_date->format('d/m/Y') }}');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        class="inline-flex items-center px-3 py-2 border border-transparent rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 transition-all hover:scale-105 shadow-sm hover:shadow-md"
+                                                        title="Delete exam">
+                                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

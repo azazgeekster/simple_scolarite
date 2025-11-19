@@ -247,46 +247,76 @@
                         </div>
 
                         <!-- Section 5: Date & Time -->
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                Schedule Details
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Exam Date <span class="text-red-500">*</span>
-                                    </label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                            <!-- EXAM DATE -->
+                            <div>
+                                <label for="exam_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Exam Date <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
+                                        <!-- Calendar Icon -->
+                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                                             fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round"
+                                             stroke-linejoin="round" stroke-width="2"
+                                             d="M6 2v2M14 2v2M4 6h12v10H4zM8 10h4"/></svg>
+                                    </div>
                                     <input type="date" id="exam_date" name="exam_date" value="{{ old('exam_date') }}" required
-                                        class="block w-full px-4 py-3.5 text-base border-2 border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl transition-all shadow-sm">
-                                    @error('exam_date')
-                                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                    @enderror
+                                        class="block w-full p-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600
+                                               rounded-xl shadow-sm text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500" />
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Start Time <span class="text-red-500">*</span>
-                                    </label>
-                                    <input type="time" id="start_time" name="start_time" value="{{ old('start_time') }}" required
-                                        class="block w-full px-4 py-3.5 text-base border-2 border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl transition-all shadow-sm">
-                                    @error('start_time')
-                                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        End Time <span class="text-red-500">*</span>
-                                    </label>
-                                    <input type="time" id="end_time" name="end_time" value="{{ old('end_time') }}" required
-                                        class="block w-full px-4 py-3.5 text-base border-2 border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl transition-all shadow-sm">
-                                    @error('end_time')
-                                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                    @enderror
-                                </div>
+                                @error('exam_date')
+                                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                @enderror
                             </div>
+
+                            <!-- START TIME -->
+                            <div>
+                                <label for="start_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Start Time <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
+                                        <!-- Clock Icon -->
+                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                                             viewBox="0 0 24 24" fill="none"><path stroke="currentColor" stroke-width="2"
+                                             stroke-linecap="round" stroke-linejoin="round"
+                                             d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                                    </div>
+                                    <input type="time" id="start_time" name="start_time" value="{{ old('start_time') }}" min="08:00" max="18:00" required
+                                        class="block w-full p-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600
+                                               rounded-xl shadow-sm text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500" />
+                                </div>
+                                @error('start_time')
+                                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- END TIME -->
+                            <div>
+                                <label for="end_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    End Time <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
+                                        <!-- Clock Icon -->
+                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                                             viewBox="0 0 24 24" fill="none"><path stroke="currentColor" stroke-width="2"
+                                             stroke-linecap="round" stroke-linejoin="round"
+                                             d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                                    </div>
+                                    <input type="time" id="end_time" name="end_time" value="{{ old('end_time') }}" min="08:00" max="18:00" required
+                                        class="block w-full p-3.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600
+                                               rounded-xl shadow-sm text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500" />
+                                </div>
+                                @error('end_time')
+                                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                @enderror
+                            </div>
+
                         </div>
+
                     </div>
 
                     <!-- Form Actions -->

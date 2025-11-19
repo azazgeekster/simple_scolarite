@@ -121,7 +121,7 @@ class ConvocationController extends Controller
 
         $logoPath = public_path('storage/logos/logo_fac_fr.png');
 
-        $qrCode = new QrCode($student->cne);
+        $qrCode = new QrCode($student->apogee);
         $writer = new PngWriter();
         $result = $writer->write($qrCode);
 
@@ -407,7 +407,7 @@ class ConvocationController extends Controller
             ->with(['module', 'academicYear', 'convocations' => function($query) use ($student) {
                 $query->whereHas('studentModuleEnrollment', function($q) use ($student) {
                     $q->where('student_id', $student->id);
-                });
+                })->with('local');
             }])
             ->orderBy('exam_date')
             ->orderBy('start_time')
@@ -433,6 +433,12 @@ class ConvocationController extends Controller
             // Get the convocation for this student (should only be one)
             $convocation = $exam->convocations->first();
 
+            // Get room from convocation's local relationship
+            $roomName = 'À définir';
+            if ($convocation && $convocation->local) {
+                $roomName = $convocation->local->code;
+            }
+
             $exams[] = [
                 'id' => $exam->id,
                 'module_id' => $exam->module_id,
@@ -447,7 +453,7 @@ class ConvocationController extends Controller
                 'date' => $exam->exam_date,
                 'time' => $startTime->format('H:i'),
                 'duration' => $duration,
-                'room' => $exam->local ?? 'À définir',
+                'room' => $roomName,
                 'building' => 'Bâtiment A',
                 'exam_number' => $convocation->n_examen ?? $exam->id,
             ];
@@ -473,7 +479,7 @@ class ConvocationController extends Controller
             ->with(['module', 'academicYear', 'convocations' => function($query) use ($student) {
                 $query->whereHas('studentModuleEnrollment', function($q) use ($student) {
                     $q->where('student_id', $student->id);
-                });
+                })->with('local');
             }])
             ->orderBy('exam_date')
             ->orderBy('start_time')
@@ -495,6 +501,15 @@ class ConvocationController extends Controller
             $minutes = $durationMinutes % 60;
             $duration = sprintf('%dh%02d', $hours, $minutes);
 
+            // Get the convocation for this student (should only be one)
+            $convocation = $exam->convocations->first();
+
+            // Get room from convocation's local relationship
+            $roomName = 'N/A';
+            if ($convocation && $convocation->local) {
+                $roomName = $convocation->local->code;
+            }
+
             $exams[] = [
                 'id' => $exam->id,
                 'module_id' => $exam->module_id,
@@ -507,11 +522,12 @@ class ConvocationController extends Controller
                 'season' => $season,
                 'season_ar' => $season_ar,
                 'date' => $exam->exam_date,
-                'time' => $startTime->format('H:i'),
+                'stime' => $startTime->format('H:i'),
+                'etime' => $endTime->format('H:i'),
                 'duration' => $duration,
-                'room' => $exam->local ?? 'À définir',
+                'room' => $roomName,
                 'building' => 'Bâtiment A', // You might want to add this to the Exam model
-                'exam_number' => $exam->id, // Using exam ID as exam number
+                'exam_number' => $convocation->n_examen ?? $exam->id,
             ];
         }
 
@@ -578,7 +594,7 @@ class ConvocationController extends Controller
             ->with(['module', 'convocations' => function($query) use ($student) {
                 $query->whereHas('studentModuleEnrollment', function($q) use ($student) {
                     $q->where('student_id', $student->id);
-                });
+                })->with('local');
             }])
             ->orderBy('exam_date')
             ->orderBy('start_time')
@@ -593,7 +609,7 @@ class ConvocationController extends Controller
             ->with(['module', 'convocations' => function($query) use ($student) {
                 $query->whereHas('studentModuleEnrollment', function($q) use ($student) {
                     $q->where('student_id', $student->id);
-                });
+                })->with('local');
             }])
             ->orderBy('exam_date')
             ->orderBy('start_time')
@@ -664,6 +680,15 @@ class ConvocationController extends Controller
             $minutes = $durationMinutes % 60;
             $duration = sprintf('%dh%02d', $hours, $minutes);
 
+            // Get the convocation for this student (should only be one)
+            $convocation = $exam->convocations->first();
+
+            // Get room from convocation's local relationship
+            $roomName = 'À définir';
+            if ($convocation && $convocation->local) {
+                $roomName = $convocation->local->code;
+            }
+
             $exams[] = [
                 'id' => $exam->id,
                 'module_code' => $exam->module->code,
@@ -672,8 +697,9 @@ class ConvocationController extends Controller
                 'date' => $exam->exam_date,
                 'time' => $startTime->format('H:i'),
                 'duration' => $duration,
-                'room' => $exam->local ?? 'À définir',
+                'room' => $roomName,
                 'building' => 'Bâtiment A',
+                'exam_number' => $convocation->n_examen ?? $exam->id,
             ];
         }
 

@@ -72,6 +72,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/', [ExamSchedulingController::class, 'store'])->name('store');
             Route::get('/{exam}/room-allocation', [ExamSchedulingController::class, 'roomAllocation'])->name('room-allocation');
             Route::post('/{exam}/allocate-rooms', [ExamSchedulingController::class, 'allocateRooms'])->name('allocate-rooms');
+            Route::post('/{exam}/rebalance-rooms', [ExamSchedulingController::class, 'rebalanceRooms'])->name('rebalance-rooms');
+            Route::delete('/{exam}', [ExamSchedulingController::class, 'destroy'])->name('destroy');
+            Route::get('/{exam}/download-pv', [ExamSchedulingController::class, 'downloadPV'])->name('download-pv');
         });
 
         // Local (Room) Management

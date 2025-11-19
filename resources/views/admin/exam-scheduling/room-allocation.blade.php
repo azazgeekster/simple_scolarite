@@ -9,7 +9,7 @@
                     <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <p class="text-sm font-medium text-emerald-800 dark:text-emerald-300">{{ session('success') }}</p>
+                    <div class="text-sm font-medium text-emerald-800 dark:text-emerald-300 whitespace-pre-line">{{ session('success') }}</div>
                 </div>
             @endif
 
@@ -18,7 +18,7 @@
                     <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <p class="text-sm font-medium text-red-800 dark:text-red-300">{{ session('error') }}</p>
+                    <div class="text-sm font-medium text-red-800 dark:text-red-300 whitespace-pre-line">{{ session('error') }}</div>
                 </div>
             @endif
 
@@ -174,26 +174,26 @@
                     </div>
                 </div>
 
-                <!-- Allocated Seats -->
+                <!-- Assigned Students -->
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 transform transition-all hover:scale-105">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Allocated Seats</p>
-                            <p class="mt-2 text-3xl font-bold {{ $exam->total_allocated_seats >= $totalStudents ? 'text-indigo-600 dark:text-indigo-400' : 'text-amber-600 dark:text-amber-400' }}">
-                                {{ $exam->total_allocated_seats }}
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Students Assigned</p>
+                            <p class="mt-2 text-3xl font-bold {{ $assignedStudents >= $totalStudents ? 'text-indigo-600 dark:text-indigo-400' : 'text-amber-600 dark:text-amber-400' }}">
+                                {{ $assignedStudents }}
                             </p>
                         </div>
-                        <div class="p-3 {{ $exam->total_allocated_seats >= $totalStudents ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-amber-100 dark:bg-amber-900/30' }} rounded-xl">
-                            <svg class="w-8 h-8 {{ $exam->total_allocated_seats >= $totalStudents ? 'text-indigo-600 dark:text-indigo-400' : 'text-amber-600 dark:text-amber-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="p-3 {{ $assignedStudents >= $totalStudents ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-amber-100 dark:bg-amber-900/30' }} rounded-xl">
+                            <svg class="w-8 h-8 {{ $assignedStudents >= $totalStudents ? 'text-indigo-600 dark:text-indigo-400' : 'text-amber-600 dark:text-amber-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>
                             </svg>
                         </div>
                     </div>
                 </div>
 
-                <!-- Remaining Seats -->
+                <!-- Remaining Students -->
                 @php
-                    $remaining = $totalStudents - $exam->total_allocated_seats;
+                    $remaining = $totalStudents - $assignedStudents;
                 @endphp
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 transform transition-all hover:scale-105">
                     <div class="flex items-center justify-between">
@@ -234,40 +234,37 @@
             <!-- AI-Powered Insights & Recommendations -->
             <div class="mb-8 space-y-4">
                 <!-- Status Banner -->
-                @if($exam->total_allocated_seats > 0)
+                @if($assignedStudents > 0 || $exam->total_allocated_seats > 0)
                     <div class="rounded-2xl border-2 p-6 shadow-lg
-                        {{ $exam->total_allocated_seats < $totalStudents ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' :
-                           ($exam->total_allocated_seats == $totalStudents ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' :
-                            'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800') }}">
+                        {{ $assignedStudents < $totalStudents ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' :
+                            'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' }}">
                         <div class="flex items-center">
-                            @if($exam->total_allocated_seats < $totalStudents)
+                            @if($assignedStudents < $totalStudents)
                                 <svg class="w-8 h-8 text-amber-600 dark:text-amber-400 mr-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                                 </svg>
                                 <div>
-                                    <h3 class="text-lg font-semibold text-amber-900 dark:text-amber-200">Insufficient Allocation</h3>
+                                    <h3 class="text-lg font-semibold text-amber-900 dark:text-amber-200">Students Pending Assignment</h3>
                                     <p class="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                                        You need <strong>{{ $totalStudents - $exam->total_allocated_seats }} more seats</strong> to accommodate all students. Click "Auto-Balance Seats" for smart allocation.
+                                        <strong>{{ $assignedStudents }} of {{ $totalStudents }} students</strong> have been assigned to rooms.
+                                        @if($exam->total_allocated_seats < $totalStudents)
+                                            Allocate <strong>{{ $totalStudents - $exam->total_allocated_seats }} more seats</strong> and submit to assign remaining students.
+                                        @else
+                                            Click "Submit Room Allocation" to assign the remaining <strong>{{ $totalStudents - $assignedStudents }} students</strong>.
+                                        @endif
                                     </p>
                                 </div>
-                            @elseif($exam->total_allocated_seats == $totalStudents)
+                            @else
                                 <svg class="w-8 h-8 text-emerald-600 dark:text-emerald-400 mr-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
                                 <div>
-                                    <h3 class="text-lg font-semibold text-emerald-900 dark:text-emerald-200">Perfect Allocation!</h3>
+                                    <h3 class="text-lg font-semibold text-emerald-900 dark:text-emerald-200">All Students Assigned!</h3>
                                     <p class="text-sm text-emerald-700 dark:text-emerald-300 mt-1">
-                                        All <strong>{{ $totalStudents }} students</strong> have been allocated seats. Ready to proceed!
-                                    </p>
-                                </div>
-                            @else
-                                <svg class="w-8 h-8 text-blue-600 dark:text-blue-400 mr-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                </svg>
-                                <div>
-                                    <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-200">Over Allocated</h3>
-                                    <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                                        You have <strong>{{ $exam->total_allocated_seats - $totalStudents }} extra seats</strong> allocated. Consider removing some rooms for optimal efficiency.
+                                        All <strong>{{ $totalStudents }} students</strong> have been successfully assigned to rooms.
+                                        @if($exam->total_allocated_seats > $totalStudents)
+                                            You have <strong>{{ $exam->total_allocated_seats - $totalStudents }} extra seats</strong> for flexibility.
+                                        @endif
                                     </p>
                                 </div>
                             @endif
@@ -284,6 +281,18 @@
                     $underUtilizedRooms = $exam->roomAllocations->filter(function($alloc) {
                         return ($alloc->allocated_seats / $alloc->local->capacity) < 0.5;
                     });
+
+                    // Check if rebalancing is needed: multiple rooms and last one is under-utilized
+                    $needsRebalancing = false;
+                    $lastRoomUtilization = 0;
+                    if ($exam->roomAllocations->count() > 1 && $assignedStudents > 0) {
+                        $allocations = $exam->roomAllocations->sortBy('id');
+                        $lastAlloc = $allocations->last();
+                        $studentsInLastRoom = $exam->convocations()->where('local_id', $lastAlloc->local_id)->count();
+                        $lastRoomUtilization = ($studentsInLastRoom / $lastAlloc->local->capacity) * 100;
+                        // Need rebalancing if last room is less than 40% utilized
+                        $needsRebalancing = $lastRoomUtilization < 40 && $studentsInLastRoom > 0;
+                    }
                 @endphp
 
                 @if($remaining > 0 || $underUtilizedRooms->isNotEmpty())
@@ -343,6 +352,118 @@
                         </div>
                     </div>
                 @endif
+
+                <!-- Rebalancing Panel - Shows when multiple rooms exist and last one is under-utilized -->
+                @if($needsRebalancing)
+                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-300 dark:border-amber-700 rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-start">
+                            <div class="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl mr-4">
+                                <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-amber-900 dark:text-amber-200 mb-2">Rebalance Room Distribution</h3>
+                                <p class="text-sm text-amber-700 dark:text-amber-300 mb-4">
+                                    The last room is only <strong>{{ number_format($lastRoomUtilization, 0) }}%</strong> utilized.
+                                    You can redistribute students more evenly across all {{ $exam->roomAllocations->count() }} rooms.
+                                </p>
+
+                                <div class="flex flex-wrap gap-3">
+                                    <!-- Auto Balance Button -->
+                                    <form action="{{ route('admin.exam-scheduling.rebalance-rooms', $exam->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        <input type="hidden" name="mode" value="auto">
+                                        <button type="submit"
+                                                class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                            </svg>
+                                            Auto Balance
+                                        </button>
+                                    </form>
+
+                                    <!-- Manual Balance Button -->
+                                    <button type="button"
+                                            onclick="toggleManualBalanceModal()"
+                                            class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-gray-800 border-2 border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-400 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-amber-50 dark:hover:bg-amber-900/20">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                                        </svg>
+                                        Manual Balance
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Manual Balance Modal -->
+                    <div id="manualBalanceModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+                            <div class="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4">
+                                <h3 class="text-lg font-bold text-white flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                                    </svg>
+                                    Manual Room Balancing
+                                </h3>
+                            </div>
+
+                            <form action="{{ route('admin.exam-scheduling.rebalance-rooms', $exam->id) }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="mode" value="manual">
+
+                                <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                        Total students to distribute: <strong class="text-indigo-600 dark:text-indigo-400">{{ $assignedStudents }}</strong>
+                                    </p>
+
+                                    @foreach($exam->roomAllocations->sortBy('id') as $allocation)
+                                        @php
+                                            $studentsInRoom = $exam->convocations()->where('local_id', $allocation->local_id)->count();
+                                        @endphp
+                                        <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <div>
+                                                    <span class="font-bold text-gray-900 dark:text-white">{{ $allocation->local->name }}</span>
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">(max: {{ $allocation->local->capacity }})</span>
+                                                </div>
+                                                <span class="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-lg">
+                                                    Current: {{ $studentsInRoom }}
+                                                </span>
+                                            </div>
+                                            <input type="number"
+                                                   name="allocations[{{ $allocation->local_id }}]"
+                                                   value="{{ $studentsInRoom }}"
+                                                   min="0"
+                                                   max="{{ $allocation->local->capacity }}"
+                                                   class="manual-balance-input w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-500 dark:bg-gray-800 dark:text-white text-sm font-semibold"
+                                                   data-capacity="{{ $allocation->local->capacity }}"
+                                                   onchange="validateManualBalance()">
+                                        </div>
+                                    @endforeach
+
+                                    <div id="balanceValidation" class="hidden mt-4 p-3 rounded-lg text-sm">
+                                        <!-- Validation message will appear here -->
+                                    </div>
+                                </div>
+
+                                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                                    <button type="button"
+                                            onclick="toggleManualBalanceModal()"
+                                            class="px-4 py-2 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                        Cancel
+                                    </button>
+                                    <button type="submit"
+                                            id="manualBalanceSubmit"
+                                            class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                        Apply Balance
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -368,7 +489,9 @@
                             <div class="p-6 space-y-4">
                                 @foreach($exam->roomAllocations as $index => $allocation)
                                     @php
-                                        $utilization = ($allocation->allocated_seats / $allocation->local->capacity) * 100;
+                                        // Count actual students assigned to this room
+                                        $studentsInRoom = $exam->convocations()->where('local_id', $allocation->local_id)->count();
+                                        $utilization = ($studentsInRoom / $allocation->local->capacity) * 100;
                                         $utilizationColor = $utilization < 50 ? 'amber' : ($utilization < 80 ? 'blue' : 'emerald');
                                     @endphp
                                     <div class="group relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-6 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
@@ -421,8 +544,8 @@
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                                             </svg>
                                                         </div>
-                                                        <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">Allocated</p>
-                                                        <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">{{ $allocation->allocated_seats }}</p>
+                                                        <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">Assigned</p>
+                                                        <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">{{ $studentsInRoom }}</p>
                                                     </div>
                                                     <div class="bg-gradient-to-br from-{{ $utilizationColor }}-50 to-{{ $utilizationColor }}-100 dark:from-{{ $utilizationColor }}-900/30 dark:to-{{ $utilizationColor }}-900/40 border-2 border-{{ $utilizationColor }}-200 dark:border-{{ $utilizationColor }}-800 rounded-xl p-4 text-center">
                                                         <div class="flex items-center justify-center mb-2">
@@ -438,9 +561,9 @@
                                                 <!-- Enhanced Progress Bar -->
                                                 <div class="space-y-2">
                                                     <div class="flex items-center justify-between text-xs">
-                                                        <span class="font-medium text-gray-600 dark:text-gray-400">Seat Utilization</span>
+                                                        <span class="font-medium text-gray-600 dark:text-gray-400">Student Assignment</span>
                                                         <span class="font-semibold {{ $utilization < 50 ? 'text-amber-600 dark:text-amber-400' : ($utilization < 80 ? 'text-blue-600 dark:text-blue-400' : 'text-emerald-600 dark:text-emerald-400') }}">
-                                                            {{ $allocation->allocated_seats }} / {{ $allocation->local->capacity }}
+                                                            {{ $studentsInRoom }} / {{ $allocation->local->capacity }}
                                                         </span>
                                                     </div>
                                                     <div class="relative w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden shadow-inner">
@@ -629,7 +752,8 @@
                                                        class="seat-input hidden"
                                                        min="1"
                                                        max="{{ $local->capacity }}"
-                                                       value="{{ $local->capacity }}">
+                                                       value="{{ $local->capacity }}"
+                                                       disabled>
                                                 <div class="text-right">
                                                     <div class="text-sm font-bold text-indigo-600 dark:text-indigo-400 allocated-count">0</div>
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">allocated</div>
@@ -748,8 +872,8 @@
     <script>
         // Room allocation management
         const TOTAL_STUDENTS = {{ $totalStudents }};
-        const CURRENT_ALLOCATED = {{ $exam->total_allocated_seats }};
-        let remainingStudents = TOTAL_STUDENTS - CURRENT_ALLOCATED;
+        const CURRENTLY_ASSIGNED = {{ $assignedStudents }};
+        let remainingStudents = TOTAL_STUDENTS - CURRENTLY_ASSIGNED;
         let selectedRooms = [];
         let allocationMode = 'auto'; // 'auto' or 'manual'
 
@@ -826,6 +950,7 @@
                 card.querySelector('.allocated-seats-display').classList.add('hidden');
                 card.querySelector('.manual-input-container').classList.add('hidden');
                 card.querySelector('.seat-input').value = 0;
+                card.querySelector('.seat-input').disabled = true;
             } else {
                 // Select
                 if (allocationMode === 'auto') {
@@ -840,6 +965,7 @@
                         card.querySelector('.allocated-seats-display').classList.remove('hidden');
                         card.querySelector('.allocated-count').textContent = toAllocate;
                         card.querySelector('.seat-input').value = toAllocate;
+                        card.querySelector('.seat-input').disabled = false;
                     } else {
                         showNotification('No more students remaining to allocate!', 'info');
                     }
@@ -851,6 +977,7 @@
                     card.querySelector('.selection-indicator').classList.remove('border-gray-300', 'dark:border-gray-600');
                     card.querySelector('.checkmark').classList.remove('hidden');
                     card.querySelector('.manual-input-container').classList.remove('hidden');
+                    card.querySelector('.seat-input').disabled = false;
                 }
             }
 
@@ -878,7 +1005,8 @@
                 allocated += parseInt(input.value) || 0;
             });
 
-            remainingStudents = TOTAL_STUDENTS - CURRENT_ALLOCATED - allocated;
+            // Calculate remaining: Total students - Already assigned students - Newly selected seats
+            remainingStudents = TOTAL_STUDENTS - CURRENTLY_ASSIGNED - allocated;
 
             // Update counters
             document.getElementById('remainingCount').textContent = remainingStudents;
@@ -995,5 +1123,85 @@
                 }
             }
         });
+
+        // Manual Balance Modal Functions
+        function toggleManualBalanceModal() {
+            const modal = document.getElementById('manualBalanceModal');
+            if (modal) {
+                modal.classList.toggle('hidden');
+                if (!modal.classList.contains('hidden')) {
+                    validateManualBalance();
+                }
+            }
+        }
+
+        function validateManualBalance() {
+            const inputs = document.querySelectorAll('.manual-balance-input');
+            const validationDiv = document.getElementById('balanceValidation');
+            const submitBtn = document.getElementById('manualBalanceSubmit');
+            const totalStudents = {{ $assignedStudents }};
+
+            let sum = 0;
+            let hasCapacityError = false;
+
+            inputs.forEach(input => {
+                const value = parseInt(input.value) || 0;
+                const capacity = parseInt(input.dataset.capacity);
+                sum += value;
+
+                if (value > capacity) {
+                    hasCapacityError = true;
+                    input.classList.add('border-red-500');
+                    input.classList.remove('border-gray-300', 'dark:border-gray-600');
+                } else {
+                    input.classList.remove('border-red-500');
+                    input.classList.add('border-gray-300', 'dark:border-gray-600');
+                }
+            });
+
+            if (validationDiv) {
+                if (hasCapacityError) {
+                    validationDiv.className = 'mt-4 p-3 rounded-lg text-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800';
+                    validationDiv.innerHTML = '<strong>Error:</strong> Some rooms exceed their capacity.';
+                    validationDiv.classList.remove('hidden');
+                    if (submitBtn) submitBtn.disabled = true;
+                } else if (sum !== totalStudents) {
+                    const diff = totalStudents - sum;
+                    validationDiv.className = 'mt-4 p-3 rounded-lg text-sm bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800';
+                    if (diff > 0) {
+                        validationDiv.innerHTML = `<strong>Warning:</strong> ${diff} student(s) not assigned. Total: ${sum}/${totalStudents}`;
+                    } else {
+                        validationDiv.innerHTML = `<strong>Warning:</strong> ${Math.abs(diff)} extra seat(s) assigned. Total: ${sum}/${totalStudents}`;
+                    }
+                    validationDiv.classList.remove('hidden');
+                    if (submitBtn) submitBtn.disabled = sum !== totalStudents;
+                } else {
+                    validationDiv.className = 'mt-4 p-3 rounded-lg text-sm bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800';
+                    validationDiv.innerHTML = `<strong>Perfect!</strong> All ${totalStudents} students will be distributed.`;
+                    validationDiv.classList.remove('hidden');
+                    if (submitBtn) submitBtn.disabled = false;
+                }
+            }
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('manualBalanceModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    toggleManualBalanceModal();
+                }
+            }
+        });
+
+        // Close modal on backdrop click
+        const modal = document.getElementById('manualBalanceModal');
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    toggleManualBalanceModal();
+                }
+            });
+        }
     </script>
 @endsection
