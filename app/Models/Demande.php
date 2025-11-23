@@ -29,6 +29,11 @@ class Demande extends Model
         'extension_requested_at',
         'extension_days',
         'collected_at',
+        'decharge_generated_at',
+        'decharge_signed_by',
+        'definitive_warning_acknowledged',
+        'definitive_warning_acknowledged_at',
+        'admin_notes',
     ];
 
     protected $casts = [
@@ -43,6 +48,10 @@ class Demande extends Model
         'returned_at' => 'datetime',
         'extension_requested_at' => 'datetime',
         'collected_at' => 'datetime',
+        'decharge_generated_at' => 'datetime',
+        'decharge_signed_by' => 'integer',
+        'definitive_warning_acknowledged' => 'boolean',
+        'definitive_warning_acknowledged_at' => 'datetime',
     ];
 
     // ==========================================
@@ -545,5 +554,116 @@ class Demande extends Model
     public function requiresReturn(): bool
     {
         return $this->document && $this->document->requires_return;
+    }
+
+    // ==========================================
+    // DÉCHARGE & DEFINITIVE WITHDRAWAL
+    // ==========================================
+
+    /**
+     * Check if this is a definitive withdrawal (permanent retrait of deposited document)
+     */
+    public function isDefinitiveWithdrawal(): bool
+    {
+        return $this->isPermanent() && $this->document && $this->document->isDeposited();
+    }
+
+    /**
+     * Generate décharge
+     */
+    public function generateDecharge(int $adminId): bool
+    {
+        $this->decharge_generated_at = now();
+        $this->decharge_signed_by = $adminId;
+        return $this->save();
+    }
+
+    /**
+     * Check if décharge was generated
+     */
+    public function hasDecharge(): bool
+    {
+        return !is_null($this->decharge_generated_at);
+    }
+
+    /**
+     * Acknowledge definitive withdrawal warning
+     */
+    public function acknowledgeDefinitiveWarning(): bool
+    {
+        $this->definitive_warning_acknowledged = true;
+        $this->definitive_warning_acknowledged_at = now();
+        return $this->save();
+    }
+
+    /**
+     * Admin who signed the décharge
+     */
+    public function dechargeSignedBy()
+    {
+        return $this->belongsTo(Admin::class, 'decharge_signed_by');
+    }
+
+    // ==========================================
+    // STATISTICS SCOPES
+    // ==========================================
+
+    /**
+     * Scope for definitive withdrawals
+     */
+    public function scopeDefinitiveWithdrawals($query)
+    {
+        return $query->where('retrait_type', 'permanent')
+            ->whereHas('document', function ($q) {
+                $q->where('type', 'DEPOSITED');
+            });
+    }
+
+    /**
+     * Scope for requests within a date range
+     */
+    public function scopeDateRange($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('created_at', [$startDate, $endDate]);
+    }
+
+    /**
+     * Scope for requests by filiere
+     */
+    public function scopeByFiliere($query, int $filiereId)
+    {
+        return $query->whereHas('student.programEnrollments', function ($q) use ($filiereId) {
+            $q->where('filiere_id', $filiereId);
+        });
+    }
+
+    // ==========================================
+    // QUICK RETURN HELPER
+    // ==========================================
+
+    /**
+     * Find pending return by student (for one-click return)
+     */
+    public static function findPendingReturnForStudent(int $studentId): ?self
+    {
+        return static::where('student_id', $studentId)
+            ->where('status', 'PICKED')
+            ->where('retrait_type', 'temporaire')
+            ->whereNull('returned_at')
+            ->first();
+    }
+
+    /**
+     * Process quick return
+     */
+    public function processQuickReturn(): bool
+    {
+        if (!$this->isPicked() || !$this->isTemporaire()) {
+            return false;
+        }
+
+        $this->returned_at = now();
+        $this->status = 'COMPLETED';
+        return $this->save();
     }
 }

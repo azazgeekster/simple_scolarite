@@ -234,7 +234,8 @@ class ConvocationController extends Controller
                 'fontdata' => $fontData + [
 
                     'roboto'=>[
-                     'R'=>'roboto/roboto.ttf',
+                     'R'=>'brawler/brawler-regular.ttf',
+                     'B'=>'brawler/brawler-bold.ttf',
                     ]
                 ],
                 'default_font' => 'roboto',

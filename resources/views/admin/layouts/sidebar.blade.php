@@ -68,8 +68,8 @@
 
                 <!-- Document Requests -->
                 <li>
-                    <a href="#"
-                        class="group flex items-center px-4 py-3 text-slate-700 rounded-xl hover:bg-amber-50 hover:text-amber-700 dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-amber-400 transition-all duration-200 hover:shadow-sm hover:translate-x-1">
+                    <a href="{{ route('admin.document-requests.index') }}"
+                        class="group flex items-center px-4 py-3 text-slate-700 rounded-xl hover:bg-amber-50 hover:text-amber-700 dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-amber-400 transition-all duration-200 hover:shadow-sm hover:translate-x-1 {{ Request::routeIs('admin.document-requests.*') ? 'bg-amber-50 text-amber-700 dark:bg-slate-700/50 dark:text-amber-400' : '' }}">
                         <div class="flex items-center justify-center w-10 h-10 bg-amber-100 group-hover:bg-amber-200 dark:bg-slate-700 dark:group-hover:bg-slate-600 rounded-lg transition-colors duration-200">
                             <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>

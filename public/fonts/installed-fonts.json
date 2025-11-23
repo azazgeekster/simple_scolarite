@@ -7,5 +7,9 @@
     },
     "tajawal": {
         "normal": "tajawal_normal_3b18f00a05802ff23bb5ca9789049e41"
+    },
+    "brawler": {
+        "normal": "\/home\/abdoo\/laravel\/scolarite\/public\/fonts\/\/brawler_normal_1332b69cf055f435e1a38be711fb2252",
+        "bold": "brawler_bold_331c9e27066a9672325d219a5ae2c0f7"
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DocumentRequestController;
 use App\Http\Controllers\Admin\ExamPeriodController;
 use App\Http\Controllers\Admin\ExamImportController;
 use App\Http\Controllers\Admin\ExamSchedulingController;
@@ -99,6 +100,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{id}/reject', [ProfileChangeRequestController::class, 'reject'])->name('reject');
             Route::post('/{student}/approve-all', [ProfileChangeRequestController::class, 'approveAll'])->name('approve-all');
             Route::post('/{student}/reject-all', [ProfileChangeRequestController::class, 'rejectAll'])->name('reject-all');
+        });
+
+        // Document Requests Management
+        Route::prefix('document-requests')->name('document-requests.')->group(function () {
+            Route::get('/', [DocumentRequestController::class, 'index'])->name('index');
+            Route::get('/export', [DocumentRequestController::class, 'export'])->name('export');
+            Route::get('/statistics', [DocumentRequestController::class, 'statistics'])->name('statistics');
+            Route::get('/document-types', [DocumentRequestController::class, 'documentTypes'])->name('document-types');
+            Route::post('/document-types', [DocumentRequestController::class, 'storeDocumentType'])->name('document-types.store');
+            Route::put('/document-types/{id}', [DocumentRequestController::class, 'updateDocumentType'])->name('document-types.update');
+            Route::delete('/document-types/{id}', [DocumentRequestController::class, 'destroyDocumentType'])->name('document-types.destroy');
+            Route::post('/bulk-mark-ready', [DocumentRequestController::class, 'bulkMarkReady'])->name('bulk-mark-ready');
+            Route::post('/quick-return', [DocumentRequestController::class, 'quickReturn'])->name('quick-return');
+            Route::get('/{id}', [DocumentRequestController::class, 'show'])->name('show');
+            Route::post('/{id}/mark-ready', [DocumentRequestController::class, 'markReady'])->name('mark-ready');
+            Route::post('/{id}/mark-picked', [DocumentRequestController::class, 'markPicked'])->name('mark-picked');
+            Route::post('/{id}/mark-completed', [DocumentRequestController::class, 'markCompleted'])->name('mark-completed');
+            Route::post('/{id}/approve-extension', [DocumentRequestController::class, 'approveExtension'])->name('approve-extension');
+            Route::post('/{id}/reject-extension', [DocumentRequestController::class, 'rejectExtension'])->name('reject-extension');
+            Route::get('/{id}/decharge', [DocumentRequestController::class, 'generateDecharge'])->name('decharge');
+            Route::delete('/{id}', [DocumentRequestController::class, 'destroy'])->name('destroy');
         });
     });
 });

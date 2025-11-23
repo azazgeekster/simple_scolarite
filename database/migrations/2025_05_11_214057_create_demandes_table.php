@@ -14,9 +14,7 @@ return new class extends Migration
         Schema::create('demandes', function (Blueprint $table) {
             $table->id();
             $table->string('reference_number')->unique(); // Auto-generated: REQ-2025-00001
-
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
-
             $table->unsignedSmallInteger('document_id');
             $table->year('academic_year');
             $table->enum('semester', ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'])->nullable();
