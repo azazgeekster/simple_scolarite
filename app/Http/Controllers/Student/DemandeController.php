@@ -35,20 +35,25 @@ class DemandeController extends Controller
     }
     public function store(Request $request)
     {
-        // Get the document to check if it requires return specification
-        $document = Document::findOrFail($request->document_id);
-
-        // Build validation rules
+        // Validate request - support both single and multiple documents
         $rules = [
-            'document_id' => 'required|exists:documents,id',
+            'document_ids' => 'required|array|min:1',
+            'document_ids.*' => 'exists:documents,id',
         ];
 
-        // Only require retrait_type if document requires return
-        if ($document->requires_return) {
+        // Get documents to check if any require return
+        $documentIds = $request->document_ids ?? [];
+        $documents = Document::whereIn('id', $documentIds)->get();
+        $anyRequiresReturn = $documents->contains('requires_return', true);
+
+        // Only require retrait_type if any document requires return
+        if ($anyRequiresReturn) {
             $rules['retrait_type'] = 'required|in:temporaire,definitif';
         }
 
         $request->validate($rules, [
+            'document_ids.required' => 'Veuillez sélectionner au moins un document.',
+            'document_ids.min' => 'Veuillez sélectionner au moins un document.',
             'retrait_type.required' => 'Veuillez sélectionner un type de retrait.',
             'retrait_type.in' => 'Le type de retrait sélectionné est invalide.',
         ]);
@@ -63,10 +68,9 @@ class DemandeController extends Controller
             ->whereNull('returned_at')
             ->exists();
 
-
-            if ($hasOverdue) {
-                return back()->with('error', 'Vous avez des documents en retard. Veuillez les retourner avant de faire une nouvelle demande.');
-            }
+        if ($hasOverdue) {
+            return back()->with('error', 'Vous avez des documents en retard. Veuillez les retourner avant de faire une nouvelle demande.');
+        }
 
         // Get current academic year
         $currentYear = now()->year;
@@ -78,39 +82,60 @@ class DemandeController extends Controller
             return back()->with('error', 'Aucune année académique active trouvée.');
         }
 
-        // Check for duplicate requests
-        $alreadyToday = $student->demandes()
-            ->where('document_id', $request->document_id)
-            ->whereDate('created_at', now()->toDateString())
-            ->exists();
+        // Check for duplicate requests and create demandes
+        $created = 0;
+        $duplicates = [];
 
-        if ($alreadyToday) {
-            return back()->with('error', 'Vous avez déjà effectué cette demande aujourd\'hui.');
-        }
+        foreach ($documents as $document) {
+            // Check for duplicate requests
+            $alreadyToday = $student->demandes()
+                ->where('document_id', $document->id)
+                ->whereDate('created_at', now()->toDateString())
+                ->exists();
 
-        // Create demande
-        $demandeData = [
-            'document_id' => $request->document_id,
-            'academic_year' => $academicYear->start_year,
-            'status' => 'PENDING',
-        ];
-
-        // Only set retrait_type if document requires return
-        if ($document->requires_return) {
-            $demandeData['retrait_type'] = $request->retrait_type;
-
-            // Set return deadline if temporary
-            if ($request->retrait_type === 'temporaire') {
-                $demandeData['must_return_by'] = now()->addDays(2);
+            if ($alreadyToday) {
+                $duplicates[] = $document->label_fr;
+                continue;
             }
-        } else {
-            // For documents that don't require return, set as definitif by default
-            $demandeData['retrait_type'] = 'definitif';
+
+            // Create demande
+            $demandeData = [
+                'document_id' => $document->id,
+                'academic_year' => $academicYear->start_year,
+                'status' => 'PENDING',
+            ];
+
+            // Only set retrait_type if document requires return
+            if ($document->requires_return) {
+                $demandeData['retrait_type'] = $request->retrait_type;
+
+                // Set return deadline if temporary
+                if ($request->retrait_type === 'temporaire') {
+                    $demandeData['must_return_by'] = now()->addDays(2);
+                }
+            } else {
+                // For documents that don't require return, set as definitif by default
+                $demandeData['retrait_type'] = 'definitif';
+            }
+
+            $student->demandes()->create($demandeData);
+            $created++;
         }
 
-        $student->demandes()->create($demandeData);
+        // Build response message
+        if ($created === 0 && count($duplicates) > 0) {
+            return back()->with('error', 'Vous avez déjà effectué ces demandes aujourd\'hui: ' . implode(', ', $duplicates));
+        }
 
-        return back()->with('success', 'Votre demande a été soumise avec succès.');
+        $message = $created === 1
+            ? 'Votre demande a été soumise avec succès.'
+            : "{$created} demande(s) soumise(s) avec succès.";
+
+        if (count($duplicates) > 0) {
+            $message .= ' (Demandes ignorées car déjà effectuées: ' . implode(', ', $duplicates) . ')';
+        }
+
+        return back()->with('success', $message);
     }
 
     public function print(Demande $demande)

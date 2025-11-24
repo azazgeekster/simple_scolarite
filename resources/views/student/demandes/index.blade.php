@@ -118,89 +118,177 @@
                 <form method="POST" action="{{ route('student.demande.store') }}" x-data="demandeForm()">
                     @csrf
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Document Select -->
-                        <div class="group">
-                            <label for="document_id"
-                                class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                                <span class="flex items-center space-x-2">
-                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                        </path>
-                                    </svg>
-                                    <span>Document</span>
-                                </span>
-                            </label>
-                            <select name="document_id" id="document_id" @change="updateDocumentInfo($event.target.value)"
-                                required
-                                class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-300 dark:hover:border-gray-500">
-                                <option disabled selected>Choisissez un document</option>
-                                @foreach($documents as $doc)
-                                    {{-- Hide "Relevé de notes" as it has a dedicated page --}}
-                                    @if($doc->slug !== 'releve_notes')
-                                        <option value="{{ $doc->id }}"
-                                            data-requires-return="{{ $doc->requires_return ? '1' : '0' }}">
-                                            {{ $doc->label_fr }}
-                                        </option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
+                    <!-- Document Cards Grid -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
+                            <span class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                <span>Sélectionnez un ou plusieurs documents</span>
+                            </span>
+                        </label>
 
-                        <!-- Retrait Type Select (Conditional) -->
-                        <div class="group" x-show="requiresReturn" x-transition>
-                            <label for="retrait_type"
-                                class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            @foreach($documents as $doc)
+                                @if($doc->slug !== 'releve_notes')
+                                    <label
+                                        class="relative cursor-pointer group"
+                                        :class="selectedDocuments.includes({{ $doc->id }}) ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800' : ''"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            name="document_ids[]"
+                                            value="{{ $doc->id }}"
+                                            data-requires-return="{{ $doc->requires_return ? '1' : '0' }}"
+                                            class="sr-only"
+                                            @change="toggleDocument({{ $doc->id }}, $event.target.checked, {{ $doc->requires_return ? 'true' : 'false' }})"
+                                        >
+                                        <div
+                                            class="relative p-4 rounded-xl border-2 transition-all duration-200 h-full"
+                                            :class="selectedDocuments.includes({{ $doc->id }})
+                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                                : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md'"
+                                        >
+                                            <!-- Checkmark indicator -->
+                                            <div
+                                                class="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200"
+                                                :class="selectedDocuments.includes({{ $doc->id }})
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'bg-gray-100 dark:bg-gray-600 text-gray-400'"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+
+                                            <!-- Document Icon -->
+                                            <div class="mb-3">
+                                                @php
+                                                    $iconColor = match($doc->slug) {
+                                                        'attestation_inscription' => 'text-blue-500',
+                                                        'attestation_reussite' => 'text-green-500',
+                                                        'certificat_scolarite' => 'text-purple-500',
+                                                        'diplome' => 'text-amber-500',
+                                                        'releve_notes' => 'text-indigo-500',
+                                                        default => 'text-gray-500'
+                                                    };
+                                                    $bgColor = match($doc->slug) {
+                                                        'attestation_inscription' => 'bg-blue-100 dark:bg-blue-900/30',
+                                                        'attestation_reussite' => 'bg-green-100 dark:bg-green-900/30',
+                                                        'certificat_scolarite' => 'bg-purple-100 dark:bg-purple-900/30',
+                                                        'diplome' => 'bg-amber-100 dark:bg-amber-900/30',
+                                                        'releve_notes' => 'bg-indigo-100 dark:bg-indigo-900/30',
+                                                        default => 'bg-gray-100 dark:bg-gray-700'
+                                                    };
+                                                @endphp
+                                                <div class="w-12 h-12 {{ $bgColor }} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                                                    @switch($doc->slug)
+                                                        @case('attestation_inscription')
+                                                            <svg class="w-6 h-6 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                            </svg>
+                                                            @break
+                                                        @case('attestation_reussite')
+                                                            <svg class="w-6 h-6 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                                            </svg>
+                                                            @break
+                                                        @case('certificat_scolarite')
+                                                            <svg class="w-6 h-6 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                                            </svg>
+                                                            @break
+                                                        @case('diplome')
+                                                            <svg class="w-6 h-6 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+                                                                <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/>
+                                                            </svg>
+                                                            @break
+                                                        @default
+                                                            <svg class="w-6 h-6 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                            </svg>
+                                                    @endswitch
+                                                </div>
+                                            </div>
+
+                                            <!-- Document Name -->
+                                            <h4 class="font-semibold text-sm text-gray-900 dark:text-white mb-1 pr-6">
+                                                {{ $doc->label_fr }}
+                                            </h4>
+
+                                            <!-- Return indicator -->
+                                            @if($doc->requires_return)
+                                                <span class="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    Retour possible
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                    Remise définitive
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </label>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Selected count badge -->
+                    <div x-show="selectedDocuments.length > 0" x-transition class="mb-4">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-xl">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <span class="font-semibold" x-text="selectedDocuments.length + ' document(s) sélectionné(s)'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Retrait Type (shown when any selected document requires return) -->
+                    <div x-show="hasDocumentRequiringReturn" x-transition class="mb-6">
+                        <div class="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                            <label for="retrait_type" class="block text-sm font-semibold text-amber-800 dark:text-amber-200 mb-3">
                                 <span class="flex items-center space-x-2">
-                                    <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                    <span>Type de retrait</span>
+                                    <span>Type de retrait (pour documents avec retour)</span>
                                 </span>
                             </label>
-                            <select name="retrait_type" id="retrait_type" :required="requiresReturn"
-                                class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 hover:border-gray-300 dark:hover:border-gray-500">
-                                <option disabled selected>Choisissez le type</option>
-                                <option value="temporaire">Temporaire</option>
+                            <select name="retrait_type" id="retrait_type" :required="hasDocumentRequiringReturn"
+                                class="w-full sm:w-auto px-4 py-3 rounded-xl border-2 border-amber-200 dark:border-amber-700 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20">
+                                <option value="" disabled selected>Choisissez le type</option>
+                                <option value="temporaire">Temporaire (retour dans 48h)</option>
                                 <option value="definitif">Définitif</option>
                             </select>
                         </div>
+                    </div>
 
-                        <!-- Info Message (when document doesn't require return) -->
-                        <div x-show="!requiresReturn && documentSelected" x-transition class="sm:col-span-2 lg:col-span-3">
-                            <div
-                                class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                                <div class="flex items-start gap-3">
-                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5"
-                                        fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                    <p class="text-sm text-blue-800 dark:text-blue-200">
-                                        Ce document vous sera remis directement, aucun retour nécessaire.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <div class="flex items-end sm:col-span-2 lg:col-span-1">
-                            <button type="submit"
-                                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg focus:ring-4 focus:ring-blue-500/25 active:scale-[0.98]">
-                                <span class="flex items-center justify-center space-x-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                                    </svg>
-                                    <span>Soumettre</span>
-                                </span>
-                            </button>
-                        </div>
+                    <!-- Submit Button -->
+                    <div class="flex justify-end">
+                        <button type="submit"
+                            :disabled="selectedDocuments.length === 0"
+                            :class="selectedDocuments.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:from-blue-700 hover:to-indigo-700 hover:scale-[1.02] hover:shadow-lg'"
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 transform focus:ring-4 focus:ring-blue-500/25 active:scale-[0.98]">
+                            <span class="flex items-center justify-center space-x-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                </svg>
+                                <span x-text="selectedDocuments.length > 1 ? 'Soumettre les demandes' : 'Soumettre la demande'">Soumettre</span>
+                            </span>
+                        </button>
                     </div>
                 </form>
 
@@ -1274,7 +1362,14 @@
         }
 
         // Enhanced form submission with loading state
-        document.querySelector('form[action*="demande.store"]').addEventListener('submit', function () {
+        document.querySelector('form[action*="demande.store"]')?.addEventListener('submit', function (e) {
+            const selectedDocs = document.querySelectorAll('input[name="document_ids[]"]:checked');
+            if (selectedDocs.length === 0) {
+                e.preventDefault();
+                showNotification('Veuillez sélectionner au moins un document.', 'error');
+                return;
+            }
+
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
 
@@ -1329,21 +1424,28 @@
 
         function demandeForm() {
             return {
-                requiresReturn: false,
-                documentSelected: false,
+                selectedDocuments: [],
+                hasDocumentRequiringReturn: false,
 
-                updateDocumentInfo(documentId) {
-                    this.documentSelected = !!documentId;
-
-                    if (!documentId) {
-                        this.requiresReturn = false;
-                        return;
+                toggleDocument(documentId, isChecked, requiresReturn) {
+                    if (isChecked) {
+                        if (!this.selectedDocuments.includes(documentId)) {
+                            this.selectedDocuments.push(documentId);
+                        }
+                    } else {
+                        this.selectedDocuments = this.selectedDocuments.filter(id => id !== documentId);
                     }
 
-                    // Get the selected option
-                    const select = document.getElementById('document_id');
-                    const option = select.options[select.selectedIndex];
-                    this.requiresReturn = option.getAttribute('data-requires-return') === '1';
+                    // Update hasDocumentRequiringReturn based on all selected documents
+                    this.updateRequiresReturn();
+                },
+
+                updateRequiresReturn() {
+                    // Check all checkboxes to see if any selected document requires return
+                    const checkboxes = document.querySelectorAll('input[name="document_ids[]"]:checked');
+                    this.hasDocumentRequiringReturn = Array.from(checkboxes).some(
+                        cb => cb.getAttribute('data-requires-return') === '1'
+                    );
                 }
             }
         }

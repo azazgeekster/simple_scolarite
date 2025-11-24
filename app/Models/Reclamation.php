@@ -18,6 +18,7 @@ class Reclamation extends Model
     const STATUS_REJECTED = 'REJECTED';
 
     protected $fillable = [
+        'reference',
         'module_grade_id',
         'reclamation_type',
         'reason',
@@ -26,13 +27,44 @@ class Reclamation extends Model
         'status',
         'original_grade',
         'revised_grade',
+        'corrected_by',
+        'corrected_at',
     ];
 
     protected $casts = [
         'module_grade_id' => 'integer',
         'original_grade' => 'decimal:2',
         'revised_grade' => 'decimal:2',
+        'corrected_at' => 'datetime',
     ];
+
+    // Boot method for auto-generating reference
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($reclamation) {
+            if (empty($reclamation->reference)) {
+                $reclamation->reference = self::generateReference();
+            }
+        });
+    }
+
+    // Generate unique reference number (format: REC-XXXXXX)
+    public static function generateReference(): string
+    {
+        do {
+            $reference = 'REC-' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
+        } while (self::where('reference', $reference)->exists());
+
+        return $reference;
+    }
+
+    // Relationship for corrector
+    public function corrector()
+    {
+        return $this->belongsTo(\App\Models\Admin::class, 'corrected_by');
+    }
 
     // Relationships
     public function moduleGrade()

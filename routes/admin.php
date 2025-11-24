@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\ExamSchedulingController;
 use App\Http\Controllers\Admin\LocalManagementController;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\ProfileChangeRequestController;
+use App\Http\Controllers\Admin\StudentManagementController;
+use App\Http\Controllers\Admin\GradeManagementController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Auth\AdminForgotPasswordController;
 use App\Http\Controllers\Auth\AdminResetPasswordController;
@@ -121,6 +123,58 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{id}/reject-extension', [DocumentRequestController::class, 'rejectExtension'])->name('reject-extension');
             Route::get('/{id}/decharge', [DocumentRequestController::class, 'generateDecharge'])->name('decharge');
             Route::delete('/{id}', [DocumentRequestController::class, 'destroy'])->name('destroy');
+        });
+
+        // Student Management
+        Route::prefix('students')->name('students.')->group(function () {
+            Route::get('/', [StudentManagementController::class, 'index'])->name('index');
+            Route::get('/export', [StudentManagementController::class, 'export'])->name('export');
+            Route::post('/bulk-activate', [StudentManagementController::class, 'bulkActivate'])->name('bulk-activate');
+            Route::post('/bulk-deactivate', [StudentManagementController::class, 'bulkDeactivate'])->name('bulk-deactivate');
+            Route::get('/{id}', [StudentManagementController::class, 'show'])->name('show');
+            Route::put('/{id}', [StudentManagementController::class, 'update'])->name('update');
+            Route::patch('/{id}/toggle-status', [StudentManagementController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/{id}/reset-password', [StudentManagementController::class, 'resetPassword'])->name('reset-password');
+            Route::post('/{id}/enroll-module', [StudentManagementController::class, 'enrollModule'])->name('enroll-module');
+            Route::delete('/{id}/unenroll-module/{enrollmentId}', [StudentManagementController::class, 'unenrollModule'])->name('unenroll-module');
+            Route::post('/{id}/enroll-program', [StudentManagementController::class, 'enrollProgram'])->name('enroll-program');
+            Route::patch('/{id}/program-enrollment/{enrollmentId}', [StudentManagementController::class, 'updateProgramEnrollment'])->name('update-program-enrollment');
+            Route::get('/{id}/convocation/{convocationId}', [StudentManagementController::class, 'downloadConvocation'])->name('download-convocation');
+        });
+
+        // Grade Management
+        Route::prefix('grades')->name('grades.')->group(function () {
+            Route::get('/', [GradeManagementController::class, 'index'])->name('index');
+            Route::post('/module/{moduleId}/publish', [GradeManagementController::class, 'publishModule'])->name('publish-module');
+            Route::post('/module/{moduleId}/unpublish', [GradeManagementController::class, 'unpublishModule'])->name('unpublish-module');
+            Route::post('/bulk-publish', [GradeManagementController::class, 'bulkPublish'])->name('bulk-publish');
+
+            // Import
+            Route::get('/import', [GradeManagementController::class, 'showImportForm'])->name('import');
+            Route::post('/import', [GradeManagementController::class, 'import'])->name('import.process');
+            Route::post('/import/preview', [GradeManagementController::class, 'previewImport'])->name('import.preview');
+            Route::post('/import/chunk', [GradeManagementController::class, 'processImportChunk'])->name('import.chunk');
+            Route::get('/download-template', [GradeManagementController::class, 'downloadTemplate'])->name('download-template');
+            Route::get('/modules-for-filiere', [GradeManagementController::class, 'getModulesForFiliere'])->name('modules-for-filiere');
+
+            // Reclamations
+            Route::get('/reclamations', [GradeManagementController::class, 'reclamations'])->name('reclamations');
+            Route::get('/reclamations/export', [GradeManagementController::class, 'exportReclamations'])->name('reclamations.export');
+            Route::get('/reclamations/template', [GradeManagementController::class, 'downloadReclamationsTemplate'])->name('reclamations.template');
+            Route::post('/reclamations/import', [GradeManagementController::class, 'importReclamations'])->name('reclamations.import');
+            Route::get('/reclamations/pv', [GradeManagementController::class, 'downloadReclamationsPV'])->name('reclamations.pv');
+            Route::get('/reclamations/{id}', [GradeManagementController::class, 'showReclamation'])->name('reclamations.show');
+            Route::post('/reclamations/{id}/review', [GradeManagementController::class, 'reviewReclamation'])->name('reclamations.review');
+            Route::post('/reclamations/{id}/resolve', [GradeManagementController::class, 'resolveReclamation'])->name('reclamations.resolve');
+            Route::post('/reclamations/{id}/reject', [GradeManagementController::class, 'rejectReclamation'])->name('reclamations.reject');
+            Route::post('/reclamations/bulk-update', [GradeManagementController::class, 'bulkUpdateReclamations'])->name('reclamations.bulk-update');
+
+            // Reclamation Settings
+            Route::get('/reclamation-settings', [GradeManagementController::class, 'reclamationSettings'])->name('reclamation-settings');
+            Route::post('/reclamation-settings', [GradeManagementController::class, 'storeReclamationSetting'])->name('reclamation-settings.store');
+            Route::put('/reclamation-settings/{id}', [GradeManagementController::class, 'updateReclamationSetting'])->name('reclamation-settings.update');
+            Route::delete('/reclamation-settings/{id}', [GradeManagementController::class, 'deleteReclamationSetting'])->name('reclamation-settings.delete');
+            Route::get('/modules-by-filiere', [GradeManagementController::class, 'getModulesByFiliereSemester'])->name('modules-by-filiere');
         });
     });
 });

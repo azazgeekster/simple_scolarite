@@ -42,8 +42,8 @@
 
                 <!-- Students -->
                 <li>
-                    <a href="#"
-                        class="group flex items-center px-4 py-3 text-slate-700 rounded-xl hover:bg-blue-50 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-blue-400 transition-all duration-200 hover:shadow-sm hover:translate-x-1">
+                    <a href="{{ route('admin.students.index') }}"
+                        class="group flex items-center px-4 py-3 text-slate-700 rounded-xl hover:bg-blue-50 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-blue-400 transition-all duration-200 hover:shadow-sm hover:translate-x-1 {{ Request::routeIs('admin.students.*') ? 'bg-blue-50 text-blue-700 dark:bg-slate-700/50 dark:text-blue-400' : '' }}">
                         <div class="flex items-center justify-center w-10 h-10 bg-blue-100 group-hover:bg-blue-200 dark:bg-slate-700 dark:group-hover:bg-slate-600 rounded-lg transition-colors duration-200">
                             <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -141,13 +141,13 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200">
+                            <a href="{{ route('admin.grades.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.grades.index') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
                                 <span class="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
-                                Grades Management
+                                Grades Publication
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200">
+                            <a href="{{ route('admin.grades.reclamations') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.grades.reclamations*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
                                 <span class="w-2 h-2 bg-red-400 rounded-full mr-3"></span>
                                 Reclamations
                             </a>
