@@ -1,15 +1,17 @@
 <?php
 
+use App\Http\Controllers\Admin\AcademicManagementController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentRequestController;
 use App\Http\Controllers\Admin\ExamPeriodController;
 use App\Http\Controllers\Admin\ExamImportController;
 use App\Http\Controllers\Admin\ExamSchedulingController;
+use App\Http\Controllers\Admin\GradeManagementController;
 use App\Http\Controllers\Admin\LocalManagementController;
 use App\Http\Controllers\Admin\MessageController;
+use App\Http\Controllers\Admin\ModuleProfessorManagementController;
 use App\Http\Controllers\Admin\ProfileChangeRequestController;
 use App\Http\Controllers\Admin\StudentManagementController;
-use App\Http\Controllers\Admin\GradeManagementController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Auth\AdminForgotPasswordController;
 use App\Http\Controllers\Auth\AdminResetPasswordController;
@@ -175,6 +177,48 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/reclamation-settings/{id}', [GradeManagementController::class, 'updateReclamationSetting'])->name('reclamation-settings.update');
             Route::delete('/reclamation-settings/{id}', [GradeManagementController::class, 'deleteReclamationSetting'])->name('reclamation-settings.delete');
             Route::get('/modules-by-filiere', [GradeManagementController::class, 'getModulesByFiliereSemester'])->name('modules-by-filiere');
+        });
+
+        // Academic Management (Departments, Filieres, Modules, Professors)
+        Route::prefix('academic')->name('academic.')->group(function () {
+            // Dashboard
+            Route::get('/', [AcademicManagementController::class, 'index'])->name('index');
+
+            // Departments
+            Route::get('/departments', [AcademicManagementController::class, 'departments'])->name('departments');
+            Route::post('/departments', [AcademicManagementController::class, 'storeDepartment'])->name('departments.store');
+            Route::put('/departments/{id}', [AcademicManagementController::class, 'updateDepartment'])->name('departments.update');
+            Route::delete('/departments/{id}', [AcademicManagementController::class, 'destroyDepartment'])->name('departments.destroy');
+            Route::get('/departments/export', [AcademicManagementController::class, 'exportDepartments'])->name('departments.export');
+            Route::get('/departments/template', [AcademicManagementController::class, 'downloadDepartmentsTemplate'])->name('departments.template');
+            Route::post('/departments/import', [AcademicManagementController::class, 'importDepartments'])->name('departments.import');
+
+            // Filieres
+            Route::get('/filieres', [AcademicManagementController::class, 'filieres'])->name('filieres');
+            Route::post('/filieres', [AcademicManagementController::class, 'storeFiliere'])->name('filieres.store');
+            Route::put('/filieres/{id}', [AcademicManagementController::class, 'updateFiliere'])->name('filieres.update');
+            Route::delete('/filieres/{id}', [AcademicManagementController::class, 'destroyFiliere'])->name('filieres.destroy');
+            Route::get('/filieres/export', [AcademicManagementController::class, 'exportFilieres'])->name('filieres.export');
+            Route::get('/filieres/template', [AcademicManagementController::class, 'downloadFilieresTemplate'])->name('filieres.template');
+            Route::post('/filieres/import', [AcademicManagementController::class, 'importFilieres'])->name('filieres.import');
+
+            // Modules
+            Route::get('/modules', [ModuleProfessorManagementController::class, 'modules'])->name('modules');
+            Route::post('/modules', [ModuleProfessorManagementController::class, 'storeModule'])->name('modules.store');
+            Route::put('/modules/{id}', [ModuleProfessorManagementController::class, 'updateModule'])->name('modules.update');
+            Route::delete('/modules/{id}', [ModuleProfessorManagementController::class, 'destroyModule'])->name('modules.destroy');
+            Route::get('/modules/export', [ModuleProfessorManagementController::class, 'exportModules'])->name('modules.export');
+            Route::get('/modules/template', [ModuleProfessorManagementController::class, 'downloadModulesTemplate'])->name('modules.template');
+            Route::post('/modules/import', [ModuleProfessorManagementController::class, 'importModules'])->name('modules.import');
+
+            // Professors
+            Route::get('/professors', [ModuleProfessorManagementController::class, 'professors'])->name('professors');
+            Route::post('/professors', [ModuleProfessorManagementController::class, 'storeProfessor'])->name('professors.store');
+            Route::put('/professors/{id}', [ModuleProfessorManagementController::class, 'updateProfessor'])->name('professors.update');
+            Route::delete('/professors/{id}', [ModuleProfessorManagementController::class, 'destroyProfessor'])->name('professors.destroy');
+            Route::get('/professors/export', [ModuleProfessorManagementController::class, 'exportProfessors'])->name('professors.export');
+            Route::get('/professors/template', [ModuleProfessorManagementController::class, 'downloadProfessorsTemplate'])->name('professors.template');
+            Route::post('/professors/import', [ModuleProfessorManagementController::class, 'importProfessors'])->name('professors.import');
         });
     });
 });

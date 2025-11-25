@@ -118,7 +118,18 @@ class DocumentRequestController extends Controller
             ->limit(5)
             ->get();
 
-        return view('admin.document-requests.show', compact('demande', 'otherRequests'));
+        // Get student's document history statistics
+        $studentHistory = [
+            'total' => Demande::where('student_id', $demande->student_id)->count(),
+            'completed' => Demande::where('student_id', $demande->student_id)->where('status', 'COMPLETED')->count(),
+            'pending_returns' => Demande::where('student_id', $demande->student_id)
+                ->where('status', 'PICKED')
+                ->where('retrait_type', 'temporaire')
+                ->whereNull('returned_at')
+                ->count()
+        ];
+
+        return view('admin.document-requests.show', compact('demande', 'otherRequests', 'studentHistory'));
     }
 
     /**
