@@ -48,7 +48,7 @@ class DemandeController extends Controller
 
         // Only require retrait_type if any document requires return
         if ($anyRequiresReturn) {
-            $rules['retrait_type'] = 'required|in:temporaire,definitif';
+            $rules['retrait_type'] = 'required|in:temporaire,permanent';
         }
 
         $request->validate($rules, [
@@ -115,7 +115,7 @@ class DemandeController extends Controller
                 }
             } else {
                 // For documents that don't require return, set as definitif by default
-                $demandeData['retrait_type'] = 'definitif';
+                $demandeData['retrait_type'] = 'permanent';
             }
 
             $student->demandes()->create($demandeData);

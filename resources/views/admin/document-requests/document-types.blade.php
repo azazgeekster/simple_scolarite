@@ -143,95 +143,100 @@
 </div>
 
 <!-- Create/Edit Modal -->
-<div id="documentModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-        <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <form id="documentForm" method="POST">
-                @csrf
-                <div id="methodField"></div>
+<div id="documentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg transform transition-all">
+        <form id="documentForm" method="POST">
+            @csrf
+            <div id="methodField"></div>
 
-                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4" id="modal-title">
-                        Nouveau Type de Document
-                    </h3>
+            <div class="px-6 py-5">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4" id="modal-title">
+                    Nouveau Type de Document
+                </h3>
 
-                    <div class="space-y-4">
-                        <!-- Slug -->
-                        <div>
-                            <label for="slug" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Identifiant (slug) <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" name="slug" id="slug" required
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm text-sm"
-                                placeholder="attestation_inscription">
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Utilisé pour l'identification unique</p>
-                        </div>
+                <div class="space-y-4">
+                    <!-- Slug -->
+                    <div>
+                        <label for="slug" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Identifiant (slug) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="slug" id="slug" required
+                            class=" bg-white text-black mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600
+                                   dark:bg-gray-700 dark:text-white shadow-sm text-sm"
+                            placeholder="attestation_inscription">
+                    </div>
 
-                        <!-- Label FR -->
-                        <div>
-                            <label for="label_fr" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Libellé (Français) <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" name="label_fr" id="label_fr" required
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm text-sm"
-                                placeholder="Attestation d'Inscription">
-                        </div>
+                    <!-- Label FR -->
+                    <div>
+                        <label for="label_fr" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Libellé (Français) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="label_fr" id="label_fr" required
+                            class=" bg-white text-black mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600
+                                   dark:bg-gray-700 dark:text-white shadow-sm text-sm"
+                            placeholder="Attestation d'Inscription">
+                    </div>
 
-                        <!-- Label AR -->
-                        <div>
-                            <label for="label_ar" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Libellé (Arabe)
-                            </label>
-                            <input type="text" name="label_ar" id="label_ar" dir="rtl"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm text-sm"
-                                placeholder="شهادة التسجيل">
-                        </div>
+                    <!-- Label AR -->
+                    <div>
+                        <label for="label_ar" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Libellé (Arabe)
+                        </label>
+                        <input type="text" name="label_ar" id="label_ar" dir="rtl"
+                            class=" bg-white text-black mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600
+                                   dark:bg-gray-700 dark:text-white shadow-sm text-sm"
+                            placeholder="شهادة التسجيل">
+                    </div>
 
-                        <!-- Label EN -->
-                        <div>
-                            <label for="label_en" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Libellé (Anglais)
-                            </label>
-                            <input type="text" name="label_en" id="label_en"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm text-sm"
-                                placeholder="Registration Certificate">
-                        </div>
+                    <!-- Label EN -->
+                    <div>
+                        <label for="label_en" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Libellé (Anglais)
+                        </label>
+                        <input type="text" name="label_en" id="label_en"
+                            class=" bg-white text-black mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600
+                                   dark:bg-gray-700 dark:text-white shadow-sm text-sm"
+                            placeholder="Registration Certificate">
+                    </div>
 
-                        <!-- Description -->
-                        <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Description
-                            </label>
-                            <textarea name="description" id="description" rows="3"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm text-sm"
-                                placeholder="Description du document..."></textarea>
-                        </div>
+                    <!-- Description -->
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Description
+                        </label>
+                        <textarea name="description" id="description" rows="3"
+                            class="text-black bg-white mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600
+                                   dark:bg-gray-700 dark:text-white shadow-sm text-sm"
+                            placeholder="Description du document..."></textarea>
+                    </div>
 
-                        <!-- Requires Return -->
-                        <div class="flex items-center">
-                            <input type="checkbox" name="requires_return" id="requires_return" value="1"
-                                class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500">
-                            <label for="requires_return" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                                Document à retourner (temporaire)
-                            </label>
-                        </div>
+                    <!-- Requires Return -->
+                    <div class="flex items-center">
+                        <input type="checkbox" name="requires_return" id="requires_return" value="1"
+                            class="bg-white h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500">
+                        <label for="requires_return" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                            Document à retourner (temporaire)
+                        </label>
                     </div>
                 </div>
+            </div>
 
-                <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 sm:ml-3 sm:w-auto sm:text-sm">
-                        Enregistrer
-                    </button>
-                    <button type="button" onclick="closeModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Annuler
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="bg-gray-50 dark:bg-gray-900/50 px-6 py-3 flex justify-end space-x-3">
+                <button type="submit"
+                    class="px-4 py-2 rounded-md bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 shadow-sm">
+                    Enregistrer
+                </button>
+                <button type="button" onclick="closeModal()"
+                    class="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600
+                           bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300
+                           hover:bg-gray-50 dark:hover:bg-gray-600">
+                    Annuler
+                </button>
+            </div>
+        </form>
     </div>
 </div>
+
 
 <script>
     function openCreateModal() {
@@ -250,18 +255,21 @@
         document.getElementById('documentModal').classList.remove('hidden');
     }
 
-    function openEditModal(document) {
+    function openEditModal(doc) {
+        // Now 'document' refers to the global DOM correctly
         document.getElementById('modal-title').textContent = 'Modifier Type de Document';
-        document.getElementById('documentForm').action = '{{ url("admin/document-requests/document-types") }}/' + document.id;
+
+        // Use 'doc' to access your data
+        document.getElementById('documentForm').action = '{{ url("admin/document-requests/document-types") }}/' + doc.id;
         document.getElementById('methodField').innerHTML = '@method("PUT")';
 
-        // Fill form
-        document.getElementById('slug').value = document.slug || '';
-        document.getElementById('label_fr').value = document.label_fr || '';
-        document.getElementById('label_ar').value = document.label_ar || '';
-        document.getElementById('label_en').value = document.label_en || '';
-        document.getElementById('description').value = document.description || '';
-        document.getElementById('requires_return').checked = document.requires_return == 1;
+        // Fill form using 'doc'
+        document.getElementById('slug').value = doc.slug || '';
+        document.getElementById('label_fr').value = doc.label_fr || '';
+        document.getElementById('label_ar').value = doc.label_ar || '';
+        document.getElementById('label_en').value = doc.label_en || '';
+        document.getElementById('description').value = doc.description || '';
+        document.getElementById('requires_return').checked = doc.requires_return == 1;
 
         document.getElementById('documentModal').classList.remove('hidden');
     }

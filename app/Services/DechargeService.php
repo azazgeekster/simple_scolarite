@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use App\Models\Demande;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Mpdf\Mpdf;
+use Mpdf\MpdfException;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -36,6 +37,34 @@ class DechargeService
     }
 
     /**
+     * Create mPDF instance with proper configuration
+     */
+    protected function createMpdf(): Mpdf
+    {
+        $fontConfig = config('mpdf_fonts');
+
+        return new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_left' => 15,
+            'margin_right' => 15,
+            'margin_top' => 15,
+            'margin_bottom' => 15,
+            'autoScriptToLang' => true,
+            'autoLangToFont' => true,
+            'default_font' => 'brawler',
+            'fontDir' => array_merge(
+                (new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'],
+                $fontConfig['fontDir']
+            ),
+            'fontdata' => array_merge(
+                (new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'],
+                $fontConfig['fontdata']
+            ),
+        ]);
+    }
+
+    /**
      * Generate a décharge (liability release) PDF for a document withdrawal
      */
     public function generate(Demande $demande): string
@@ -50,17 +79,23 @@ class DechargeService
             'qrCode' => $this->generateQrCode($demande),
         ];
 
-        $pdf = Pdf::loadView('admin.document-requests.decharge', $data);
-        $pdf->setPaper('a4');
+        try {
+            $mpdf = $this->createMpdf();
 
-        // Generate filename
-        $filename = 'decharge_' . $demande->reference_number . '_' . now()->format('Ymd_His') . '.pdf';
-        $path = 'decharges/' . $filename;
+            $html = view('admin.document-requests.decharge', $data)->render();
+            $mpdf->WriteHTML($html);
 
-        // Store PDF
-        Storage::disk('public')->put($path, $pdf->output());
+            // Generate filename
+            $filename = 'decharge_' . $demande->reference_number . '_' . now()->format('Ymd_His') . '.pdf';
+            $path = 'decharges/' . $filename;
 
-        return $path;
+            // Store PDF
+            Storage::disk('public')->put($path, $mpdf->Output('', 'S'));
+
+            return $path;
+        } catch (MpdfException $e) {
+            throw new \Exception('Failed to generate decharge PDF: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -78,11 +113,20 @@ class DechargeService
             'qrCode' => $this->generateQrCode($demande),
         ];
 
-        $pdf = Pdf::loadView('admin.document-requests.decharge', $data);
-        $pdf->setPaper('a4');
+        try {
+            $mpdf = $this->createMpdf();
 
-        $filename = 'Decharge_' . $demande->reference_number . '.pdf';
+            $html = view('admin.document-requests.decharge', $data)->render();
+            $mpdf->WriteHTML($html);
 
-        return $pdf->stream($filename);
+            $filename = 'Decharge_' . $demande->reference_number . '.pdf';
+
+            return response($mpdf->Output($filename, 'I'), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            ]);
+        } catch (MpdfException $e) {
+            throw new \Exception('Failed to stream decharge PDF: ' . $e->getMessage());
+        }
     }
 }

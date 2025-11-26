@@ -1,26 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <title>Décharge - {{ $demande->reference_number }}</title>
-
-    <style>
-        @font-face {
-            font-family: 'brawler';
-            src: url('{{ public_path("fonts/brawler/brawler-regular.ttf") }}') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'brawler';
-            src: url('{{ public_path("fonts/brawler/brawler-bold.ttf") }}') format('truetype');
-            font-weight: bold;
-            font-style: normal;
-        }
-    </style>
-
     <style>
         * {
             margin: 0;
@@ -29,28 +11,29 @@
         }
 
         body {
-            font-family: "brawler", serif;
+            font-family: 'brawler', serif;
             font-weight: 400;
             font-style: normal;
-            font-size: 13pt;
+            font-size: 11pt;
             line-height: 1.8;
             padding: 50px 60px;
         }
 
         .header {
-            display: table;
             width: 100%;
             margin-bottom: 8px;
         }
 
+        .header table {
+            width: 100%;
+        }
+
         .header-left {
-            display: table-cell;
             width: 70%;
             vertical-align: middle;
         }
 
         .header-right {
-            display: table-cell;
             width: 30%;
             text-align: right;
             vertical-align: middle;
@@ -69,37 +52,40 @@
         }
 
         .title {
-            font-size: 32pt;
+            font-size: 20pt;
             font-weight: bold;
             text-align: center;
-            /* margin: 20px 0 15px 0; */
+            margin-top: 50px;
+            line-height: 1;
         }
 
-        .subtitle {
-            font-size: 20pt;
+        .arabic {
+            font-family: 'amiri';
+            direction: rtl;
             text-align: center;
-            margin-bottom: 30px;
+            font-weight: bold;
+            font-size: 20pt;
+            /* margin-bottom: 20px; */
         }
 
         .info-section {
             margin: 20px 0;
         }
 
-        .info-row {
-            display: table;
+        .info-table {
             width: 100%;
-            margin-bottom: 5px;
+            border-collapse: collapse;
         }
 
         .info-label {
-            display: table-cell;
             font-weight: bold;
             width: 200px;
             padding-right: 20px;
+            padding-bottom: 5px;
         }
 
         .info-value {
-            display: table-cell;
+            padding-bottom: 5px;
         }
 
         .declaration {
@@ -110,12 +96,6 @@
         .document-list {
             margin: 5px 0 5px 10px;
         }
-
-/*
-
-        .operator-section {
-            margin: 30px 0;
-        } */
 
         .notes-section {
             margin: 40px 0;
@@ -141,7 +121,7 @@
         .footer-location {
             text-align: right;
             margin-bottom: 80px;
-            font-size: 14pt;
+            /* font-size: 14pt; */
         }
 
         .signature-section {
@@ -149,10 +129,9 @@
             margin-top: 40px;
         }
 
-        .signature-label {
-            /* margin-bottom: 80px; */
+        /* .signature-label {
             font-size: 13pt;
-        }
+        } */
 
         .signature-line {
             border-bottom: 1px dotted #333;
@@ -180,60 +159,58 @@
         }
     </style>
 </head>
-
 <body>
     <div class="header">
-        <div class="header-left">
-            <img src="{{ storage_path('app/public/logos/logo_fac_fr.png') }}" alt="Logo Faculté" class="logo">
-        </div>
-        <div class="header-right">
-            <img src="data:image/png;base64,{{ $qrCode }}" alt="QR Code" class="qrcode">
-        </div>
+        <table>
+            <tr>
+                <td class="header-left">
+                    <img src="{{ storage_path('app/public/logos/logo_fac_fr.png') }}" alt="Logo Faculté" class="logo">
+                </td>
+                <td class="header-right">
+                    <img src="data:image/png;base64,{{ $qrCode }}" alt="QR Code" class="qrcode">
+                </td>
+            </tr>
+        </table>
     </div>
 
     <div class="title">Décharge</div>
-    {{-- <div class="subtitle">Retrait de dossier d'inscription</div> --}}
+    <div class="arabic">سحب</div>
 
     <div class="info-section">
-        <div class="info-row">
-            <div class="info-label">Nom:</div>
-            <div class="info-value">{{ strtoupper($student->nom ?? 'N/A') }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">Prénom:</div>
-            <div class="info-value">{{ strtoupper($student->prenom ?? 'N/A') }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">CNE:</div>
-            <div class="info-value">{{ $student->cne ?? 'N/A' }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">CIN:</div>
-            <div class="info-value">{{ $student->cin ?? 'N/A' }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">APOGEE:</div>
-            <div class="info-value">{{ $student->apogee ?? 'N/A' }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">Filière:</div>
-            <div class="info-value">{{ $student->programEnrollments->first()->filiere->label_fr ?? 'N/A' }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">Année d'inscription:</div>
-            <div class="info-value">{{ $demande->academic_year }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">Pièce Fournie:</div>
-            <div class="info-value">{{ $demande->piece_fournie ?? 'Carte d\'étudiant' }}</div>
-        </div>
+        <table class="info-table">
+            <tr>
+                <td class="info-label">Nom:</td>
+                <td class="info-value">{{ strtoupper($student->nom ?? 'N/A') }}</td>
+            </tr>
+            <tr>
+                <td class="info-label">Prénom:</td>
+                <td class="info-value">{{ strtoupper($student->prenom ?? 'N/A') }}</td>
+            </tr>
+            <tr>
+                <td class="info-label">CNE:</td>
+                <td class="info-value">{{ $student->cne ?? 'N/A' }}</td>
+            </tr>
+            <tr>
+                <td class="info-label">CIN:</td>
+                <td class="info-value">{{ $student->cin ?? 'N/A' }}</td>
+            </tr>
+            <tr>
+                <td class="info-label">APOGEE:</td>
+                <td class="info-value">{{ $student->apogee ?? 'N/A' }}</td>
+            </tr>
+            <tr>
+                <td class="info-label">Filière:</td>
+                <td class="info-value">{{ $student->programEnrollments->first()->filiere->label_fr ?? 'N/A' }}</td>
+            </tr>
+            <tr>
+                <td class="info-label">Année d'inscription:</td>
+                <td class="info-value">{{ $demande->academic_year }}</td>
+            </tr>
+            <tr>
+                <td class="info-label">Pièce Fournie:</td>
+                <td class="info-value">{{ $demande->piece_fournie ?? 'Carte d\'étudiant' }}</td>
+            </tr>
+        </table>
     </div>
 
     <div class="declaration">
@@ -242,62 +219,33 @@
 
     <div class="document-list">
         <div class="document-item">
-            • <strong>{{ $document->label_fr ?? 'N/A' }}</strong>  @if($demande->semester)
-            <span class="document-item">
-               ( {{ $demande->semester }} )
-            </span>
-        @endif : {{ ucfirst($demande->retrait_type) }}
-
-        </div>
-
-        </div>
-{{-- 
-    @if($demande->isPermanent() && $document->isDeposited())
-        <div class="warning-box">
-            <div class="warning-title">⚠ ATTENTION - RETRAIT DÉFINITIF</div>
-            <div class="warning-text">
-                Ce retrait est <strong>DÉFINITIF</strong>. En retirant ce document original,
-                je reconnais que mon statut d'étudiant actif sera suspendu et que je ne pourrai
-                plus bénéficier des services liés à cette inscription.
-            </div>
-            <div class="warning-text">
-                Je déclare avoir été informé(e) des conséquences de ce retrait définitif
-                et accepte toutes les conditions qui en découlent.
-            </div>
-        </div>
-    @elseif($demande->isTemporaire() && $demande->must_return_by)
-        <div class="info-row" style="margin-top: 30px;">
-            <div class="info-label">Date limite de retour:</div>
-            <div class="info-value"><strong>{{ $demande->must_return_by->format('d/m/Y') }}</strong></div>
-        </div>
-    @endif --}}
-
-    <div class="operator-section">
-        <div class="info-row">
-            <div class="info-label">Opérateur:</div>
-            <div class="info-value">{{ $admin->name ?? '' }}</div>
+            • <strong>{{ $document->label_fr ?? 'N/A' }}</strong>
+            @if($demande->semester)
+                <span class="document-item">( {{ $demande->semester }} )</span>
+            @endif
+            : {{ ucfirst($demande->retrait_type) }}
         </div>
     </div>
 
-    {{-- <div class="notes-section">
-        <div class="notes-label">NB:</div>
-        <div class="notes-lines"></div>
-        <div class="notes-lines"></div>
-        <div class="notes-lines"></div>
-    </div> --}}
+    <div class="operator-section">
+        <table class="info-table" style="margin-top: 20px;">
+            <tr>
+                <td class="info-label">Opérateur:</td>
+                <td class="info-value">{{ $admin->name ?? '' }}</td>
+            </tr>
+        </table>
+    </div>
 
     <div class="footer">
         <div class="footer-location">
-               Ait Melloul , le {{ $date }}
+            Ait Melloul, le {{ now()->format("d/m/Y H:i:s")}}
         </div>
 
         <div class="signature-section">
             <div class="signature-label">
-                Signature de l'étudiant(e): <span
-                    class="signature-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                Signature de l'étudiant(e): <span class="signature-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
             </div>
         </div>
     </div>
 </body>
-
 </html>

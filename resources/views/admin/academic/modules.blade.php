@@ -342,18 +342,50 @@
                     </div>
 
                     {{-- PROFESSEUR --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Professeur</label>
-                        <select name="professor_id"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
-                                rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                                bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <option value="">Non assigné</option>
-                            @foreach($professors as $professor)
-                                <option value="{{ $professor->id }}">{{ $professor->nom }} {{ $professor->prenom }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    {{-- PROFESSEUR --}}
+<div x-data="{ open: false, search: '', selectedId: '', selectedName: 'Non assigné' }">
+    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Professeur</label>
+
+    {{-- Added @click.away here on the parent wrapper --}}
+    <div class="relative" @click.away="open = false">
+
+        <input type="hidden" name="professor_id" x-model="selectedId">
+
+        {{-- Removed @click.away from the button --}}
+        <button type="button" @click="open = !open"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+                bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white text-left flex items-center justify-between">
+            <span x-text="selectedName"></span>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+
+        <div x-show="open" x-transition
+             class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-hidden">
+            <div class="p-2">
+                <input type="text" x-model="search" placeholder="Rechercher un professeur..."
+                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                       bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm">
+            </div>
+            <div class="overflow-y-auto max-h-48">
+                <button type="button" @click="selectedId = ''; selectedName = 'Non assigné'; open = false"
+                        class="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white">
+                    Non assigné
+                </button>
+                @foreach($professors as $professor)
+                    <button type="button"
+                            x-show="'{{ strtolower($professor->nom . ' ' . $professor->prenom) }}'.includes(search.toLowerCase())"
+                            @click="selectedId = '{{ $professor->id }}'; selectedName = '{{ $professor->nom }} {{ $professor->prenom }}'; open = false"
+                            class="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white text-sm">
+                        {{ $professor->nom }} {{ $professor->prenom }}
+                    </button>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
 
                     {{-- NUMERIC FIELDS --}}
                     <div class="grid grid-cols-3 gap-4">

@@ -129,13 +129,26 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6 border border-gray-200 dark:border-gray-700">
         <form method="GET" action="{{ route('admin.academic.professors') }}" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rechercher</label>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="CIN, nom, prénom, email..." class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           placeholder="nom, prénom, email..."
+                           class="w-full px-4 py-2
+                                  border border-gray-300 dark:border-gray-600
+                                  rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                  bg-white text-gray-900
+                                  dark:bg-gray-700 dark:text-white">
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Département</label>
-                    <select name="departement" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    <select name="departement"
+                            class="w-full px-4 py-2
+                                   border border-gray-300 dark:border-gray-600
+                                   rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                   bg-white text-gray-900
+                                   dark:bg-gray-700 dark:text-white">
                         <option value="">Tous les départements</option>
                         @foreach($departements as $departement)
                             <option value="{{ $departement->id }}" {{ request('departement') == $departement->id ? 'selected' : '' }}>
@@ -144,6 +157,7 @@
                         @endforeach
                     </select>
                 </div>
+
                 <div class="flex items-end gap-2">
                     <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
                         Filtrer
@@ -162,7 +176,7 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">CIN</th>
+                        {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">CIN</th> --}}
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nom Complet</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Téléphone</th>
@@ -176,9 +190,9 @@
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($professors as $professor)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            {{-- <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $professor->cin }}</span>
-                            </td>
+                            </td> --}}
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">
@@ -276,35 +290,53 @@
                 <form action="{{ route('admin.academic.professors.store') }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="grid grid-cols-3 gap-4">
-                        <div>
+                        {{-- <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">CIN *</label>
-                            <input type="text" name="cin" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                        </div>
+                            <input type="text" name="cin" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
+                        </div> --}}
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom *</label>
-                            <input type="text" name="nom" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <input type="text" name="nom" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prénom *</label>
-                            <input type="text" name="prenom" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <input type="text" name="prenom" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email *</label>
-                            <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <input type="email" name="email" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Téléphone</label>
-                            <input type="text" name="phone" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <input type="text" name="phone"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Département</label>
-                            <select name="departement_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <select name="departement_id"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                           focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                           bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                                 <option value="">Sélectionner un département</option>
                                 @foreach($departements as $departement)
                                     <option value="{{ $departement->id }}">{{ $departement->label }}</option>
@@ -313,13 +345,19 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Grade</label>
-                            <input type="text" name="grade" placeholder="ex: Professeur, Docteur..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <input type="text" name="grade" placeholder="ex: Professeur, Docteur..."
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Spécialisation</label>
-                        <input type="text" name="specialization" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                        <input type="text" name="specialization"
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                      focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                      bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-4">
@@ -339,7 +377,7 @@
 <!-- Edit Modal -->
 <div id="editModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="closeEditModal()"></div>
+        <div class="fixed inset-0   bg-opacity-20 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="closeEditModal()"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full relative z-10">
             <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -355,35 +393,53 @@
                     @csrf
                     @method('PUT')
                     <div class="grid grid-cols-3 gap-4">
-                        <div>
+                        {{-- <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">CIN *</label>
-                            <input type="text" id="edit_cin" name="cin" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                        </div>
+                            <input type="text" id="edit_cin" name="cin" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
+                        </div> --}}
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom *</label>
-                            <input type="text" id="edit_nom" name="nom" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <input type="text" id="edit_nom" name="nom" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prénom *</label>
-                            <input type="text" id="edit_prenom" name="prenom" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <input type="text" id="edit_prenom" name="prenom" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email *</label>
-                            <input type="email" id="edit_email" name="email" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <input type="email" id="edit_email" name="email" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Téléphone</label>
-                            <input type="text" id="edit_phone" name="phone" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <input type="text" id="edit_phone" name="phone"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Département</label>
-                            <select id="edit_departement_id" name="departement_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <select id="edit_departement_id" name="departement_id"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                           focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                           bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                                 <option value="">Sélectionner un département</option>
                                 @foreach($departements as $departement)
                                     <option value="{{ $departement->id }}">{{ $departement->label }}</option>
@@ -392,13 +448,19 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Grade</label>
-                            <input type="text" id="edit_grade" name="grade" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <input type="text" id="edit_grade" name="grade"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                          focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                          bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Spécialisation</label>
-                        <input type="text" id="edit_specialization" name="specialization" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                        <input type="text" id="edit_specialization" name="specialization"
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                      focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                      bg-white text-gray-900 dark:bg-gray-700 dark:text-white">
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-4">
@@ -449,7 +511,7 @@
                                 <p class="text-sm text-blue-700 dark:text-blue-200">
                                     <strong>Instructions:</strong><br>
                                     1. Téléchargez le template Excel<br>
-                                    2. Remplissez les données (CIN, Nom, Prénom, Email, Tél, Code Dept, Grade, Spécialisation)<br>
+                                    2. Remplissez les données ( Nom, Prénom, Email, Tél, Code Dept, Grade, Spécialisation)<br>
                                     3. Importez le fichier rempli
                                 </p>
                             </div>
@@ -481,7 +543,7 @@ function closeCreateModal() {
 
 function openEditModal(professor) {
     document.getElementById('editForm').action = `/admin/academic/professors/${professor.id}`;
-    document.getElementById('edit_cin').value = professor.cin;
+    // document.getElementById('edit_cin').value = professor.cin;
     document.getElementById('edit_nom').value = professor.nom;
     document.getElementById('edit_prenom').value = professor.prenom;
     document.getElementById('edit_email').value = professor.email;

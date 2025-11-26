@@ -138,8 +138,13 @@ class DocumentRequestController extends Controller
     public function markReady(Request $request, $id)
     {
         $demande = Demande::findOrFail($id);
-
-        if (!$demande->isPending()) {
+         if (!$demande->isPending()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cette demande ne peut pas être marquée comme prête.'
+                ], 400);
+            }
             return back()->with('error', 'Cette demande ne peut pas être marquée comme prête.');
         }
 
@@ -155,11 +160,28 @@ class DocumentRequestController extends Controller
 
             DB::commit();
 
-            return back()->with('success', "Demande {$demande->reference_number} marquée comme prête pour retrait.");
+            $message = "Demande {$demande->reference_number} marquée comme prête pour retrait.";
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message
+                ]);
+            }
+
+            return back()->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error marking request as ready: ' . $e->getMessage());
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erreur lors de la mise à jour de la demande.'
+                ], 500);
+            }
+
             return back()->with('error', 'Erreur lors de la mise à jour de la demande.');
         }
     }
@@ -167,21 +189,44 @@ class DocumentRequestController extends Controller
     /**
      * Mark a request as picked up by student.
      */
-    public function markPicked($id)
+    public function markPicked(Request $request, $id)
     {
         $demande = Demande::findOrFail($id);
 
         if (!$demande->isReady()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cette demande ne peut pas être marquée comme retirée.'
+                ], 400);
+            }
             return back()->with('error', 'Cette demande ne peut pas être marquée comme retirée.');
         }
 
         try {
             $demande->markAsPicked();
 
-            return back()->with('success', "Document {$demande->reference_number} retiré par l'étudiant.");
+            $message = "Document {$demande->reference_number} retiré par l'étudiant.";
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message
+                ]);
+            }
+
+            return back()->with('success', $message);
 
         } catch (\Exception $e) {
             \Log::error('Error marking request as picked: ' . $e->getMessage());
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erreur lors de la mise à jour de la demande.'
+                ], 500);
+            }
+
             return back()->with('error', 'Erreur lors de la mise à jour de la demande.');
         }
     }
@@ -189,21 +234,44 @@ class DocumentRequestController extends Controller
     /**
      * Mark a request as completed (document returned).
      */
-    public function markCompleted($id)
+    public function markCompleted(Request $request, $id)
     {
         $demande = Demande::findOrFail($id);
 
         if (!$demande->isPicked()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cette demande ne peut pas être complétée.'
+                ], 400);
+            }
             return back()->with('error', 'Cette demande ne peut pas être complétée.');
         }
 
         try {
             $demande->markAsCompleted();
 
-            return back()->with('success', "Demande {$demande->reference_number} complétée avec succès.");
+            $message = "Demande {$demande->reference_number} complétée avec succès.";
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message
+                ]);
+            }
+
+            return back()->with('success', $message);
 
         } catch (\Exception $e) {
             \Log::error('Error marking request as completed: ' . $e->getMessage());
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erreur lors de la mise à jour de la demande.'
+                ], 500);
+            }
+
             return back()->with('error', 'Erreur lors de la mise à jour de la demande.');
         }
     }
@@ -340,6 +408,83 @@ class DocumentRequestController extends Controller
             \Log::error('Error generating decharge: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors de la génération de la décharge.');
         }
+    }
+
+    /**
+     * Display statistics dashboard for document requests.
+     */
+    public function statistics(Request $request)
+    {
+        // Date range filter (default to last 30 days)
+        $startDate = $request->get('start_date', now()->subDays(30)->format('Y-m-d'));
+        $endDate = $request->get('end_date', now()->format('Y-m-d'));
+
+        $query = Demande::whereBetween('demandes.created_at', [$startDate, $endDate]);
+
+        // Status distribution
+        $statusDistribution = (clone $query)
+            ->select('status', DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->get();
+
+        // Document type popularity
+        $byDocumentType = (clone $query)
+            ->join('documents', 'demandes.document_id', '=', 'documents.id')
+            ->select(
+                'documents.label_fr as document',
+                'documents.type as type',
+                DB::raw('count(*) as count')
+            )
+            ->groupBy('documents.label_fr', 'documents.type')
+            ->orderBy('count', 'desc')
+            ->get();
+
+        // Definitive withdrawals by month (only for deposited documents)
+        $definitiveByMonth = (clone $query)
+            ->join('documents as d1', 'demandes.document_id', '=', 'd1.id')
+            ->where('d1.type', 'DEPOSITED')
+            ->where('retrait_type', 'definitif')
+            ->select(
+                DB::raw('YEAR(demandes.created_at) as year'),
+                DB::raw('MONTH(demandes.created_at) as month'),
+                DB::raw('count(*) as count')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
+
+        // Definitive withdrawals by filiere
+        $byFiliere = (clone $query)
+            ->join('documents as d2', 'demandes.document_id', '=', 'd2.id')
+            ->where('d2.type', 'DEPOSITED')
+            ->where('retrait_type', 'definitif')
+            ->join('students', 'demandes.student_id', '=', 'students.id')
+            ->join('student_program_enrollments', 'students.id', '=', 'student_program_enrollments.student_id')
+            ->join('filieres', 'student_program_enrollments.filiere_id', '=', 'filieres.id')
+            ->select(
+                'filieres.label_fr as filiere',
+                DB::raw('count(DISTINCT demandes.id) as count')
+            )
+            ->groupBy('filieres.label_fr')
+            ->orderBy('count', 'desc')
+            ->get();
+
+        // Average processing time (from created to ready)
+        $avgProcessingTime = (clone $query)
+            ->whereNotNull('ready_at')
+            ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, ready_at)) as avg_hours')
+            ->value('avg_hours');
+
+        return view('admin.document-requests.statistics', compact(
+            'startDate',
+            'endDate',
+            'statusDistribution',
+            'byDocumentType',
+            'definitiveByMonth',
+            'byFiliere',
+            'avgProcessingTime'
+        ));
     }
 
     /**

@@ -189,17 +189,17 @@
                 <div class="flex flex-wrap gap-3 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                     <label class="inline-flex items-center cursor-pointer">
                         <input type="checkbox" name="overdue" value="1" {{ request('overdue') ? 'checked' : '' }}
-                            class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-red-600 shadow-sm focus:ring-red-500">
+                            class="bg-white rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-red-600 shadow-sm focus:ring-red-500">
                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">En retard</span>
                     </label>
                     <label class="inline-flex items-center cursor-pointer">
                         <input type="checkbox" name="extension_requested" value="1" {{ request('extension_requested') ? 'checked' : '' }}
-                            class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-purple-600 shadow-sm focus:ring-purple-500">
+                            class="bg-white  rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-purple-600 shadow-sm focus:ring-purple-500">
                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Extensions demandées</span>
                     </label>
                     <label class="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" name="definitive" value="1" {{ request('definitive') ? 'checked' : '' }}
-                            class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-600 shadow-sm focus:ring-gray-500">
+                        <input type="checkbox" name="permanent" value="1" {{ request('permanent') ? 'checked' : '' }}
+                            class="bg-white rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-600 shadow-sm focus:ring-gray-500">
                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Retraits définitifs</span>
                     </label>
                 </div>
@@ -323,6 +323,7 @@
                                         <div class="flex items-center justify-end gap-2">
                                             <!-- Quick Actions based on status -->
                                             @if($request->isPending())
+                                   
                                                 <form action="{{ route('admin.document-requests.mark-ready', $request->id) }}" method="POST" class="inline">
                                                     @csrf
                                                     <button type="submit" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors shadow-sm" title="Marquer Prêt">
@@ -426,5 +427,103 @@
     selectItems.forEach(item => {
         item.addEventListener('change', updateBulkActionBar);
     });
+
+    // AJAX handling for status change buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle all mark-ready forms
+        const markReadyForms = document.querySelectorAll('form[action*="mark-ready"]');
+        markReadyForms.forEach(form => {
+            form.addEventListener('submit', handleStatusChange);
+        });
+
+        // Handle all mark-picked forms
+        const markPickedForms = document.querySelectorAll('form[action*="mark-picked"]');
+        markPickedForms.forEach(form => {
+            form.addEventListener('submit', handleStatusChange);
+        });
+
+        // Handle all mark-completed forms
+        const markCompletedForms = document.querySelectorAll('form[action*="mark-completed"]');
+        markCompletedForms.forEach(form => {
+            form.addEventListener('submit', handleStatusChange);
+        });
+    });
+
+    function handleStatusChange(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const button = form.querySelector('button[type="submit"]');
+        const originalContent = button.innerHTML;
+
+        // Disable button and show loading
+        button.disabled = true;
+        button.innerHTML = '<svg class="animate-spin h-3.5 w-3.5 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+
+        // Get form data
+        const formData = new FormData(form);
+
+        // Send AJAX request
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success notification
+                showNotification('success', data.message);
+
+                // Reload page after short delay to show updated status
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                throw new Error(data.message || 'Une erreur est survenue');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', error.message || 'Erreur lors de la mise à jour');
+
+            // Re-enable button
+            button.disabled = false;
+            button.innerHTML = originalContent;
+        });
+    }
+
+    // Notification function
+    function showNotification(type, message) {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
+            type === 'success'
+                ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+                : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+        }`;
+
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <svg class="w-5 h-5 ${type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}" fill="currentColor" viewBox="0 0 20 20">
+                    ${type === 'success'
+                        ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>'
+                        : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>'
+                    }
+                </svg>
+                <p class="ml-3 text-sm font-medium ${type === 'success' ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300'}">${message}</p>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    }
 </script>
 @endsection

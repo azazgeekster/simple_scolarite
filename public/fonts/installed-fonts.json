@@ -11,5 +11,11 @@
     "brawler": {
         "normal": "\/home\/abdoo\/laravel\/scolarite\/public\/fonts\/\/brawler_normal_1332b69cf055f435e1a38be711fb2252",
         "bold": "brawler_bold_331c9e27066a9672325d219a5ae2c0f7"
+    },
+    "noto": {
+        "bold": "noto_bold_c0e88accf918daf144a8103cb53147d5"
+    },
+    "amiri": {
+        "bold": "amiri_bold_1f4b9ee5bb68021dd2ca0999a54d42a6"
     }
 }
