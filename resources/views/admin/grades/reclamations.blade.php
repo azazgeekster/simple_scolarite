@@ -299,7 +299,7 @@
 <!-- Export Modal -->
 <div id="exportModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeExportModal()"></div>
+        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity" onclick="closeExportModal()"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Exporter les Réclamations</h3>
             <form action="{{ route('admin.grades.reclamations.export') }}" method="GET">
@@ -383,7 +383,7 @@
 <!-- Import Modal -->
 <div id="importModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeImportModal()"></div>
+        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity" onclick="closeImportModal()"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Importer les Corrections</h3>
             <form action="{{ route('admin.grades.reclamations.import') }}" method="POST" enctype="multipart/form-data">
@@ -411,7 +411,9 @@
 <!-- PV Download Modal -->
 <div id="pvModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closePVModal()"></div>
+        <!-- Changed this line: removed gray-500, added bg-black/30 and backdrop-blur-sm -->
+        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity" onclick="closePVModal()"></div>
+
         <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Télécharger le PV</h3>
             <form action="{{ route('admin.grades.reclamations.pv') }}" method="GET">

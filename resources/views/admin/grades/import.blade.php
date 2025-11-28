@@ -10,13 +10,38 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Importer des Notes</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Importez les notes des étudiants via un fichier Excel</p>
         </div>
-        <a href="{{ route('admin.grades.index') }}"
-           class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.grades.bulk-import') }}"
+               class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+                Import en Masse
+            </a>
+            <a href="{{ route('admin.grades.index') }}"
+               class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+                </svg>
+                Retour
+            </a>
+        </div>
+    </div>
+
+    <!-- Info Box about Bulk Import -->
+    <div class="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl border border-green-200 dark:border-green-800 p-4">
+        <div class="flex items-start">
+            <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            Retour
-        </a>
+            <div>
+                <h3 class="text-sm font-semibold text-green-900 dark:text-green-100 mb-1">Nouveau: Import en Masse Disponible!</h3>
+                <p class="text-sm text-green-800 dark:text-green-200">
+                    Vous pouvez maintenant importer <strong>toutes les notes de toutes les filières et semestres</strong> en une seule fois avec un fichier unique.
+                    <a href="{{ route('admin.grades.bulk-import') }}" class="underline font-medium hover:text-green-600">Essayez l'import en masse →</a>
+                </p>
+            </div>
+        </div>
     </div>
 
     <!-- Step Indicator -->

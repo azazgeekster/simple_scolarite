@@ -45,10 +45,10 @@
                     <div class="mt-3 flex items-center gap-2">
                         <span class="text-sm text-gray-600 dark:text-gray-400">Note actuelle:</span>
                         <span class="inline-flex items-center justify-center px-3 py-1.5 bg-white dark:bg-gray-700 rounded-lg font-bold text-lg
-                            @if($moduleGrade->final_grade >= 10) text-green-600 dark:text-green-400
+                            @if($moduleGrade->grade >= 10) text-green-600 dark:text-green-400
                             @else text-red-600 dark:text-red-400
                             @endif">
-                            {{ number_format($moduleGrade->final_grade, 2) }}/20
+                            {{ number_format($moduleGrade->grade, 2) }}/20
                         </span>
                     </div>
                 </div>

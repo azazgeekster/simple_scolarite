@@ -112,8 +112,8 @@ class Reclammation extends Model
     {
         $this->update([
             'status' => 'UNDER_REVIEW',
-            'reviewed_by' => $reviewerId,
-            'reviewed_at' => now(),
+            'corrected_by' => $reviewerId,
+            'corrected_at' => now(),
         ]);
     }
 
@@ -123,8 +123,8 @@ class Reclammation extends Model
             'status' => 'RESOLVED',
             'revised_grade' => $revisedGrade,
             'admin_response' => $response,
-            'reviewed_by' => $reviewerId,
-            'reviewed_at' => now(),
+            'corrected_by' => $reviewerId,
+            'corrected_at' => now(),
         ]);
 
         // Update the actual module grade

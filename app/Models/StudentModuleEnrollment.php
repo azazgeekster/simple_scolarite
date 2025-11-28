@@ -97,33 +97,33 @@ class StudentModuleEnrollment extends Model
     // Scopes for final results
     public function scopePassed($query)
     {
-        return $query->whereIn('final_result', ['validé', 'validé après rattrapage']);
+        return $query->whereIn('final_result', ['V', 'VR', 'AC']);
     }
 
     public function scopeFailed($query)
     {
-        return $query->where('final_result', 'non validé');
+        return $query->whereIn('final_result', ['NV', 'AJ', 'ABI']);
     }
 
     public function scopeWaitingRattrapage($query)
     {
-        return $query->where('final_result', 'en attente rattrapage');
+        return $query->where('final_result', 'RATT');
     }
 
     // Helper Methods
     public function isPassed(): bool
     {
-        return in_array($this->final_result, ['validé', 'validé après rattrapage']);
+        return in_array($this->final_result, ['V', 'VR', 'AC']);
     }
 
     public function isFailed(): bool
     {
-        return $this->final_result === 'non validé';
+        return in_array($this->final_result, ['NV', 'AJ', 'ABI']);
     }
 
     public function isWaitingRattrapage(): bool
     {
-        return $this->final_result === 'en attente rattrapage';
+        return $this->final_result === 'RATT';
     }
 
     public function isRetake(): bool
@@ -159,19 +159,18 @@ class StudentModuleEnrollment extends Model
         $finalResult = null;
 
         if ($rattrapageGrade && $rattrapageGrade->grade !== null) {
-            // If rattrapage exists, it's the final grade
+            // Has rattrapage grade
             $finalGrade = $rattrapageGrade->grade;
-            $finalResult = $finalGrade >= 10 ? 'validé après rattrapage' : 'non validé';
-        } elseif ($normalGrade && $normalGrade->grade !== null) {
-            // Use normal session grade
+            $finalResult = $finalGrade >= 10 ? 'VR' : 'NV';
+        } else {
+            // Only normal session grade
             $finalGrade = $normalGrade->grade;
-
             if ($finalGrade >= 10) {
-                $finalResult = 'validé';
-            } elseif ($finalGrade >= 6) {
-                $finalResult = 'en attente rattrapage';
+                $finalResult = 'V';
+            } elseif ($finalGrade >= 8) {
+                $finalResult = 'RATT'; // Can go to rattrapage or compensation
             } else {
-                $finalResult = 'non validé';
+                $finalResult = 'NV';
             }
         }
 

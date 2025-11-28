@@ -58,12 +58,12 @@ class ModuleGrade extends Model
     // Scopes
     public function scopePassed($query)
     {
-        return $query->whereIn('result', ['validé', 'validé après rattrapage']);
+        return $query->whereIn('result', ['V', 'VR', 'AC']);
     }
 
     public function scopeFailed($query)
     {
-        return $query->where('result', 'non validé');
+        return $query->whereIn('result', ['NV', 'AJ', 'ABI']);
     }
 
     public function scopeNormalSession($query)
@@ -89,17 +89,17 @@ class ModuleGrade extends Model
     // Helper Methods
     public function isPassed(): bool
     {
-        return in_array($this->result, ['validé', 'validé après rattrapage']);
+        return in_array($this->result, ['V', 'VR', 'AC']);
     }
 
     public function isFailed(): bool
     {
-        return $this->result === 'non validé';
+        return in_array($this->result, ['NV', 'AJ', 'ABI']);
     }
 
     public function isWaitingRattrapage(): bool
     {
-        return $this->result === 'en attente rattrapage';
+        return $this->result === 'RATT';
     }
 
     public function getMention(): string
@@ -130,17 +130,70 @@ class ModuleGrade extends Model
     }
 
     /**
-     * Check if réclamation period is still open (24h after publication)
+     * Check if réclamation period is still open
+     * Checks both time window and admin settings
      */
     public function isReclamationPeriodOpen(): bool
     {
         if (!$this->is_published || !$this->published_at) {
+            \Log::info('Reclamation check failed: not published', [
+                'grade_id' => $this->id,
+                'is_published' => $this->is_published,
+                'published_at' => $this->published_at,
+            ]);
             return false;
         }
 
+        // Check if admin has enabled reclamations for this module
+        $moduleEnrollment = $this->moduleEnrollment;
+        if (!$moduleEnrollment) {
+            \Log::info('Reclamation check failed: no module enrollment', ['grade_id' => $this->id]);
+            return false;
+        }
+
+        $module = $moduleEnrollment->module;
+        $programEnrollment = $moduleEnrollment->programEnrollment;
+        
+        if (!$module || !$programEnrollment) {
+            \Log::info('Reclamation check failed: no module or program enrollment', [
+                'grade_id' => $this->id,
+                'has_module' => !is_null($module),
+                'has_program' => !is_null($programEnrollment),
+            ]);
+            return false;
+        }
+
+        // Check if reclamation setting exists and is active
+        $reclamationSetting = \App\Models\ReclamationSetting::where('academic_year', $programEnrollment->academic_year)
+            ->where('session', $this->session)
+            ->where('module_id', $module->id)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$reclamationSetting) {
+            \Log::info('Reclamation check failed: no active setting', [
+                'grade_id' => $this->id,
+                'module_id' => $module->id,
+                'academic_year' => $programEnrollment->academic_year,
+                'session' => $this->session,
+            ]);
+            return false; // Admin hasn't enabled reclamations for this module
+        }
+
         // Réclamations open for 24 hours after grade publication
-        $deadline = $this->published_at->addHours(24);
-        return now() <= $deadline;
+        $deadline = $this->published_at->copy()->addHours(24);
+        $isWithinDeadline = now() <= $deadline;
+        
+        \Log::info('Reclamation check result', [
+            'grade_id' => $this->id,
+            'published_at' => $this->published_at,
+            'deadline' => $deadline,
+            'now' => now(),
+            'is_within_deadline' => $isWithinDeadline,
+            'setting_found' => true,
+        ]);
+        
+        return $isWithinDeadline;
     }
 
     /**
@@ -156,6 +209,110 @@ class ModuleGrade extends Model
         return $this->reclamations()
             ->whereIn('status', ['PENDING', 'UNDER_REVIEW'])
             ->exists();
+    }
+
+    public function getValidationStatusAttribute(): array
+    {
+        return match($this->result) {
+            'V' => ['label' => 'V', 'color' => 'green'],
+            'VR' => ['label' => 'VR', 'color' => 'green'],
+            'AC' => ['label' => 'AC', 'color' => 'blue'],
+            'NV' => ['label' => 'NV', 'color' => 'red'],
+            'AJ' => ['label' => 'AJ', 'color' => 'red'],
+            'ABI' => ['label' => 'ABI', 'color' => 'gray'],
+            'RATT' => ['label' => 'RATT', 'color' => 'yellow'],
+            default => ['label' => $this->result ?? '-', 'color' => 'gray'],
+        };
+    }
+
+    /**
+     * Rattrapage Management Methods
+     */
+    
+    /**
+     * Check if student is eligible for rattrapage
+     */
+    public function isEligibleForRattrapage(): bool
+    {
+        return $this->result === 'RATT';
+    }
+
+    /**
+     * Justify an absence - changes ABI to RATT
+     */
+    public function justifyAbsence(string $reason = null, string $document = null, int $justifiedBy = null): bool
+    {
+        if ($this->result !== 'ABI') {
+            return false; // Only ABI can be justified
+        }
+
+        if ($this->is_absence_justified) {
+            return false; // Already justified
+        }
+
+        // Update grade result
+        $this->result = 'RATT';
+        $this->is_absence_justified = true;
+        $this->save();
+
+        // Create justification record
+        $moduleEnrollment = $this->moduleEnrollment;
+        if ($moduleEnrollment && $moduleEnrollment->programEnrollment) {
+            JustifiedAbsence::create([
+                'student_id' => $moduleEnrollment->programEnrollment->student_id,
+                'module_id' => $moduleEnrollment->module_id,
+                'academic_year' => $moduleEnrollment->programEnrollment->academic_year,
+                'session' => $this->session,
+                'justification_reason' => $reason,
+                'justification_document' => $document,
+                'justified_at' => now(),
+                'justified_by' => $justifiedBy ?? auth('admin')->id(),
+            ]);
+        }
+
+        return true;
+    }
+
+    /**
+     * Unjustify an absence - changes RATT back to ABI (if was justified)
+     */
+    public function unjustifyAbsence(): bool
+    {
+        if (!$this->is_absence_justified) {
+            return false; // Not justified
+        }
+
+        // Update grade result
+        $this->result = 'ABI';
+        $this->is_absence_justified = false;
+        $this->save();
+
+        // Delete justification record
+        $moduleEnrollment = $this->moduleEnrollment;
+        if ($moduleEnrollment && $moduleEnrollment->programEnrollment) {
+            JustifiedAbsence::where('student_id', $moduleEnrollment->programEnrollment->student_id)
+                ->where('module_id', $moduleEnrollment->module_id)
+                ->where('session', $this->session)
+                ->delete();
+        }
+
+        return true;
+    }
+
+    /**
+     * Get justification record
+     */
+    public function justification()
+    {
+        $moduleEnrollment = $this->moduleEnrollment;
+        if (!$moduleEnrollment || !$moduleEnrollment->programEnrollment) {
+            return null;
+        }
+
+        return JustifiedAbsence::where('student_id', $moduleEnrollment->programEnrollment->student_id)
+            ->where('module_id', $moduleEnrollment->module_id)
+            ->where('session', $this->session)
+            ->first();
     }
 
     // Model Events

@@ -120,15 +120,31 @@
                         </form>
                     @endif
 
-                    <!-- Generate Décharge -->
-                    @if($demande->isPicked() || $demande->isCompleted())
-                        <a href="{{ route('admin.document-requests.decharge', $demande->id) }}" target="_blank"
-                            class="inline-flex items-center px-4 py-2 border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 text-sm font-medium rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors">
+                    <!-- Generate/Download Attestation de Scolarité or Décharge -->
+                    @if($demande->document->slug === 'attestation_scolarite')
+                        <!-- Attestation Button -->
+                        <a href="{{ route('admin.document-requests.attestation', $demande->id) }}" target="_blank"
+                            class="inline-flex items-center px-4 py-2 {{ ($demande->isPicked() || $demande->isCompleted()) ? 'border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20' : 'bg-purple-600 text-white hover:bg-purple-700' }} text-sm font-medium rounded-lg transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                @if($demande->isPicked() || $demande->isCompleted())
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                @else
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                @endif
                             </svg>
-                            Télécharger Décharge
+                            {{ ($demande->isPicked() || $demande->isCompleted()) ? 'Télécharger Attestation' : 'Générer Attestation' }}
                         </a>
+                    @else
+                        <!-- Décharge Button (for other documents) -->
+                        @if($demande->isPicked() || $demande->isCompleted())
+                            <a href="{{ route('admin.document-requests.decharge', $demande->id) }}" target="_blank"
+                                class="inline-flex items-center px-4 py-2 border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 text-sm font-medium rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Télécharger Décharge
+                            </a>
+                        @endif
                     @endif
 
                     @if(!$demande->isPicked() && !$demande->isCompleted())
@@ -357,93 +373,233 @@
 
             <!-- Sidebar -->
             <div class="space-y-6">
-                <!-- Student Info -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Étudiant</h2>
-                    </div>
-                    <div class="p-6">
-                        <div class="text-center mb-4">
-                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xl font-bold">
-                                {{ strtoupper(substr($demande->student->prenom ?? 'N', 0, 1) . substr($demande->student->nom ?? 'A', 0, 1)) }}
-                            </div>
+                <!-- Student Info Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <!-- Header with gradient -->
+                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-base font-semibold text-gray-900 dark:text-white flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                Informations Étudiant
+                            </h2>
                         </div>
-                        <dl class="space-y-3">
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nom</dt>
-                                <dd class="mt-1 text-sm font-medium text-gray-900 dark:text-white">{{ $demande->student->full_name ?? 'N/A' }}</dd>
+                    </div>
+
+                    <div class="p-6">
+                        <!-- Avatar and Name -->
+                        <div class="text-center mb-6">
+                            <div class="relative inline-block">
+                                <div class="flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white text-2xl font-bold shadow-lg ring-4 ring-white dark:ring-gray-800">
+                                    {{ strtoupper(substr($demande->student->prenom ?? 'N', 0, 1) . substr($demande->student->nom ?? 'A', 0, 1)) }}
+                                </div>
+                                <!-- Status indicator -->
+                                <div class="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-4 border-white dark:border-gray-800 rounded-full" title="Actif"></div>
                             </div>
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">CNE</dt>
-                                <dd class="mt-1 text-sm font-mono text-gray-900 dark:text-white">{{ $demande->student->cne ?? 'N/A' }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Apogée</dt>
-                                <dd class="mt-1 text-sm font-mono text-gray-900 dark:text-white">{{ $demande->student->apogee ?? 'N/A' }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-white truncate">{{ $demande->student->email ?? 'N/A' }}</dd>
-                            </div>
+                            <h3 class="mt-3 text-lg font-bold text-gray-900 dark:text-white">
+                                {{ $demande->student->full_name ?? 'N/A' }}
+                            </h3>
                             @if($demande->student->programEnrollments->isNotEmpty())
-                                <div>
-                                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Filière</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                                        {{ $demande->student->programEnrollments->first()->filiere->label_fr ?? 'N/A' }}
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    {{ $demande->student->programEnrollments->first()->filiere->label_fr ?? '' }}
+                                </p>
+                            @endif
+                        </div>
+
+                        <!-- Contact & ID Information -->
+                        <dl class="space-y-4">
+                            <!-- CNE -->
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 w-8">
+                                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">CNE</dt>
+                                    <dd class="mt-1 text-sm font-mono font-semibold text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900/50 px-2 py-1 rounded inline-block">
+                                        {{ $demande->student->cne ?? 'N/A' }}
                                     </dd>
                                 </div>
-                            @endif
-                        </dl>
+                            </div>
 
-                        <!-- Student History Summary -->
-                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2">Historique</h4>
-                            <div class="grid grid-cols-3 gap-2 text-center">
-                                <div>
-                                    <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $studentHistory['total'] }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                            <!-- Apogée -->
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 w-8">
+                                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                                    </svg>
                                 </div>
-                                <div>
-                                    <p class="text-lg font-bold text-green-600">{{ $studentHistory['completed'] }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">Complété</p>
-                                </div>
-                                <div>
-                                    <p class="text-lg font-bold {{ $studentHistory['pending_returns'] > 0 ? 'text-orange-600' : 'text-gray-400' }}">{{ $studentHistory['pending_returns'] }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">À retourner</p>
+                                <div class="flex-1 min-w-0">
+                                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Code Apogée</dt>
+                                    <dd class="mt-1 text-sm font-mono font-semibold text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900/50 px-2 py-1 rounded inline-block">
+                                        {{ $demande->student->apogee ?? 'N/A' }}
+                                    </dd>
                                 </div>
                             </div>
+
+                            <!-- Email -->
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 w-8">
+                                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Email</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-white truncate" title="{{ $demande->student->email ?? 'N/A' }}">
+                                        {{ $demande->student->email ?? 'N/A' }}
+                                    </dd>
+                                </div>
+                            </div>
+                        </dl>
+
+                        <!-- Student Statistics -->
+                        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    Statistiques
+                                </h4>
+                            </div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <!-- Total Requests -->
+                                <div class="text-center p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors">
+                                    <div class="flex justify-center mb-2">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $studentHistory['total'] }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Total</p>
+                                </div>
+
+                                <!-- Completed -->
+                                <div class="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors">
+                                    <div class="flex justify-center mb-2">
+                                        <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $studentHistory['completed'] }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Complétés</p>
+                                </div>
+
+                                <!-- Pending Returns -->
+                                <div class="text-center p-3 {{ $studentHistory['pending_returns'] > 0 ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-gray-50 dark:bg-gray-900/50' }} rounded-lg hover:{{ $studentHistory['pending_returns'] > 0 ? 'bg-orange-100 dark:bg-orange-900/30' : 'bg-gray-100 dark:bg-gray-900' }} transition-colors">
+                                    <div class="flex justify-center mb-2">
+                                        <div class="w-10 h-10 rounded-full {{ $studentHistory['pending_returns'] > 0 ? 'bg-orange-100 dark:bg-orange-900/30' : 'bg-gray-100 dark:bg-gray-800' }} flex items-center justify-center">
+                                            <svg class="w-5 h-5 {{ $studentHistory['pending_returns'] > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <p class="text-2xl font-bold {{ $studentHistory['pending_returns'] > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400' }}">{{ $studentHistory['pending_returns'] }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">En attente</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <a href="{{ route('admin.students.show', $demande->student->id ?? '#') }}" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md">
+                                <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Voir le profil complet
+                            </a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Other Requests -->
                 @if($otherRequests->isNotEmpty())
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Autres Demandes</h2>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                        <!-- Header -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-base font-semibold text-gray-900 dark:text-white flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Historique des demandes
+                                </h2>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400">
+                                    {{ $otherRequests->count() }}
+                                </span>
+                            </div>
                         </div>
-                        <div class="p-4">
-                            <ul class="space-y-3">
-                                @foreach($otherRequests as $otherReq)
-                                    <li>
-                                        <a href="{{ route('admin.document-requests.show', $otherReq->id) }}" class="block p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                            <p class="text-sm font-medium text-amber-600 dark:text-amber-400">{{ $otherReq->reference_number }}</p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $otherReq->document->label_fr ?? 'Document' }}</p>
-                                            <div class="flex items-center justify-between mt-2">
-                                                <span class="px-2 py-0.5 text-xs rounded-full
-                                                    @if($otherReq->status === 'PENDING') bg-yellow-100 text-yellow-800
-                                                    @elseif($otherReq->status === 'READY') bg-blue-100 text-blue-800
-                                                    @elseif($otherReq->status === 'PICKED') bg-green-100 text-green-800
-                                                    @else bg-gray-100 text-gray-800
-                                                    @endif">
-                                                    {{ $otherReq->status_label }}
+
+                        <!-- List -->
+                        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                            @foreach($otherRequests as $otherReq)
+                                <a href="{{ route('admin.document-requests.show', $otherReq->id) }}" class="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-150 group">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1 min-w-0">
+                                            <!-- Reference Number -->
+                                            <div class="flex items-center space-x-2 mb-2">
+                                                <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                                </svg>
+                                                <span class="text-sm font-semibold text-amber-600 dark:text-amber-400 group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors">
+                                                    {{ $otherReq->reference_number }}
                                                 </span>
-                                                <span class="text-xs text-gray-400">{{ $otherReq->created_at->format('d/m/Y') }}</span>
                                             </div>
-                                        </a>
-                                    </li>
-                                @endforeach
-                            </ul>
+
+                                            <!-- Document Name -->
+                                            <p class="text-sm text-gray-900 dark:text-white font-medium mb-2 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
+                                                {{ $otherReq->document->label_fr ?? 'Document' }}
+                                            </p>
+
+                                            <!-- Meta Info -->
+                                            <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400">
+                                                <span class="flex items-center">
+                                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                    </svg>
+                                                    {{ $otherReq->created_at->format('d/m/Y') }}
+                                                </span>
+                                                <span class="flex items-center">
+                                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    {{ $otherReq->created_at->diffForHumans() }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Status Badge -->
+                                        <div class="flex-shrink-0 ml-4">
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium shadow-sm
+                                                @if($otherReq->status === 'PENDING') bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400
+                                                @elseif($otherReq->status === 'READY') bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
+                                                @elseif($otherReq->status === 'PICKED') bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+                                                @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400
+                                                @endif">
+                                                {{ $otherReq->status_label }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+
+                        <!-- View All Link -->
+                        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+                            <a href="{{ route('admin.document-requests.index', ['search' => $demande->student->cne ?? '']) }}" class="flex items-center justify-center text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors group">
+                                <span>Voir toutes les demandes</span>
+                                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
                         </div>
                     </div>
                 @endif

@@ -124,6 +124,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{id}/approve-extension', [DocumentRequestController::class, 'approveExtension'])->name('approve-extension');
             Route::post('/{id}/reject-extension', [DocumentRequestController::class, 'rejectExtension'])->name('reject-extension');
             Route::get('/{id}/decharge', [DocumentRequestController::class, 'generateDecharge'])->name('decharge');
+            Route::get('/{id}/attestation', [DocumentRequestController::class, 'generateAttestation'])->name('attestation');
             Route::delete('/{id}', [DocumentRequestController::class, 'destroy'])->name('destroy');
         });
 
@@ -151,13 +152,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/module/{moduleId}/unpublish', [GradeManagementController::class, 'unpublishModule'])->name('unpublish-module');
             Route::post('/bulk-publish', [GradeManagementController::class, 'bulkPublish'])->name('bulk-publish');
 
-            // Import
-            Route::get('/import', [GradeManagementController::class, 'showImportForm'])->name('import');
-            Route::post('/import', [GradeManagementController::class, 'import'])->name('import.process');
-            Route::post('/import/preview', [GradeManagementController::class, 'previewImport'])->name('import.preview');
-            Route::post('/import/chunk', [GradeManagementController::class, 'processImportChunk'])->name('import.chunk');
-            Route::get('/download-template', [GradeManagementController::class, 'downloadTemplate'])->name('download-template');
-            Route::get('/modules-for-filiere', [GradeManagementController::class, 'getModulesForFiliere'])->name('modules-for-filiere');
+            // Import (bulk upload - all filieres & semesters at once)
+            Route::get('/import', [GradeManagementController::class, 'showBulkImportForm'])->name('import');
+            Route::get('/import/session-grades-template', [GradeManagementController::class, 'downloadBulkSessionGradesTemplate'])->name('import.session-grades-template');
+            Route::post('/import/session-grades', [GradeManagementController::class, 'importBulkSessionGrades'])->name('import.session-grades');
+            Route::get('/import/final-grades-template', [GradeManagementController::class, 'downloadFinalGradesTemplate'])->name('import.final-grades-template');
+            Route::post('/import/final-grades', [GradeManagementController::class, 'importFinalGrades'])->name('import.final-grades');
+
+            // Import Errors
+            Route::get('/import-errors/{batchId}', [GradeManagementController::class, 'viewImportErrors'])->name('import-errors');
+            Route::get('/import-errors/{batchId}/download', [GradeManagementController::class, 'downloadImportErrors'])->name('import-errors.download');
+
+            // PV (Procès-Verbal) for modules
+            Route::post('/module-pv', [GradeManagementController::class, 'downloadModulePV'])->name('module-pv');
+
+            // Toggle reclamations for modules
+            Route::post('/module/{moduleId}/toggle-reclamations', [GradeManagementController::class, 'toggleModuleReclamations'])->name('toggle-reclamations');
+            Route::post('/bulk-toggle-reclamations', [GradeManagementController::class, 'bulkToggleReclamations'])->name('bulk-toggle-reclamations');
 
             // Reclamations
             Route::get('/reclamations', [GradeManagementController::class, 'reclamations'])->name('reclamations');
@@ -167,6 +178,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/reclamations/pv', [GradeManagementController::class, 'downloadReclamationsPV'])->name('reclamations.pv');
             Route::get('/reclamations/{id}', [GradeManagementController::class, 'showReclamation'])->name('reclamations.show');
             Route::post('/reclamations/{id}/review', [GradeManagementController::class, 'reviewReclamation'])->name('reclamations.review');
+
+            // Rattrapage Convocations
+            Route::prefix('rattrapage')->name('rattrapage.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\RattrapageConvocationController::class, 'index'])->name('index');
+                
+                // Justify absences
+                Route::post('/justify/{gradeId}', [\App\Http\Controllers\Admin\RattrapageConvocationController::class, 'justifyAbsence'])->name('justify');
+                Route::post('/unjustify/{gradeId}', [\App\Http\Controllers\Admin\RattrapageConvocationController::class, 'unjustifyAbsence'])->name('unjustify');
+                Route::post('/bulk-justify', [\App\Http\Controllers\Admin\RattrapageConvocationController::class, 'bulkJustifyAbsences'])->name('bulk-justify');
+                Route::get('/justification-template', [\App\Http\Controllers\Admin\RattrapageConvocationController::class, 'downloadJustificationTemplate'])->name('justification-template');
+                
+                // Get students for AJAX
+                Route::get('/students', [\App\Http\Controllers\Admin\RattrapageConvocationController::class, 'getStudents'])->name('students');
+                
+                // Convocations
+                Route::get('/convocations', [\App\Http\Controllers\Admin\RattrapageConvocationController::class, 'convocations'])->name('convocations');
+                Route::post('/convocate/{examId}', [\App\Http\Controllers\Admin\RattrapageConvocationController::class, 'convocateToRattrapage'])->name('convocate');
+                Route::post('/bulk-convocate', [\App\Http\Controllers\Admin\RattrapageConvocationController::class, 'bulkConvocateByModule'])->name('bulk-convocate');
+            });
             Route::post('/reclamations/{id}/resolve', [GradeManagementController::class, 'resolveReclamation'])->name('reclamations.resolve');
             Route::post('/reclamations/{id}/reject', [GradeManagementController::class, 'rejectReclamation'])->name('reclamations.reject');
             Route::post('/reclamations/bulk-update', [GradeManagementController::class, 'bulkUpdateReclamations'])->name('reclamations.bulk-update');

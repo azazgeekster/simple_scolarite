@@ -1,43 +1,45 @@
 <aside id="logo-sidebar"
-    class="fixed top-0 left-0 z-40 w-72 h-screen pt-20 transition-all duration-300 -translate-x-full bg-gradient-to-b from-slate-50 to-white border-r border-slate-200/60 shadow-xl sm:translate-x-0 dark:from-slate-900 dark:to-slate-800 dark:border-slate-700/50 backdrop-blur-sm"
+    class="fixed top-0 left-0 z-40 w-72 h-screen pt-20 transition-all duration-300 -translate-x-full bg-white border-r border-slate-200/80 shadow-sm sm:translate-x-0 dark:bg-slate-900 dark:border-slate-700/60"
     aria-label="Sidebar">
 
     <!-- Sidebar Header -->
-    <div class="px-6 pb-4 border-b border-slate-200/50 dark:border-slate-700/50">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                </svg>
+    <div class="px-5 pb-5 mb-2 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-800/30">
+            <div class="relative">
+                <div class="w-11 h-11 bg-gradient-to-br from-amber-500 via-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/25 dark:shadow-orange-500/10">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                    </svg>
+                </div>
+                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
             </div>
-            <div>
-                <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Admin Portal</h2>
-                <p class="text-sm text-slate-500 dark:text-slate-400">Management Panel</p>
+            <div class="flex-1 min-w-0">
+                <h2 class="text-base font-bold text-slate-800 dark:text-slate-100 truncate">Administration</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Panneau de gestion</p>
             </div>
         </div>
     </div>
 
-    <div class="h-full px-4 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600">
-        <nav class="mt-6">
-            <ul class="space-y-2">
+    <div class="h-full px-3 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600">
+        <nav class="mt-2">
+            <ul class="space-y-1">
 
                 <!-- Dashboard -->
                 <li>
                     <a href="{{ route('admin.dashboard') }}"
-                        class="group flex items-center px-4 py-3 text-slate-700 rounded-xl hover:bg-purple-50 hover:text-purple-700 dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-purple-400 transition-all duration-200 hover:shadow-sm hover:translate-x-1 {{ Request::routeIs('admin.dashboard') ? 'bg-purple-50 text-purple-700 dark:bg-slate-700/50 dark:text-purple-400' : '' }}">
-                        <div class="flex items-center justify-center w-10 h-10 bg-purple-100 group-hover:bg-purple-200 dark:bg-slate-700 dark:group-hover:bg-slate-600 rounded-lg transition-colors duration-200">
-                            <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="group flex items-center px-3 py-2.5 text-slate-700 rounded-lg hover:bg-purple-50 dark:text-slate-300 dark:hover:bg-slate-800/50 transition-all duration-150 {{ Request::routeIs('admin.dashboard') ? 'bg-gradient-to-r from-purple-50 to-purple-50/50 dark:from-purple-900/20 dark:to-purple-900/10 text-purple-700 dark:text-purple-400 shadow-sm' : '' }}">
+                        <div class="flex items-center justify-center w-9 h-9 {{ Request::routeIs('admin.dashboard') ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-slate-100 dark:bg-slate-800' }} rounded-lg transition-colors duration-150">
+                            <svg class="w-5 h-5 {{ Request::routeIs('admin.dashboard') ? 'text-purple-600 dark:text-purple-400' : 'text-slate-500 dark:text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                             </svg>
                         </div>
-                        <span class="ml-4 font-medium">Dashboard</span>
+                        <span class="ml-3 font-medium text-sm">Dashboard</span>
                     </a>
                 </li>
 
                 <!-- Divider -->
-                <li class="my-6">
-                    <hr class="border-slate-200 dark:border-slate-700">
-                    <p class="px-4 mt-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Student Management</p>
+                <li class="pt-5 pb-2">
+                    <p class="px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Gestion Étudiants</p>
                 </li>
 
                 <!-- Students -->
@@ -115,41 +117,47 @@
                         </svg>
                     </button>
 
-                    <ul x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform -translate-y-2" class="mt-2 ml-6 space-y-1">
+                    <ul x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="mt-1.5 ml-4 space-y-0.5 pl-2 border-l-2 border-slate-200 dark:border-slate-700">
                         <li>
-                            <a href="{{ route('admin.exam-periods.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exam-periods.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
-                                <span class="w-2 h-2 bg-indigo-400 rounded-full mr-3"></span>
-                                Exam Periods
+                            <a href="{{ route('admin.exam-periods.index') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-orange-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-orange-400 transition-all duration-150 {{ Request::routeIs('admin.exam-periods.*') ? 'bg-gradient-to-r from-orange-50 to-transparent text-orange-600 dark:from-orange-950/30 dark:text-orange-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-indigo-400 rounded-full flex-shrink-0"></span>
+                                <span>Périodes d'examen</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.exam-scheduling.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exam-scheduling.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
-                                <span class="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
-                                Schedule Exams
+                            <a href="{{ route('admin.exam-scheduling.index') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-orange-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-orange-400 transition-all duration-150 {{ Request::routeIs('admin.exam-scheduling.*') ? 'bg-gradient-to-r from-orange-50 to-transparent text-orange-600 dark:from-orange-950/30 dark:text-orange-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-blue-400 rounded-full flex-shrink-0"></span>
+                                <span>Planifier examens</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.locals.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.locals.*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
-                                <span class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></span>
-                                Manage Rooms
+                            <a href="{{ route('admin.locals.index') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-orange-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-orange-400 transition-all duration-150 {{ Request::routeIs('admin.locals.*') ? 'bg-gradient-to-r from-orange-50 to-transparent text-orange-600 dark:from-orange-950/30 dark:text-orange-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-cyan-400 rounded-full flex-shrink-0"></span>
+                                <span>Gérer les salles</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.exams.import') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.exams.import') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
-                                <span class="w-2 h-2 bg-purple-400 rounded-full mr-3"></span>
-                                Import Exams
+                            <a href="{{ route('admin.exams.import') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-orange-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-orange-400 transition-all duration-150 {{ Request::routeIs('admin.exams.import') ? 'bg-gradient-to-r from-orange-50 to-transparent text-orange-600 dark:from-orange-950/30 dark:text-orange-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-purple-400 rounded-full flex-shrink-0"></span>
+                                <span>Importer examens</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.grades.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.grades.index') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
-                                <span class="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
-                                Grades Publication
+                            <a href="{{ route('admin.grades.index') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-orange-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-orange-400 transition-all duration-150 {{ Request::routeIs('admin.grades.index') ? 'bg-gradient-to-r from-orange-50 to-transparent text-orange-600 dark:from-orange-950/30 dark:text-orange-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-green-400 rounded-full flex-shrink-0"></span>
+                                <span>Publication notes</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.grades.reclamations') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.grades.reclamations*') ? 'bg-slate-100 dark:bg-slate-700/50 text-orange-600 dark:text-orange-400' : '' }}">
-                                <span class="w-2 h-2 bg-red-400 rounded-full mr-3"></span>
-                                Reclamations
+                            <a href="{{ route('admin.grades.reclamations') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-orange-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-orange-400 transition-all duration-150 {{ Request::routeIs('admin.grades.reclamations*') ? 'bg-gradient-to-r from-orange-50 to-transparent text-orange-600 dark:from-orange-950/30 dark:text-orange-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-red-400 rounded-full flex-shrink-0"></span>
+                                <span>Réclamations</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.grades.rattrapage.index') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-orange-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-orange-400 transition-all duration-150 {{ Request::routeIs('admin.grades.rattrapage.*') ? 'bg-gradient-to-r from-orange-50 to-transparent text-orange-600 dark:from-orange-950/30 dark:text-orange-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-yellow-400 rounded-full flex-shrink-0"></span>
+                                <span>Rattrapage</span>
                             </a>
                         </li>
                     </ul>
@@ -165,42 +173,42 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                 </svg>
                             </div>
-                            <span class="ml-4 font-medium">Academic Management</span>
+                            <span class="ml-4 font-medium">Academic</span>
                         </div>
                         <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
 
-                    <ul x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform -translate-y-2" class="mt-2 ml-6 space-y-1">
+                    <ul x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="mt-1.5 ml-4 space-y-0.5 pl-2 border-l-2 border-slate-200 dark:border-slate-700">
                         <li>
-                            <a href="{{ route('admin.academic.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.academic.index') ? 'bg-slate-100 dark:bg-slate-700/50 text-violet-600 dark:text-violet-400' : '' }}">
-                                <span class="w-2 h-2 bg-violet-400 rounded-full mr-3"></span>
-                                Dashboard
+                            <a href="{{ route('admin.academic.index') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-violet-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-violet-400 transition-all duration-150 {{ Request::routeIs('admin.academic.index') ? 'bg-gradient-to-r from-violet-50 to-transparent text-violet-600 dark:from-violet-950/30 dark:text-violet-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-violet-400 rounded-full flex-shrink-0"></span>
+                                <span>Tableau de bord</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.academic.departments') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.academic.departments*') ? 'bg-slate-100 dark:bg-slate-700/50 text-violet-600 dark:text-violet-400' : '' }}">
-                                <span class="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
-                                Departments
+                            <a href="{{ route('admin.academic.departments') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-violet-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-violet-400 transition-all duration-150 {{ Request::routeIs('admin.academic.departments*') ? 'bg-gradient-to-r from-violet-50 to-transparent text-violet-600 dark:from-violet-950/30 dark:text-violet-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-blue-400 rounded-full flex-shrink-0"></span>
+                                <span>Départements</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.academic.filieres') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.academic.filieres*') ? 'bg-slate-100 dark:bg-slate-700/50 text-violet-600 dark:text-violet-400' : '' }}">
-                                <span class="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
-                                Filieres
+                            <a href="{{ route('admin.academic.filieres') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-violet-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-violet-400 transition-all duration-150 {{ Request::routeIs('admin.academic.filieres*') ? 'bg-gradient-to-r from-violet-50 to-transparent text-violet-600 dark:from-violet-950/30 dark:text-violet-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-green-400 rounded-full flex-shrink-0"></span>
+                                <span>Filières</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.academic.modules') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.academic.modules*') ? 'bg-slate-100 dark:bg-slate-700/50 text-violet-600 dark:text-violet-400' : '' }}">
-                                <span class="w-2 h-2 bg-indigo-400 rounded-full mr-3"></span>
-                                Modules
+                            <a href="{{ route('admin.academic.modules') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-violet-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-violet-400 transition-all duration-150 {{ Request::routeIs('admin.academic.modules*') ? 'bg-gradient-to-r from-violet-50 to-transparent text-violet-600 dark:from-violet-950/30 dark:text-violet-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-indigo-400 rounded-full flex-shrink-0"></span>
+                                <span>Modules</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.academic.professors') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors duration-200 {{ Request::routeIs('admin.academic.professors*') ? 'bg-slate-100 dark:bg-slate-700/50 text-violet-600 dark:text-violet-400' : '' }}">
-                                <span class="w-2 h-2 bg-purple-400 rounded-full mr-3"></span>
-                                Professors
+                            <a href="{{ route('admin.academic.professors') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-white hover:text-violet-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-violet-400 transition-all duration-150 {{ Request::routeIs('admin.academic.professors*') ? 'bg-gradient-to-r from-violet-50 to-transparent text-violet-600 dark:from-violet-950/30 dark:text-violet-400 font-medium' : '' }}">
+                                <span class="w-1 h-1 bg-purple-400 rounded-full flex-shrink-0"></span>
+                                <span>Professeurs</span>
                             </a>
                         </li>
                     </ul>

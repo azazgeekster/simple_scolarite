@@ -426,32 +426,59 @@ class ExamSchedulingController extends Controller
     }
 
     /**
-     * Create exam convocations for all students enrolled in the module
+     * Create exam convocations for students
+     * - Normal exams: All enrolled students
+     * - Rattrapage exams: Only students with RATT status or justified absences
      */
     private function createConvocationsForExam($exam, $module, $examPeriod)
     {
-        // Get all student module enrollments for this module in the current academic year
-        $enrollments = StudentModuleEnrollment::where('module_id', $module->id)
-            ->where('semester', $module->semester)
-            ->whereHas('programEnrollment', function ($query) use ($examPeriod) {
-                $query->where('academic_year', $examPeriod->academic_year)
-                    ->where('enrollment_status', 'active');
-            })
-            ->get();
-
         $convocationsCreated = 0;
 
-        foreach ($enrollments as $enrollment) {
-            // Create a convocation for each student enrollment
-            ExamConvocation::create([
-                'exam_id' => $exam->id,
-                'student_module_enrollment_id' => $enrollment->id,
-            ]);
+        if ($exam->session_type === 'rattrapage') {
+            // For rattrapage exams: Only convocate students with RATT or justified ABI
+            // Get students with RATT status from normal session
+            $rattGrades = \App\Models\ModuleGrade::where('result', 'RATT')
+                ->where('session', 'normal')
+                ->whereHas('moduleEnrollment', function($q) use ($module, $examPeriod) {
+                    $q->where('module_id', $module->id)
+                      ->whereHas('programEnrollment', function($q2) use ($examPeriod) {
+                          $q2->where('academic_year', $examPeriod->academic_year)
+                             ->where('enrollment_status', 'active');
+                      });
+                })
+                ->with('moduleEnrollment')
+                ->get();
 
-            $convocationsCreated++;
+            foreach ($rattGrades as $grade) {
+                ExamConvocation::create([
+                    'exam_id' => $exam->id,
+                    'student_module_enrollment_id' => $grade->module_enrollment_id,
+                ]);
+                $convocationsCreated++;
+            }
+
+            \Log::info("Created {$convocationsCreated} rattrapage convocations for exam {$exam->id} (Module: {$module->label}) - Only RATT students");
+
+        } else {
+            // For normal exams: Convocate all enrolled students
+            $enrollments = StudentModuleEnrollment::where('module_id', $module->id)
+                ->where('semester', $module->semester)
+                ->whereHas('programEnrollment', function ($query) use ($examPeriod) {
+                    $query->where('academic_year', $examPeriod->academic_year)
+                        ->where('enrollment_status', 'active');
+                })
+                ->get();
+
+            foreach ($enrollments as $enrollment) {
+                ExamConvocation::create([
+                    'exam_id' => $exam->id,
+                    'student_module_enrollment_id' => $enrollment->id,
+                ]);
+                $convocationsCreated++;
+            }
+
+            \Log::info("Created {$convocationsCreated} normal session convocations for exam {$exam->id} (Module: {$module->label}) - All enrolled students");
         }
-
-        \Log::info("Created {$convocationsCreated} convocations for exam {$exam->id} (Module: {$module->label})");
 
         return $convocationsCreated;
     }

@@ -49,7 +49,7 @@ class StudentReclamationController extends Controller
         // Check if can submit reclamation
         if (!$moduleGrade->canSubmitReclamation()) {
             return redirect()
-                ->route('grades.index')
+                ->route('student.grades')
                 ->with('error', 'Vous ne pouvez pas soumettre de réclamation pour cette note.');
         }
 
@@ -81,7 +81,7 @@ class StudentReclamationController extends Controller
         // Check if can submit reclamation
         if (!$moduleGrade->canSubmitReclamation()) {
             return redirect()
-                ->route('grades.index')
+                ->route('student.grades')
                 ->with('error', 'Vous ne pouvez pas soumettre de réclamation pour cette note.');
         }
 

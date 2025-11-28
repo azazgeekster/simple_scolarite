@@ -28,6 +28,7 @@ class Reclamation extends Model
         'original_grade',
         'revised_grade',
         'corrected_by',
+        'corrector_type',
         'corrected_at',
     ];
 
@@ -54,16 +55,16 @@ class Reclamation extends Model
     public static function generateReference(): string
     {
         do {
-            $reference = 'REC-' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
+            $reference = date('Y') . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
         } while (self::where('reference', $reference)->exists());
 
         return $reference;
     }
 
-    // Relationship for corrector
+    // Polymorphic relationship for corrector (can be Admin or Professor)
     public function corrector()
     {
-        return $this->belongsTo(\App\Models\Admin::class, 'corrected_by');
+        return $this->morphTo('corrector', 'corrector_type', 'corrected_by');
     }
 
     // Relationships
@@ -131,9 +132,19 @@ class Reclamation extends Model
         return $this->status === self::STATUS_REJECTED;
     }
 
+    public function isClosed(): bool
+    {
+        return in_array($this->status, [self::STATUS_RESOLVED, self::STATUS_REJECTED]);
+    }
+
     public function hasGradeChange(): bool
     {
         return !is_null($this->revised_grade) && $this->revised_grade != $this->original_grade;
+    }
+
+    public function hasGradeChanged(): bool
+    {
+        return $this->hasGradeChange();
     }
 
     // Status Transition Methods
@@ -149,10 +160,17 @@ class Reclamation extends Model
 
     public function resolve(float $revisedGrade, string $adminResponse): self
     {
+        // Get the authenticated admin (for now, only admins can resolve reclamations)
+        $correctorId = auth('admin')->id();
+        $correctorType = \App\Models\Admin::class;
+
         $this->update([
             'status' => self::STATUS_RESOLVED,
             'revised_grade' => $revisedGrade,
             'admin_response' => $adminResponse,
+            'corrected_by' => $correctorId,
+            'corrector_type' => $correctorType,
+            'corrected_at' => now(),
         ]);
 
         return $this;
@@ -160,9 +178,16 @@ class Reclamation extends Model
 
     public function reject(string $adminResponse): self
     {
+        // Get the authenticated admin (for now, only admins can reject reclamations)
+        $correctorId = auth('admin')->id();
+        $correctorType = \App\Models\Admin::class;
+
         $this->update([
             'status' => self::STATUS_REJECTED,
             'admin_response' => $adminResponse,
+            'corrected_by' => $correctorId,
+            'corrector_type' => $correctorType,
+            'corrected_at' => now(),
         ]);
 
         return $this;

@@ -59,7 +59,7 @@
                             </p>
                             @if($reclamation->moduleGrade->moduleEnrollment->module->professor)
                                 <p class="text-sm text-gray-600 dark:text-gray-300">
-                                    Prof: {{ $reclamation->moduleGrade->moduleEnrollment->module->professor->name ?? 'N/A' }}
+                                    Prof: {{ $reclamation->moduleGrade->moduleEnrollment->module->professor->full_name ?? 'N/A' }}
                                 </p>
                             @endif
                         </div>

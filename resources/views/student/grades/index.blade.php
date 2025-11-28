@@ -158,7 +158,7 @@
                                     <tr>
                                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Module</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Note</th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Statut</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Résultat</th>
                                         <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Actions</th>
                                     </tr>
                                 </thead>
@@ -178,21 +178,25 @@
                                                     </div>
                                                 </div>
                                             </td>
+                                            {{-- @dd($grade) --}}
                                             <td class="px-4 py-4 text-center">
                                                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl font-bold text-xl shadow-sm
-                                                    @if($grade->final_grade >= 16) bg-gradient-to-br from-green-500 to-emerald-600 text-white
-                                                    @elseif($grade->final_grade >= 14) bg-gradient-to-br from-green-400 to-green-500 text-white
-                                                    @elseif($grade->final_grade >= 12) bg-gradient-to-br from-blue-400 to-blue-500 text-white
-                                                    @elseif($grade->final_grade >= 10) bg-gradient-to-br from-yellow-400 to-yellow-500 text-white
+                                                    @if($grade->grade >= 16) bg-gradient-to-br from-green-500 to-emerald-600 text-white
+                                                    @elseif($grade->grade >= 14) bg-gradient-to-br from-green-400 to-green-500 text-white
+                                                    @elseif($grade->grade >= 12) bg-gradient-to-br from-blue-400 to-blue-500 text-white
+                                                    @elseif($grade->grade >= 10) bg-gradient-to-br from-yellow-400 to-yellow-500 text-white
                                                     @else bg-gradient-to-br from-red-400 to-red-500 text-white
                                                     @endif">
-                                                    {{ number_format($grade->final_grade, 2) }}
+                                                    {{ number_format($grade->grade, 2) }}
                                                 </div>
                                             </td>
                                             <td class="px-4 py-4">
-                                                @php $status = $grade->validation_status ?? ['label' => 'Non noté', 'color' => 'gray']; @endphp
+                                                @php $status = $grade->validation_status; @endphp
+
+
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold
                                                     @if($status['color'] === 'green') bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400
+                                                    @elseif($status['color'] === 'blue') bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400
                                                     @elseif($status['color'] === 'yellow') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400
                                                     @elseif($status['color'] === 'gray') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
                                                     @else bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400
@@ -201,13 +205,22 @@
                                                 </span>
                                             </td>
                                             <td class="px-4 py-4 text-right">
-                                                <a href="{{ route('reclamations.create', $grade) }}"
-                                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors duration-200">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                                    </svg>
-                                                    Réclamation
-                                                </a>
+                                                @if($grade->canSubmitReclamation())
+                                                    <a href="{{ route('reclamations.create', $grade) }}"
+                                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition-colors duration-200">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                        </svg>
+                                                        Réclamation
+                                                    </a>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 text-xs font-semibold rounded-lg cursor-not-allowed">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                                        </svg>
+                                                        Indisponible
+                                                    </span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -225,29 +238,32 @@
                                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $grade->module->code }}</p>
                                         </div>
                                         <div class="flex-shrink-0 w-14 h-14 rounded-xl font-bold text-lg flex items-center justify-center shadow-sm
-                                            @if($grade->final_grade >= 10) bg-gradient-to-br from-green-400 to-green-500 text-white
+                                            @if($grade->grade >= 10) bg-gradient-to-br from-green-400 to-green-500 text-white
                                             @else bg-gradient-to-br from-red-400 to-red-500 text-white
                                             @endif">
-                                            {{ number_format($grade->final_grade, 2) }}
+                                            {{ number_format($grade->grade, 2) }}
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-between gap-3">
-                                        @php $status = $grade->validation_status ?? ['label' => 'Non noté', 'color' => 'gray']; @endphp
+                                        @php $status = $grade->validation_status; @endphp
                                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold
                                             @if($status['color'] === 'green') bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400
+                                            @elseif($status['color'] === 'blue') bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400
                                             @elseif($status['color'] === 'yellow') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400
                                             @elseif($status['color'] === 'gray') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
                                             @else bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400
                                             @endif">
                                             {{ $status['label'] }}
                                         </span>
-                                        <a href="{{ route('reclamations.create', $grade) }}"
-                                           class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                            </svg>
-                                            Réclamation
-                                        </a>
+                                        @if($grade->canSubmitReclamation())
+                                            <a href="{{ route('reclamations.create', $grade) }}"
+                                               class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                </svg>
+                                                Réclamation
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
@@ -274,7 +290,7 @@
                                     <tr>
                                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Module</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Note</th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Statut</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Résultat</th>
                                         <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Actions</th>
                                     </tr>
                                 </thead>
@@ -296,14 +312,14 @@
                                             </td>
                                             <td class="px-4 py-4 text-center">
                                                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl font-bold text-xl shadow-sm
-                                                    @if($grade->final_grade >= 10) bg-gradient-to-br from-blue-400 to-blue-500 text-white
+                                                    @if($grade->grade >= 10) bg-gradient-to-br from-blue-400 to-blue-500 text-white
                                                     @else bg-gradient-to-br from-red-400 to-red-500 text-white
                                                     @endif">
-                                                    {{ number_format($grade->final_grade, 2) }}
+                                                    {{ number_format($grade->grade, 2) }}
                                                 </div>
                                             </td>
                                             <td class="px-4 py-4">
-                                                @php $status = $grade->validation_status ?? ['label' => 'Non noté', 'color' => 'gray']; @endphp
+                                                @php $status = $grade->validation_status; @endphp
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold
                                                     @if($status['color'] === 'blue') bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400
                                                     @elseif($status['color'] === 'gray') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
@@ -313,13 +329,22 @@
                                                 </span>
                                             </td>
                                             <td class="px-4 py-4 text-right">
-                                                <a href="{{ route('reclamations.create', $grade) }}"
-                                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors duration-200">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                                    </svg>
-                                                    Réclamation
-                                                </a>
+                                                @if($grade->canSubmitReclamation())
+                                                    <a href="{{ route('reclamations.create', $grade) }}"
+                                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition-colors duration-200">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                        </svg>
+                                                        Réclamation
+                                                    </a>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 text-xs font-semibold rounded-lg cursor-not-allowed">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                                        </svg>
+                                                        Indisponible
+                                                    </span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -337,14 +362,14 @@
                                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $grade->module->code }}</p>
                                         </div>
                                         <div class="flex-shrink-0 w-14 h-14 rounded-xl font-bold text-lg flex items-center justify-center shadow-sm
-                                            @if($grade->final_grade >= 10) bg-gradient-to-br from-blue-400 to-blue-500 text-white
+                                            @if($grade->grade >= 10) bg-gradient-to-br from-blue-400 to-blue-500 text-white
                                             @else bg-gradient-to-br from-red-400 to-red-500 text-white
                                             @endif">
-                                            {{ number_format($grade->final_grade, 2) }}
+                                            {{ number_format($grade->grade, 2) }}
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-between gap-3">
-                                        @php $status = $grade->validation_status ?? ['label' => 'Non noté', 'color' => 'gray']; @endphp
+                                        @php $status = $grade->validation_status; @endphp
                                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold
                                             @if($status['color'] === 'blue') bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400
                                             @elseif($status['color'] === 'gray') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
@@ -352,13 +377,15 @@
                                             @endif">
                                             {{ $status['label'] }}
                                         </span>
-                                        <a href="{{ route('reclamations.create', $grade) }}"
-                                           class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                            </svg>
-                                            Réclamation
-                                        </a>
+                                        @if($grade->canSubmitReclamation())
+                                            <a href="{{ route('reclamations.create', $grade) }}"
+                                               class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                </svg>
+                                                Réclamation
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach

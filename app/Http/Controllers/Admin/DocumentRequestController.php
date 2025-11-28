@@ -8,6 +8,7 @@ use App\Models\Document;
 use App\Models\Filiere;
 use App\Models\Student;
 use App\Services\DechargeService;
+use App\Services\AttestationScolariteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -407,6 +408,43 @@ class DocumentRequestController extends Controller
         } catch (\Exception $e) {
             \Log::error('Error generating decharge: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors de la génération de la décharge.');
+        }
+    }
+
+    /**
+     * Generate and download attestation de scolarité PDF
+     */
+    public function generateAttestation($id, AttestationScolariteService $attestationService)
+    {
+        $demande = Demande::with(['student.programEnrollments.filiere', 'student.programEnrollments.academicYear', 'document'])->findOrFail($id);
+
+        // Check if this is an attestation de scolarité request
+        if ($demande->document->slug !== 'attestation_scolarite') {
+            return back()->with('error', 'Cette action est disponible uniquement pour les attestations de scolarité.');
+        }
+
+        // Check if student has an active enrollment
+        $currentEnrollment = $demande->student->currentProgramEnrollment();
+        if (!$currentEnrollment) {
+            return back()->with('error', 'L\'étudiant n\'a pas d\'inscription active. L\'attestation ne peut pas être générée.');
+        }
+
+        try {
+            // Mark as ready and processed automatically when generating
+            if ($demande->isPending()) {
+                $demande->markAsReady(auth('admin')->id());
+            }
+
+            // Mark as picked (downloaded) to track that student received it
+            if ($demande->isReady()) {
+                $demande->markAsPicked();
+            }
+
+            return $attestationService->stream($demande);
+
+        } catch (\Exception $e) {
+            \Log::error('Error generating attestation: ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors de la génération de l\'attestation.');
         }
     }
 
